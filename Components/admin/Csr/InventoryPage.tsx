@@ -16,12 +16,23 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
+  FileDown,
+  FileSpreadsheet,
 } from "lucide-react";
+
 import { useEffect, useMemo, useState } from "react";
 import AddItem from "./Modals/AddItem";
 import ViewItem, { ViewInventoryItem } from "./Modals/ViewItem";
 
 type InventoryStatus = "In Stock" | "Low Stock" | "Out of Stock";
+
+const CATEGORY_FILTER_OPTIONS = [
+  "Guest Amenities",
+  "Bathroom Supplies",
+  "Cleaning Supplies",
+  "Linens & Bedding",
+  "Kitchen Supplies",
+] as const;
 
 interface InventoryRow {
   item_id: string;
@@ -98,6 +109,7 @@ export default function InventoryPage() {
   const [viewItem, setViewItem] = useState<ViewInventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | InventoryStatus>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [sortField, setSortField] = useState<keyof InventoryRow | null>(null);
@@ -183,10 +195,11 @@ export default function InventoryPage() {
         row.category.toLowerCase().includes(term) ||
         row.unit_type.toLowerCase().includes(term);
 
-      const matchesFilter = filterStatus === "all" || row.status === filterStatus;
-      return matchesSearch && matchesFilter;
+      const matchesStatus = filterStatus === "all" || row.status === filterStatus;
+      const matchesCategory = filterCategory === "all" || row.category === filterCategory;
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [filterStatus, rows, searchTerm]);
+  }, [filterCategory, filterStatus, rows, searchTerm]);
 
   const sortedRows = useMemo(() => {
     const copy = [...filteredRows];
@@ -222,6 +235,134 @@ export default function InventoryPage() {
   const inStockCount = rows.filter((r) => r.status === "In Stock").length;
   const lowStockCount = rows.filter((r) => r.status === "Low Stock").length;
   const outOfStockCount = rows.filter((r) => r.status === "Out of Stock").length;
+
+  const categoryOptions = CATEGORY_FILTER_OPTIONS;
+
+  const getExportRows = () => sortedRows;
+
+  const downloadBlob = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportExcel = () => {
+    const rowsToExport = getExportRows();
+    const headers = ["Item ID", "Item Name", "Category", "Current Stock", "Minimum Stock", "Unit Type", "Status", "Last Restocked"];
+    const csvLines = [headers.join(",")];
+
+    rowsToExport.forEach((row) => {
+      const line = [
+        row.item_id,
+        row.item_name,
+        row.category,
+        row.current_stock,
+        row.minimum_stock,
+        row.unit_type,
+        row.status,
+        row.last_restocked ? formatDateTime(row.last_restocked) : "-",
+      ]
+        .map((value) => {
+          const safe = String(value ?? "").replace(/"/g, '""');
+          return `"${safe}"`;
+        })
+        .join(",");
+      csvLines.push(line);
+    });
+
+    const timestamp = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
+      .format(new Date())
+      .replace(/[^\d]/g, "");
+
+    downloadBlob(csvLines.join("\n"), `inventory_${timestamp}.csv`, "text/csv;charset=utf-8;");
+  };
+
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  const handleExportPdf = () => {
+    const rowsToExport = getExportRows();
+    const printWindow = window.open("", "_blank", "noopener,noreferrer");
+    if (!printWindow) return;
+
+    const tableRows = rowsToExport
+      .map(
+        (row) => `
+          <tr>
+            <td>${escapeHtml(row.item_id)}</td>
+            <td>${escapeHtml(row.item_name)}</td>
+            <td>${escapeHtml(row.category)}</td>
+            <td>${row.current_stock}</td>
+            <td>${row.minimum_stock}</td>
+            <td>${escapeHtml(row.unit_type)}</td>
+            <td>${escapeHtml(row.status)}</td>
+            <td>${escapeHtml(row.last_restocked ? formatDateTime(row.last_restocked) : "-")}</td>
+          </tr>
+        `,
+      )
+      .join("");
+
+    const doc = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Inventory Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; }
+            h1 { text-align: center; margin-bottom: 16px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background: #f3f4f6; }
+          </style>
+        </head>
+        <body>
+          <h1>Inventory Report</h1>
+          <p>Generated: ${escapeHtml(new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila" }))}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Item ID</th>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Current Stock</th>
+                <th>Minimum Stock</th>
+                <th>Unit Type</th>
+                <th>Status</th>
+                <th>Last Restocked</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows || "<tr><td colspan='8'>No data to display</td></tr>"}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(doc);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
@@ -340,21 +481,61 @@ export default function InventoryPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-600" />
-            <select
-              value={filterStatus}
-              onChange={(e) => {
-                setFilterStatus(e.target.value as any);
-                setCurrentPage(1);
-              }}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-            >
-              <option value="all">All Status</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Low Stock">Low Stock</option>
-              <option value="Out of Stock">Out of Stock</option>
-            </select>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-gray-600" />
+              <select
+                value={filterStatus}
+                onChange={(e) => {
+                  setFilterStatus(e.target.value as any);
+                  setCurrentPage(1);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              >
+                <option value="all">All Status</option>
+                <option value="In Stock">In Stock</option>
+                <option value="Low Stock">Low Stock</option>
+                <option value="Out of Stock">Out of Stock</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 whitespace-nowrap">Category</span>
+              <select
+                value={filterCategory}
+                onChange={(e) => {
+                  setFilterCategory(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              >
+                <option value="all">All Categories</option>
+                {categoryOptions.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <FileDown className="w-4 h-4" />
+                Export PDF
+              </button>
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                className="inline-flex items-center gap-2 px-3 py-2 border border-green-500 text-green-600 rounded-lg text-sm font-semibold hover:bg-green-50 transition-colors"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Export Excel
+              </button>
+            </div>
           </div>
         </div>
       </div>
