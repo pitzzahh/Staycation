@@ -6,10 +6,13 @@ export const getAllInventory = async (req: NextRequest): Promise<NextResponse> =
   try {
     const query = `
       SELECT
-        inventory_id,
+        item_id,
         item_name,
-        stock_quantity,
-        price,
+        category,
+        current_stock,
+        minimum_stock,
+        unit_type,
+        last_restocked,
         status,
         created_at,
         updated_at
@@ -41,59 +44,99 @@ export const createInventoryItem = async (req: NextRequest): Promise<NextRespons
     const body = await req.json().catch(() => ({}));
 
     const item_name = String(body?.item_name ?? body?.name ?? "").trim();
-    const stock_quantity = Number(body?.stock_quantity ?? body?.stock ?? 0);
-    const priceRaw = body?.price;
-    const price = priceRaw === null || priceRaw === undefined || priceRaw === "" ? null : Number(priceRaw);
-    const status = String(body?.status ?? "In Stock");
+    const category = String(body?.category ?? "").trim();
+    const current_stock = Number(body?.current_stock ?? body?.stock ?? 0);
+    const minimum_stock = Number(body?.minimum_stock ?? body?.min_stock ?? 0);
+    const unit_type = String(body?.unit_type ?? "").trim();
+    const statusRaw = String(body?.status ?? "").trim();
 
     if (!item_name) {
       return NextResponse.json({ success: false, error: "Item name is required" }, { status: 400 });
     }
 
-    if (!Number.isFinite(stock_quantity) || stock_quantity < 0) {
-      return NextResponse.json({ success: false, error: "Stock quantity must be a non-negative number" }, { status: 400 });
+    const allowedCategories = new Set([
+      "Guest Amenities",
+      "Bathroom Supplies",
+      "Cleaning Supplies",
+      "Linens & Bedding",
+      "Kitchen Supplies",
+    ]);
+
+    if (!allowedCategories.has(category)) {
+      return NextResponse.json(
+        { success: false, error: "Category must be one of the allowed values" },
+        { status: 400 }
+      );
     }
 
-    if (price !== null && (!Number.isFinite(price) || price < 0)) {
-      return NextResponse.json({ success: false, error: "Price must be a non-negative number" }, { status: 400 });
+    if (!Number.isFinite(current_stock) || current_stock < 0) {
+      return NextResponse.json(
+        { success: false, error: "Current stock must be a non-negative number" },
+        { status: 400 }
+      );
+    }
+
+    if (!Number.isFinite(minimum_stock) || minimum_stock < 0) {
+      return NextResponse.json(
+        { success: false, error: "Minimum stock must be a non-negative number" },
+        { status: 400 }
+      );
+    }
+
+    if (!unit_type) {
+      return NextResponse.json({ success: false, error: "Unit type is required" }, { status: 400 });
     }
 
     const allowedStatuses = new Set(["In Stock", "Low Stock", "Out of Stock"]);
-    const normalizedStatus = allowedStatuses.has(status) ? status : "In Stock";
+    const normalizedStatus = allowedStatuses.has(statusRaw) ? (statusRaw as string) : "";
 
-    const dbStatus =
-      stock_quantity === 0
+    const derivedStatus =
+      !Number.isFinite(current_stock) || current_stock <= 0
         ? "Out of Stock"
-        : stock_quantity <= 10
+        : current_stock <= 10
           ? "Low Stock"
-          : normalizedStatus === "Out of Stock"
-            ? "In Stock"
-            : normalizedStatus;
+          : "In Stock";
 
-    const inventory_id = randomUUID();
+    const dbStatus = derivedStatus || normalizedStatus || "In Stock";
+
+    const item_id = randomUUID();
 
     const query = `
       INSERT INTO inventory (
-        inventory_id,
+        item_id,
         item_name,
-        stock_quantity,
-        price,
+        category,
+        current_stock,
+        minimum_stock,
+        unit_type,
+        last_restocked,
         status,
         created_at,
         updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7, NOW(), NOW())
       RETURNING
-        inventory_id,
+        item_id,
         item_name,
-        stock_quantity,
-        price,
+        category,
+        current_stock,
+        minimum_stock,
+        unit_type,
+        last_restocked,
         status,
         created_at,
         updated_at
     `;
 
-    const result = await pool.query(query, [inventory_id, item_name, stock_quantity, price, dbStatus]);
+    const result = await pool.query(query, [
+      item_id,
+      item_name,
+      category,
+      current_stock,
+      minimum_stock,
+      unit_type,
+      dbStatus,
+    ]);
 
     return NextResponse.json({
       success: true,
