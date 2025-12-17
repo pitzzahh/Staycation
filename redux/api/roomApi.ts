@@ -59,6 +59,15 @@ export const roomApi = createApi({
                 }
             },
             invalidatesTags: ['Haven']
+        }),
+        getAllAdminRooms: builder.query({
+             query(params) {
+                return {
+                    url: "/haven",
+                    params
+                };
+            },
+            providesTags: ['Haven']
         })
     })
 });
@@ -68,5 +77,6 @@ export const {
     useGetHavenByIdQuery,
     useCreateHavenMutation,
     useUpdateHavenMutation,
-    useDeleteHavenMutation
+    useDeleteHavenMutation,
+    useGetAllAdminRoomsQuery
 } = roomApi;

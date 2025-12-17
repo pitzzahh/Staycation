@@ -378,9 +378,11 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
               </h1>
 
               <div className="mb-6 pb-6 border-b border-gray-200">
-                <p>Starting Price</p>
-                <p className="text-sm text-gray-500 mb-2">{room.price}</p>
-                <p className="text-sm text-gray-500">{room.pricePerNight}</p>
+                <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Starting from</p>
+                <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-yellow-500 mb-1">
+                  {room.price}
+                </p>
+                <p className="text-sm text-gray-600">{room.pricePerNight}</p>
               </div>
 
               <div className="mb-4 pb-4 border-b border-gray-200 space-y-3">

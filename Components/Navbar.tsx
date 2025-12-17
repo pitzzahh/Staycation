@@ -4,14 +4,22 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { theme, setTheme } = useTheme();
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const menuItems = ["havens", "contacts", "location", "about"];
 
@@ -51,7 +59,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="fixed w-full h-16 px-6 bg-white z-50">
+    <nav className="fixed w-full h-16 px-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-50 transition-colors duration-300">
       <div className="h-full flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo with animation */}
         <Link href={"/"}>
@@ -93,6 +101,21 @@ const Navbar = () => {
               </Link>
             );
           })}
+
+          {/* Dark Mode Toggle */}
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
+              aria-label="Toggle dark mode"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-5 h-5 text-orange-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-700" />
+              )}
+            </button>
+          )}
 
           {/* CTA Button / User Profile */}
           {status === "loading" ? (
@@ -234,6 +257,32 @@ const Navbar = () => {
             );
           })}
 
+          {/* Mobile Dark Mode Toggle */}
+          {mounted && (
+            <div
+              className={`transform transition-all duration-300 ${
+                isMenuOpen
+                  ? "translate-x-0 opacity-100"
+                  : "-translate-x-4 opacity-0"
+              }`}
+              style={{ transitionDelay: `${menuItems.length * 50}ms` }}
+            >
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors duration-300 rounded-lg"
+              >
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                </span>
+                {theme === "dark" ? (
+                  <Sun className="w-5 h-5 text-orange-500" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-700" />
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Mobile CTA Button / User Profile */}
           <div
             className={`transform transition-all duration-300 ${
@@ -241,7 +290,7 @@ const Navbar = () => {
                 ? "translate-x-0 opacity-100"
                 : "-translate-x-4 opacity-0"
             }`}
-            style={{ transitionDelay: `${menuItems.length * 50}ms` }}
+            style={{ transitionDelay: `${(menuItems.length + 1) * 50}ms` }}
           >
             {status === "loading" ? (
               <div className="w-full h-12 rounded-lg bg-gray-200 animate-pulse"></div>

@@ -333,13 +333,15 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
   const rooms: Room[] = initialHavens.map((haven: any) => ({
     id: haven.uuid_id ?? haven.id,
     name: haven.haven_name ?? haven.name ?? "Unnamed Haven",
-    price: `₱${haven.price ?? "N/A"}`,
-    pricePerNight: haven.stay_type ?? "per night",
+    price: `₱${haven.six_hour_rate ?? haven.weekday_rate ?? haven.weekend_rate ?? "N/A"}`,
+    pricePerNight: "per night",
     images: haven.images?.map((img: any) => img.url) ?? [],
     rating: haven.rating ?? 4.5,
     reviews: haven.review_count ?? 0,
     capacity: haven.capacity ?? 2,
-    amenities: haven.amenities ?? [],
+    amenities: Object.entries(haven.amenities || {})
+      .filter(([_, value]) => value === true)
+      .map(([key]) => key),
     description: haven.description ?? "",
     fullDescription: haven.full_description,
     beds: haven.beds,
