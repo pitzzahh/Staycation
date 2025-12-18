@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { setCheckInDate, setCheckOutDate } from "@/redux/slices/bookingSlice";
 import { useRouter } from "next/navigation";
@@ -24,6 +24,7 @@ import {
   Clock,
   Home,
   CreditCard,
+  AlertCircle,
 } from "lucide-react";
 import Spinner from "./Spinner";
 import toast from "react-hot-toast";
@@ -54,6 +55,8 @@ const Checkout = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // 1 = Guest Info, 2 = Confirmation & Payment
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const errorRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   interface GuestInfo {
     firstName: string;
@@ -210,45 +213,67 @@ const Checkout = () => {
     }));
   };
 
+  const scrollToError = (fieldName: string) => {
+    const element = errorRefs.current[fieldName];
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Add shake animation
+      element.classList.add('animate-shake');
+      setTimeout(() => element.classList.remove('animate-shake'), 500);
+    }
+  };
+
   const handleNext = () => {
     if (currentStep === 1) {
+      const newErrors: Record<string, string> = {};
+
       // Validate Step 1 - Main Guest
-      if (!formData.firstName || !formData.lastName || !formData.age || !formData.gender || !formData.email || !formData.phone) {
-        toast.error("Please fill in all required fields for the main guest");
-        return;
-      }
+      if (!formData.firstName) newErrors.firstName = "First name is required";
+      if (!formData.lastName) newErrors.lastName = "Last name is required";
+      if (!formData.age) newErrors.age = "Age is required";
+      if (!formData.gender) newErrors.gender = "Please select a gender";
+      if (!formData.email) newErrors.email = "Email is required";
+      if (!formData.phone) newErrors.phone = "Phone number is required";
+
       // Validate ID for main guest if 10+ years old
-      if (parseInt(formData.age) >= 10 && !formData.validId) {
-        toast.error("Valid ID is required for the main guest (10+ years old)");
-        return;
+      if (formData.age && parseInt(formData.age) >= 10 && !formData.validId) {
+        newErrors.validId = "Valid ID is required for guests 10+ years old";
       }
 
       // Validate additional guests
       for (let i = 0; i < additionalGuests.length; i++) {
         const guest = additionalGuests[i];
-        const guestNumber = i + 2; // Start from 2 (Adult 2, Child 3, etc.)
+        const guestNumber = i + 2;
 
-        if (!guest.firstName || !guest.lastName || !guest.age || !guest.gender) {
-          toast.error(`Please fill in all required fields for Guest ${guestNumber}`);
-          return;
-        }
+        if (!guest.firstName) newErrors[`guest${i}FirstName`] = `Guest ${guestNumber} first name is required`;
+        if (!guest.lastName) newErrors[`guest${i}LastName`] = `Guest ${guestNumber} last name is required`;
+        if (!guest.age) newErrors[`guest${i}Age`] = `Guest ${guestNumber} age is required`;
+        if (!guest.gender) newErrors[`guest${i}Gender`] = `Guest ${guestNumber} gender is required`;
 
         // Validate ID for guests 10+ years old
-        if (parseInt(guest.age) >= 10 && !guest.validId) {
-          toast.error(`Valid ID is required for Guest ${guestNumber} (10+ years old)`);
-          return;
+        if (guest.age && parseInt(guest.age) >= 10 && !guest.validId) {
+          newErrors[`guest${i}ValidId`] = `Valid ID is required for Guest ${guestNumber} (10+ years old)`;
         }
       }
 
-      // Validate guest count (adults + children only, infants not counted)
+      // Validate guest count
       if (formData.adults + formData.children > 4) {
-        toast.error("Maximum 4 guests allowed (adults + children). Infants are not counted.");
+        newErrors.guestCount = "Maximum 4 guests allowed (adults + children)";
+      }
+
+      // Validate check-in/out times
+      if (!formData.checkInTime) newErrors.checkInTime = "Check-in time is required";
+      if (!formData.checkOutTime) newErrors.checkOutTime = "Check-out time is required";
+
+      setErrors(newErrors);
+
+      if (Object.keys(newErrors).length > 0) {
+        const firstErrorKey = Object.keys(newErrors)[0];
+        toast.error(newErrors[firstErrorKey]);
+        scrollToError(firstErrorKey);
         return;
       }
-      if (!formData.checkInTime || !formData.checkOutTime) {
-        toast.error("Please select check-in and check-out times");
-        return;
-      }
+
       setCurrentStep(2);
     }
   };
@@ -264,16 +289,22 @@ const Checkout = () => {
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
+  const newErrors: Record<string, string> = {};
+
   // Validate required fields
-  if (
-    !formData.firstName ||
-    !formData.lastName ||
-    !formData.email ||
-    !formData.phone ||
-    !formData.paymentProof ||
-    !formData.termsAccepted
-  ) {
-    toast.error("Please fill in all required fields, upload proof of payment, and accept terms");
+  if (!formData.paymentProof) {
+    newErrors.paymentProof = "Proof of payment is required";
+  }
+  if (!formData.termsAccepted) {
+    newErrors.termsAccepted = "You must accept the terms and conditions";
+  }
+
+  setErrors(newErrors);
+
+  if (Object.keys(newErrors).length > 0) {
+    const firstErrorKey = Object.keys(newErrors)[0];
+    toast.error(newErrors[firstErrorKey]);
+    scrollToError(firstErrorKey);
     return;
   }
 
@@ -380,8 +411,19 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+      `}</style>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <button
           onClick={handleBack}
@@ -460,7 +502,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  <div ref={(el) => { errorRefs.current.firstName = el; }}>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       First Name *
                     </label>
@@ -468,14 +510,25 @@ const handleSubmit = async (e: React.FormEvent) => {
                       type="text"
                       name="firstName"
                       value={formData.firstName}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        setErrors(prev => ({...prev, firstName: ''}));
+                      }}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                       placeholder="Enter first name"
                     />
+                    {errors.firstName && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.firstName}
+                      </p>
+                    )}
                   </div>
 
-                  <div>
+                  <div ref={(el) => { errorRefs.current.lastName = el; }}>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Last Name *
                     </label>
@@ -483,14 +536,25 @@ const handleSubmit = async (e: React.FormEvent) => {
                       type="text"
                       name="lastName"
                       value={formData.lastName}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        setErrors(prev => ({...prev, lastName: ''}));
+                      }}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                       placeholder="Enter last name"
                     />
+                    {errors.lastName && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.lastName}
+                      </p>
+                    )}
                   </div>
 
-                  <div>
+                  <div ref={(el) => { errorRefs.current.age = el; }}>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Age *
                     </label>
@@ -498,34 +562,56 @@ const handleSubmit = async (e: React.FormEvent) => {
                       type="number"
                       name="age"
                       value={formData.age}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        setErrors(prev => ({...prev, age: ''}));
+                      }}
                       required
                       min="1"
                       max="120"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        errors.age ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                       placeholder="Enter age"
                     />
+                    {errors.age && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.age}
+                      </p>
+                    )}
                   </div>
 
-                  <div>
+                  <div ref={(el) => { errorRefs.current.gender = el; }}>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Gender *
                     </label>
                     <select
                       name="gender"
                       value={formData.gender}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        setErrors(prev => ({...prev, gender: ''}));
+                      }}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white transition-colors ${
+                        errors.gender ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                     >
                       <option value="">Select Gender</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                       <option value="other">Other</option>
                     </select>
+                    {errors.gender && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.gender}
+                      </p>
+                    )}
                   </div>
 
-                  <div>
+                  <div ref={(el) => { errorRefs.current.email = el; }}>
                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                       <Mail className="w-4 h-4 text-orange-500" />
                       Email Address *
@@ -534,14 +620,25 @@ const handleSubmit = async (e: React.FormEvent) => {
                       type="email"
                       name="email"
                       value={formData.email}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        setErrors(prev => ({...prev, email: ''}));
+                      }}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                       placeholder="Enter email"
                     />
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
 
-                  <div>
+                  <div ref={(el) => { errorRefs.current.phone = el; }}>
                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                       <Phone className="w-4 h-4 text-orange-500" />
                       Phone Number *
@@ -550,11 +647,22 @@ const handleSubmit = async (e: React.FormEvent) => {
                       type="tel"
                       name="phone"
                       value={formData.phone}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        setErrors(prev => ({...prev, phone: ''}));
+                      }}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      }`}
                       placeholder="e.g., 182918212"
                     />
+                    {errors.phone && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.phone}
+                      </p>
+                    )}
                   </div>
 
                   <div className="md:col-span-2">
@@ -577,10 +685,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
 
                 {/* Valid ID Upload Section */}
-                <div className="mt-6 p-4 bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg">
+                <div ref={(el) => { errorRefs.current.validId = el; }} className={`mt-6 p-4 border-2 border-dashed rounded-lg ${
+                  errors.validId ? 'bg-red-50 border-red-300' : 'bg-blue-50 border-blue-300'
+                }`}>
                   <div className="flex items-center gap-2 mb-3">
-                    <CreditCard className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-semibold text-blue-800">
+                    <CreditCard className={`w-5 h-5 ${errors.validId ? 'text-red-600' : 'text-blue-600'}`} />
+                    <h3 className={`font-semibold ${errors.validId ? 'text-red-800' : 'text-blue-800'}`}>
                       Valid ID (Required for guests 10+ years old)
                     </h3>
                   </div>
@@ -617,6 +727,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                         />
                         <p className="text-sm text-green-600 mt-2 font-medium">✓ ID uploaded successfully</p>
                       </div>
+                    )}
+                    {errors.validId && (
+                      <p className="mt-3 text-sm text-red-600 flex items-center gap-1 justify-center">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.validId}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -1295,21 +1411,26 @@ const handleSubmit = async (e: React.FormEvent) => {
                 )}
 
                 {/* Upload Proof of Payment */}
-                <div className="mt-6">
+                <div className="mt-6" ref={(el) => { errorRefs.current.paymentProof = el; }}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     📷 Upload Proof of Payment *
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-500 transition-colors">
+                  <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                    errors.paymentProof ? 'border-red-500 bg-red-50 hover:border-red-600' : 'border-gray-300 hover:border-orange-500'
+                  }`}>
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/jpg"
-                      onChange={(e) => handleFileChange(e, 'payment')}
+                      onChange={(e) => {
+                        handleFileChange(e, 'payment');
+                        setErrors(prev => ({...prev, paymentProof: ''}));
+                      }}
                       className="hidden"
                       id="payment-proof"
                     />
                     <label htmlFor="payment-proof" className="cursor-pointer">
-                      <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                      <p className="text-gray-600 font-medium mb-2">
+                      <Upload className={`w-12 h-12 mx-auto mb-4 ${errors.paymentProof ? 'text-red-400' : 'text-gray-400'}`} />
+                      <p className={`font-medium mb-2 ${errors.paymentProof ? 'text-red-600' : 'text-gray-600'}`}>
                         Click to upload payment screenshot
                       </p>
                       <p className="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB</p>
@@ -1325,6 +1446,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                       </div>
                     )}
                   </div>
+                  {errors.paymentProof && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.paymentProof}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
@@ -1344,16 +1471,19 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
 
               {/* Terms and Conditions */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6" ref={(el) => { errorRefs.current.termsAccepted = el; }}>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     name="termsAccepted"
                     checked={formData.termsAccepted}
-                    onChange={handleInputChange}
-                    className="w-5 h-5 text-orange-500 mt-1"
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      setErrors(prev => ({...prev, termsAccepted: ''}));
+                    }}
+                    className={`w-5 h-5 mt-1 ${errors.termsAccepted ? 'accent-red-500' : 'text-orange-500'}`}
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className={`text-sm ${errors.termsAccepted ? 'text-red-700' : 'text-gray-700'}`}>
                     I agree to the{" "}
                     <a href="#" className="text-orange-500 hover:underline">
                       Terms and Conditions
@@ -1364,6 +1494,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </a>
                   </span>
                 </label>
+                {errors.termsAccepted && (
+                  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.termsAccepted}
+                  </p>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -1396,8 +1532,9 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           )}
         </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
