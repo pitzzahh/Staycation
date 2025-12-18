@@ -26,6 +26,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import Spinner from "./Spinner";
+import toast from "react-hot-toast";
 
 interface AddOns {
   poolPass: number;
@@ -137,15 +138,15 @@ const Checkout = () => {
     if (currentStep === 1) {
       // Validate Step 1
       if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-        alert("Please fill in all required fields");
+        toast.error("Please fill in all required fields");
         return;
       }
       if (totalGuests > 4) {
-        alert("Maximum 4 guests allowed");
+        toast.error("Maximum 4 guests allowed");
         return;
       }
       if (!formData.checkInTime || !formData.checkOutTime) {
-        alert("Please select check-in and check-out times");
+        toast.error("Please select check-in and check-out times");
         return;
       }
       setCurrentStep(2);
@@ -172,7 +173,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     !formData.paymentProof ||
     !formData.termsAccepted
   ) {
-    alert("Please fill in all required fields, upload proof of payment, and accept terms");
+    toast.error("Please fill in all required fields, upload proof of payment, and accept terms");
     return;
   }
 
@@ -225,19 +226,19 @@ const handleSubmit = async (e: React.FormEvent) => {
     const response = await axios.post('/api/bookings', bookingRequestData);
 
     if (response.data.success) {
-      alert(`Booking Submitted Successfully!\n\nYour booking ID is: ${bookingId}\n\nStatus: Pending Admin Approval\n\nYou will receive a confirmation email once the admin approves your booking.`);
+      toast.success(`Booking Submitted Successfully!\n\nYour booking ID is: ${bookingId}\n\nStatus: Pending Admin Approval\n\nYou will receive a confirmation email once the admin approves your booking.`);
 
       // Clear form and redirect
       router.push('/');
     } else {
       setIsLoading(false);
-      alert('Failed to create booking. Please try again or contact support.');
+      toast.error('Failed to create booking. Please try again or contact support.');
     }
 
   } catch (error) {
     setIsLoading(false);
     console.error('Booking error:', error);
-    alert('An error occurred. Please try again or contact support.');
+    toast.error('An error occurred. Please try again or contact support.');
   }
 };
 

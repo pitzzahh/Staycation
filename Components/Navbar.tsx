@@ -21,7 +21,7 @@ const Navbar = () => {
     setMounted(true);
   }, []);
 
-  const menuItems = ["havens", "contacts", "location", "about"];
+  const menuItems = ["havens", "contacts", "location", "About"];
 
   // Close profile dropdown when clicking outside
   useEffect(() => {

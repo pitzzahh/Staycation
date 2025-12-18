@@ -1,6 +1,7 @@
 import SearchBarSticky from "@/Components/HeroSection/SearchBarSticky";
 import HotelRoomListings from "@/Components/Rooms/HotelRoomListings";
 import Footer from "@/Components/Footer";
+import FeatureSectionMain from "@/Components/Features/FeatureSectionMain";
 
 
 const getAllHavens = async () => {
@@ -25,6 +26,7 @@ export default async function RoomsPage() {
       <div className="pt-[280px] sm:pt-[320px] md:pt-[400px] lg:pt-[450px]">
         <HotelRoomListings initialHavens={havens}/>
       </div>
+      <FeatureSectionMain />
       <Footer />
     </>
   )

@@ -109,7 +109,31 @@ export const authOptions: NextAuthOptions = {
     
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!;
+        // For Google users, fetch the actual database UUID
+        if (token.sub && !token.role) {
+          try {
+            // Query users table to get the UUID by google_id
+            const result = await pool.query(
+              "SELECT user_id FROM users WHERE google_id = $1",
+              [token.sub]
+            );
+
+            if (result.rows[0]) {
+              session.user.id = String(result.rows[0].user_id);
+              console.log("✅ Google user session created with DB ID:", result.rows[0].user_id);
+            } else {
+              // Fallback to Google ID if user not found in DB
+              session.user.id = token.sub!;
+            }
+          } catch (error) {
+            console.error("❌ Error fetching user ID:", error);
+            session.user.id = token.sub!;
+          }
+        } else {
+          // For credentials users, use the token.sub directly
+          session.user.id = token.sub!;
+        }
+
         if (token.role) {
           (session.user as any).role = token.role as string;
           console.log("✅ Session created with role:", token.role);
