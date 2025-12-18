@@ -49,12 +49,51 @@ const ReservationsPage = () => {
 
   const handleCheckIn = async (bookingId: string) => {
     try {
+      // Find the booking details
+      const booking = reservations.find((r: any) => r.id === bookingId);
+      if (!booking) {
+        alert('Booking not found');
+        return;
+      }
+
+      // Update booking status to checked-in
       await updateBookingStatus({
         id: bookingId,
         status: 'checked-in'
       }).unwrap();
 
-      alert('Guest checked in successfully!');
+      // Send check-in email to guest
+      try {
+        const emailData = {
+          firstName: booking.guest_first_name,
+          lastName: booking.guest_last_name,
+          email: booking.guest_email,
+          bookingId: booking.booking_id,
+          roomName: booking.room_name,
+          checkInDate: new Date(booking.check_in_date).toLocaleDateString(),
+          checkInTime: booking.check_in_time,
+          checkOutDate: new Date(booking.check_out_date).toLocaleDateString(),
+          checkOutTime: booking.check_out_time,
+          guests: `${booking.adults} Adults, ${booking.children} Children, ${booking.infants} Infants`,
+        };
+
+        const emailResponse = await fetch('/api/send-checkin-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(emailData),
+        });
+
+        if (!emailResponse.ok) {
+          console.error('Failed to send check-in email');
+        } else {
+          console.log('Check-in email sent to:', booking.guest_email);
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Don't fail the whole operation if email fails
+      }
+
+      alert('Guest checked in successfully! Confirmation email sent.');
       refetch();
     } catch (error) {
       console.error('Error checking in:', error);
@@ -64,12 +103,50 @@ const ReservationsPage = () => {
 
   const handleCheckOut = async (bookingId: string) => {
     try {
+      // Find the booking details
+      const booking = reservations.find((r: any) => r.id === bookingId);
+      if (!booking) {
+        alert('Booking not found');
+        return;
+      }
+
+      // Update booking status to completed
       await updateBookingStatus({
         id: bookingId,
         status: 'completed'
       }).unwrap();
 
-      alert('Guest checked out successfully!');
+      // Send check-out email to guest
+      try {
+        const emailData = {
+          firstName: booking.guest_first_name,
+          lastName: booking.guest_last_name,
+          email: booking.guest_email,
+          bookingId: booking.booking_id,
+          roomName: booking.room_name,
+          checkInDate: new Date(booking.check_in_date).toLocaleDateString(),
+          checkOutDate: new Date(booking.check_out_date).toLocaleDateString(),
+          totalAmount: Number(booking.total_amount).toLocaleString(),
+          remainingBalance: Number(booking.remaining_balance),
+        };
+
+        const emailResponse = await fetch('/api/send-checkout-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(emailData),
+        });
+
+        if (!emailResponse.ok) {
+          console.error('Failed to send check-out email');
+        } else {
+          console.log('Check-out email sent to:', booking.guest_email);
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Don't fail the whole operation if email fails
+      }
+
+      alert('Guest checked out successfully! Thank you email sent.');
       refetch();
     } catch (error) {
       console.error('Error checking out:', error);

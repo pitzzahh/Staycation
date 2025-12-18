@@ -69,6 +69,13 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
   // Load employee data when modal opens
   useEffect(() => {
     if (employee && isOpen) {
+      // Convert ISO date to YYYY-MM-DD format for parseDate
+      let hireDateFormatted = "";
+      if (employee.hire_date) {
+        const dateObj = new Date(employee.hire_date);
+        hireDateFormatted = dateObj.toISOString().split('T')[0]; // Gets YYYY-MM-DD
+      }
+
       setFormData({
         firstName: employee.first_name || "",
         lastName: employee.last_name || "",
@@ -77,7 +84,7 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
         employeeId: employee.employment_id || "",
         role: employee.role || "",
         department: employee.department || "",
-        hireDate: employee.hire_date || "",
+        hireDate: hireDateFormatted,
         salary: employee.monthly_salary?.toString() || "",
         address: employee.street_address || "",
         city: employee.city || "",
