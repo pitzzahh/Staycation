@@ -4,7 +4,15 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { User, LogOut, ChevronDown, Moon, Sun } from "lucide-react";
+import {
+  User,
+  LogOut,
+  ChevronDown,
+  Moon,
+  Sun,
+  Calendar,
+  Heart,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 
 const Navbar = () => {
@@ -21,12 +29,15 @@ const Navbar = () => {
     setMounted(true);
   }, []);
 
-  const menuItems = ["havens", "contacts", "location", "About"];
+  const menuItems = ["Havens", "Contacts", "Location", "About"];
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
         setIsProfileOpen(false);
       }
     };
@@ -44,6 +55,10 @@ const Navbar = () => {
   if (pathname === "/login") {
     return null;
   }
+
+  // if (pathname === "/my-bookings") {
+  //   return null;
+  // }
 
   // Hide navbar on Admin Login page
   if (pathname === "/admin/login") {
@@ -79,22 +94,24 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           {menuItems.map((item, idx) => {
             let href = "/";
-            if (item === "contacts") href = "/contacts";
-            else if (item === "location") href = "/location";
-            else if (item === "login") href = "/login";
-            else if (item === "havens") href = "/rooms";
-            else if (item === "about") href = "/about";
+            if (item === "Contacts") href = "/contacts";
+            else if (item === "Location") href = "/location";
+            else if (item === "Login") href = "/login";
+            else if (item === "Havens") href = "/rooms";
+            else if (item === "About") href = "/about";
 
             const isActive = pathname === href;
 
             return (
               <Link key={idx} href={href}>
                 <div className="cursor-pointer">
-                  <span className={`${
-                    isActive
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-700 hover:text-yellow-600"
-                  } transition-colors duration-300 font-medium`}>
+                  <span
+                    className={`${
+                      isActive
+                        ? "text-orange-600 dark:text-orange-400 font-semibold"
+                        : "text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400"
+                    } transition-colors duration-300 font-medium`}
+                  >
                     {item}
                   </span>
                 </div>
@@ -140,13 +157,17 @@ const Navbar = () => {
                 <span className="font-semibold text-gray-800 max-w-32 truncate">
                   {session.user.name}
                 </span>
-                <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${
+                    isProfileOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {/* Profile Dropdown */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-slide-down">
-                  <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-gray-100">
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
+                  <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-700 dark:to-gray-700 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
                       {session.user.image ? (
                         <img
@@ -160,23 +181,46 @@ const Navbar = () => {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-800 truncate">{session.user.name}</p>
-                        <p className="text-sm text-gray-600 truncate">{session.user.email}</p>
+                        <p className="font-semibold text-gray-800 dark:text-white truncate">
+                          {session.user.name}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {session.user.email}
+                        </p>
                       </div>
                     </div>
                   </div>
                   <Link href="/profile">
                     <button
                       onClick={() => setIsProfileOpen(false)}
-                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-orange-50 transition-colors duration-200 text-gray-700 font-medium"
+                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-orange-50 dark:hover:bg-gray-700 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium"
                     >
                       <User className="w-5 h-5" />
                       <span>My Profile</span>
                     </button>
                   </Link>
+
+                  <Link href="/my-bookings">
+                    <button
+                      onClick={() => setIsProfileOpen(false)}
+                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-orange-50 dark:hover:bg-gray-700 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium"
+                    >
+                      <Calendar className="w-5 h-5" />
+                      <span>My Bookings</span>
+                    </button>
+                  </Link>
+                  <Link href="/my-wishlist">
+                    <button
+                      onClick={() => setIsProfileOpen(false)}
+                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-orange-50 dark:hover:bg-gray-700 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium"
+                    >
+                      <Heart className="w-5 h-4" />
+                      <span>My Wishlist</span>
+                    </button>
+                  </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-red-50 transition-colors duration-200 text-red-600 font-medium"
+                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 text-red-600 dark:text-red-400 font-medium"
                   >
                     <LogOut className="w-5 h-5" />
                     <span>Sign Out</span>
@@ -200,17 +244,17 @@ const Navbar = () => {
           aria-label="Toggle menu"
         >
           <span
-            className={`w-6 h-0.5 bg-gray-800 rounded-full transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-gray-800 dark:bg-gray-200 rounded-full transition-all duration-300 ${
               isMenuOpen ? "rotate-45 translate-y-2" : ""
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-gray-800 rounded-full transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-gray-800 dark:bg-gray-200 rounded-full transition-all duration-300 ${
               isMenuOpen ? "opacity-0" : "opacity-100"
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-gray-800 rounded-full transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-gray-800 dark:bg-gray-200 rounded-full transition-all duration-300 ${
               isMenuOpen ? "-rotate-45 -translate-y-2" : ""
             }`}
           ></span>
@@ -219,18 +263,18 @@ const Navbar = () => {
 
       {/* Mobile Menu Dropdown */}
       <div
-        className={`md:hidden absolute top-16 left-0 w-full bg-white shadow-lg overflow-hidden transition-all duration-300 ease-in-out z-50 ${
+        className={`md:hidden absolute top-16 left-0 w-full bg-white dark:bg-gray-900 shadow-lg overflow-hidden transition-all duration-300 ease-in-out z-50 ${
           isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="px-6 py-4 space-y-4">
           {menuItems.map((item, idx) => {
             let href = "/";
-            if (item === "contacts") href = "/contacts";
-            else if (item === "location") href = "/location";
-            else if (item === "login") href = "/login";
-            else if (item === "havens") href = "/rooms";
-            else if (item === "about") href = "/about";
+            if (item === "Contacts") href = "/contacts";
+            else if (item === "Location") href = "/location";
+            else if (item === "Login") href = "/login";
+            else if (item === "Havens") href = "/rooms";
+            else if (item === "About") href = "/about";
 
             const isActive = pathname === href;
 
@@ -245,11 +289,13 @@ const Navbar = () => {
                 style={{ transitionDelay: `${idx * 50}ms` }}
               >
                 <Link href={href}>
-                  <div className={`${
-                    isActive
-                      ? "text-orange-600 bg-orange-50 font-semibold border-l-4 border-orange-600"
-                      : "text-gray-700 hover:text-yellow-600 hover:bg-yellow-50"
-                  } transition-colors duration-300 font-medium py-2 px-4 rounded-lg cursor-pointer`}>
+                  <div
+                    className={`${
+                      isActive
+                        ? "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-gray-800 font-semibold border-l-4 border-orange-600 dark:border-orange-400"
+                        : "text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-gray-800"
+                    } transition-colors duration-300 font-medium py-2 px-4 rounded-lg cursor-pointer`}
+                  >
                     {item}
                   </div>
                 </Link>
@@ -297,7 +343,7 @@ const Navbar = () => {
             ) : session?.user ? (
               <div className="space-y-3">
                 {/* User Info */}
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border-2 border-orange-200">
+                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-700 dark:to-gray-700 rounded-lg border-2 border-orange-200 dark:border-gray-600">
                   {session.user.image ? (
                     <img
                       src={session.user.image}
@@ -310,8 +356,12 @@ const Navbar = () => {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-800 truncate">{session.user.name}</p>
-                    <p className="text-sm text-gray-600 truncate">{session.user.email}</p>
+                    <p className="font-semibold text-gray-800 dark:text-white truncate">
+                      {session.user.name}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {session.user.email}
+                    </p>
                   </div>
                 </div>
                 {/* Profile Button */}
@@ -324,6 +374,27 @@ const Navbar = () => {
                     <span>My Profile</span>
                   </button>
                 </Link>
+                {/* My Bookings Button */}
+                <Link href="/my-bookings">
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md"
+                  >
+                    <Calendar className="w-5 h-5" />
+                    <span>My Bookings</span>
+                  </button>
+                </Link>
+                {/* My Wishlist Button */}
+                <Link href="/my-wishlist">
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white rounded-lg font-medium transition-all duration-300 shadow-md"
+                  >
+                    <Heart className="w-5 h-5" />
+                    <span>My Wishlist</span>
+                  </button>
+                </Link>
+
                 {/* Sign Out Button */}
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}

@@ -473,3 +473,66 @@ export const deleteBooking = async (
     );
   }
 };
+
+// GET User's Bookings
+export const getUserBookings = async (
+  req: NextRequest,
+  { params }: { params: Promise<{ userId: string }> }
+): Promise<NextResponse> => {
+  const { userId } = await params;
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status"); // upcoming, past, cancelled, all
+
+    let query = `
+      SELECT
+        b.*,
+        h.tower,
+        COALESCE(
+          json_agg(hi.image_url ORDER BY hi.display_order)
+          FILTER (WHERE hi.id IS NOT NULL),
+          '[]'
+        ) as room_images
+      FROM bookings b
+      LEFT JOIN havens h ON b.room_name = h.haven_name
+      LEFT JOIN haven_images hi ON h.uuid_id = hi.haven_id
+      WHERE b.user_id = $1
+    `;
+
+    const values: any[] = [userId];
+
+    // Filter by status if provided
+    if (status && status !== "all") {
+      if (status === "upcoming") {
+        query += ` AND b.status IN ('pending', 'approved', 'confirmed') AND b.check_in_date >= CURRENT_DATE`;
+      } else if (status === "past") {
+        query += ` AND (b.status = 'completed' OR b.check_out_date < CURRENT_DATE)`;
+      } else if (status === "cancelled") {
+        query += ` AND b.status = 'cancelled'`;
+      } else {
+        query += ` AND b.status = $2`;
+        values.push(status);
+      }
+    }
+
+    query += ` GROUP BY b.id, h.tower ORDER BY b.created_at DESC`;
+
+    const result = await pool.query(query, values);
+    console.log(`✅ Retrieved ${result.rows.length} bookings for user ${userId}`);
+
+    return NextResponse.json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (error: any) {
+    console.log("❌ Error fetching user bookings:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to fetch user bookings",
+      },
+      { status: 500 }
+    );
+  }
+};

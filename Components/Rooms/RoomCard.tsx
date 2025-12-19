@@ -79,12 +79,12 @@ const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
                 className={`w-4 h-4 ${
                   index < Math.floor(room.rating)
                     ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
+                    : "text-gray-300 dark:text-gray-600"
                 }`}
               />
             ))}
           </div>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
             {room.rating} ({room.reviews} reviews)
           </span>
         </div>
@@ -98,7 +98,7 @@ const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
         {room.location && room.tower && (
           <div className="flex items-center gap-1 mb-2">
             <MapPin className="w-4 h-4 text-orange-500" />
-            <span className="text-sm text-gray-600 font-medium">
+            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
               {room.tower}, {room.location}
             </span>
           </div>
@@ -127,11 +127,11 @@ const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
         {/* Price and Button */}
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs text-gray-500">Starting from</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Starting from</p>
             <p className="text-2xl sm:text-3xl font-bold text-orange-400">
               {room.price}
             </p>
-            <p className="text-xs text-gray-500">{room.pricePerNight}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{room.pricePerNight}</p>
           </div>
 
           {/* Conditional Button based on mode */}

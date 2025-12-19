@@ -86,17 +86,17 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Hero Section */}
       <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center animate-in fade-in slide-in-from-bottom duration-700">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-orange-600 to-yellow-600 dark:from-orange-400 dark:to-yellow-400 bg-clip-text text-transparent">
                 About Staycation Haven
               </span>
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
               Your premier destination for flexible, comfortable, and affordable
               urban staycations. We transform ordinary spaces into extraordinary
               experiences.
@@ -106,22 +106,22 @@ const AboutPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="text-center p-6 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in slide-in-from-bottom"
+                className="text-center p-6 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-gray-700 dark:to-gray-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in slide-in-from-bottom"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex justify-center mb-4 text-orange-500">
+                <div className="flex justify-center mb-4 text-orange-500 dark:text-orange-400">
                   {stat.icon}
                 </div>
-                <div className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
                   {stat.value}
                 </div>
-                <div className="text-sm sm:text-base text-gray-600">
+                <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
                   {stat.label}
                 </div>
               </div>
@@ -135,10 +135,10 @@ const AboutPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-in fade-in slide-in-from-left duration-700">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-6">
                 Our Story
               </h2>
-              <div className="space-y-4 text-gray-600 leading-relaxed">
+              <div className="space-y-4 text-gray-600 dark:text-gray-400 leading-relaxed">
                 <p>
                   Founded in 2020, Staycation Haven was born from a simple idea:
                   not everyone needs a full 24-hour hotel stay. Whether
@@ -172,13 +172,13 @@ const AboutPage = () => {
       </section>
 
       {/* Our Values Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
               Our Values
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               The principles that guide us in delivering exceptional staycation
               experiences
             </p>
@@ -191,10 +191,10 @@ const AboutPage = () => {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex justify-center mb-4">{value.icon}</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">
                   {value.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                   {value.description}
                 </p>
               </div>
@@ -207,10 +207,10 @@ const AboutPage = () => {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
               Meet Our Team
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Dedicated professionals committed to making your stay exceptional
             </p>
           </div>
@@ -218,10 +218,10 @@ const AboutPage = () => {
             {team.map((member, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 animate-in fade-in slide-in-from-bottom"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 animate-in fade-in slide-in-from-bottom"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="h-64 bg-gradient-to-br from-orange-200 to-yellow-200 flex items-center justify-center">
+                <div className="h-64 bg-gradient-to-br from-orange-200 to-yellow-200 dark:from-orange-900/30 dark:to-yellow-900/30 flex items-center justify-center">
                   <img
                     src={member.image}
                     alt={member.name}
@@ -229,13 +229,13 @@ const AboutPage = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-800 mb-1">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-1">
                     {member.name}
                   </h3>
-                  <p className="text-orange-600 font-semibold mb-3">
+                  <p className="text-orange-600 dark:text-orange-400 font-semibold mb-3">
                     {member.role}
                   </p>
-                  <p className="text-gray-600 text-sm">{member.description}</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">{member.description}</p>
                 </div>
               </div>
             ))}

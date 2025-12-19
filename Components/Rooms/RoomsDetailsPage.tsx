@@ -143,18 +143,18 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-semibold transition-colors duration-300"
+            className="flex items-center gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-500 font-semibold transition-colors duration-300"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Rooms
           </button>
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Home className="w-4 h-5" />
             <span>Room Details</span>
           </div>
@@ -167,7 +167,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
           {/* Left column Images */}
           <div className="lg:col-span-2 animate-fade-in slide-in-from-left duration-500">
             {/* Main Image */}
-            <div className="relative w-full h-96 sm:h-[500px] bg-gray-200 rounded-lg overflow-hidden mb-4 group">
+            <div className="relative w-full h-96 sm:h-[500px] bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden mb-4 group">
               {/* Images Slider */}
               <div
                 className="w-full h-full flex transition-transform duration-500"
@@ -226,7 +226,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                   className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
                     index === currentImageIndex
                       ? "border-orange-500 scale-105"
-                      : "border-gray-300 hover:border-orange-300"
+                      : "border-gray-300 dark:border-gray-600 hover:border-orange-300 dark:hover:border-orange-400"
                   }`}
                 >
                   <Image
@@ -242,16 +242,16 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
 
             {/* Description Section */}
             <div
-              className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
+              className="mt-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
               style={{ animationDelay: "100ms" }}
             >
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
                 About This Room
               </h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
                 {room.fullDescription || room.description}
               </p>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 Experience ultimate comfort and luxury in this beautifully
                 designed room. Perfect for both business and leisure travelers,
                 this room offers everything you need for a memorable stay.
@@ -260,10 +260,10 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
 
             {/* Amenities Section */}
             <div
-              className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
+              className="mt-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
               style={{ animationDelay: "200ms" }}
             >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
                 Room Amenities
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -276,13 +276,13 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
             {/* Photo Tour Section */}
             {photoTour && (
               <div
-                className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
+                className="mt-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
                 style={{ animationDelay: "250ms" }}
               >
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
                   Photo Tour
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Explore every corner of this haven
                 </p>
 
@@ -295,7 +295,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                       className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
                         activeCategory === category
                           ? "bg-orange-500 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                       }`}
                     >
                       {category}
@@ -342,7 +342,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                       )}
                     </>
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                       No photos available for this category
                     </div>
                   );
@@ -353,14 +353,14 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
             {/* YouTube Video */}
             {room.youtubeUrl && (
               <div
-                className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
+                className="mt-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
                 style={{ animationDelay: "300ms" }}
               >
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Play className="w-6 h-6 text-orange-600" />
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                  <Play className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                   Video Tour
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Watch a virtual tour of this beautiful room
                 </p>
                 <div className="relative w-full pb-[56.25%] rounded-lg overflow-hidden">
@@ -379,7 +379,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
           {/* Right Column */}
           <div className="animate-fade-in slide-in-from-right duration-500">
             {/* Price & Booking Card */}
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6 sticky top-24">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 sticky top-24">
               <div className="flex items-start gap-2 mb-4">
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, index) => (
@@ -388,39 +388,39 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                       className={`w-5 h-5 ${
                         index < Math.floor(room.rating)
                           ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-800"
+                          : "text-gray-300 dark:text-gray-600"
                       }`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
                   {room.rating} ({room.reviews} reviews)
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold text-gray-800 mb-6">
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
                 {room.name}
               </h1>
 
-              <div className="mb-6 pb-6 border-b border-gray-200">
-                <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Starting from</p>
+              <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Starting from</p>
                 <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-yellow-500 mb-1">
                   {room.price}
                 </p>
-                <p className="text-sm text-gray-600">{room.pricePerNight}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{room.pricePerNight}</p>
               </div>
 
-              <div className="mb-4 pb-4 border-b border-gray-200 space-y-3">
+              <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700 space-y-3">
                 <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-blue-600" />
-                  <span className="text-gray-700">
+                  <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-gray-700 dark:text-gray-300">
                     Up to {room.capacity} guests
                   </span>
                 </div>
                 {room.beds && (
                   <div className="flex items-center gap-3">
-                    <Home className="w-5 h-5 text-blue-600" />
-                    <span className="text-gray-700">{room.roomSize}</span>
+                    <Home className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <span className="text-gray-700 dark:text-gray-300">{room.roomSize}</span>
                   </div>
                 )}
               </div>
@@ -432,7 +432,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                 >
                   Book Now
                 </button>
-                <button className="w-full border-2 border-gray-300 hover:border-orange-500 text-gray-800 hover:text-orange-600 font-semibold py-3 rounded-lg transition-all duration-300">
+                <button className="w-full border-2 border-gray-300 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-400 text-gray-800 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 font-semibold py-3 rounded-lg transition-all duration-300">
                   Add to Wishlist
                 </button>
               </div>

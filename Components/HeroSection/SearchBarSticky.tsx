@@ -166,7 +166,7 @@ const SearchBarSticky = () => {
         </div>
 
         {/* Search Card - Improved mobile responsiveness */}
-        <div className={`bg-white rounded-xl transition-all duration-500 ease-in-out ${
+        <div className={`bg-white dark:bg-gray-800 rounded-xl transition-all duration-500 ease-in-out ${
           isScrolled ? 'p-2 sm:p-3 md:p-4' : 'p-4 sm:p-5 md:p-7'
         }`}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
@@ -205,14 +205,14 @@ const SearchBarSticky = () => {
             <div className="sm:col-span-1">
               <button
                 onClick={() => setIsGuestModalOpen(true)}
-                className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg border border-gray-200 hover:border-orange-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 h-12 sm:h-14 hover:shadow-md"
+                className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 h-12 sm:h-14 hover:shadow-md"
               >
                 <Users className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
                 <div className="flex-1 text-left min-w-0">
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     Who
                   </p>
-                  <p className="text-sm sm:text-base font-semibold text-gray-800 truncate">
+                  <p className="text-sm sm:text-base font-semibold text-gray-800 dark:text-white truncate">
                     {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
                   </p>
                 </div>
