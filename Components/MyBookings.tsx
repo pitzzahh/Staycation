@@ -17,6 +17,15 @@ interface MyBookingsPageProps {
 const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
   const [filterStatus, setFilterStatus] = useState('all'); // all, upcoming, past, cancelled
 
+  const formatTo12Hour = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
   // RTK Query hooks - fetch all bookings, filter on client side
   const { data: bookingsData, isLoading, error, refetch } = useGetUserBookingsQuery(
     { userId, status: undefined } // Always fetch all bookings
@@ -259,7 +268,7 @@ const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
                               <p className="font-semibold text-gray-800 dark:text-white">
                                 {new Date(booking.check_in_date).toLocaleDateString()}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">{booking.check_in_time}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{formatTo12Hour(booking.check_in_time)}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
@@ -269,7 +278,7 @@ const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
                               <p className="font-semibold text-gray-800 dark:text-white">
                                 {new Date(booking.check_out_date).toLocaleDateString()}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">{booking.check_out_time}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{formatTo12Hour(booking.check_out_time)}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">

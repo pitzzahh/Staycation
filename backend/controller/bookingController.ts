@@ -279,7 +279,23 @@ export const getBookingById = async (
       );
     }
 
-    const query = `SELECT * FROM bookings WHERE id = $1 LIMIT 1`;
+    const query = `
+      SELECT
+        b.*,
+        h.tower,
+        COALESCE(
+          json_agg(hi.image_url ORDER BY hi.display_order)
+          FILTER (WHERE hi.id IS NOT NULL),
+          '[]'
+        ) as room_images
+      FROM bookings b
+      LEFT JOIN havens h ON b.room_name = h.haven_name
+      LEFT JOIN haven_images hi ON h.uuid_id = hi.haven_id
+      WHERE b.id = $1
+      GROUP BY b.id, h.tower
+      LIMIT 1
+    `;
+
     const result = await pool.query(query, [id]);
 
     if (result.rows.length === 0) {
@@ -288,6 +304,8 @@ export const getBookingById = async (
         { status: 404 }
       );
     }
+
+    console.log(`✅ Retrieved booking ${id} with room images`);
 
     return NextResponse.json({
       success: true,

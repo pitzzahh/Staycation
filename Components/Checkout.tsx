@@ -401,6 +401,8 @@ const Checkout = () => {
       }
 
       setCurrentStep(2);
+      // Scroll to top to see "Confirm Your Booking"
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -1496,23 +1498,35 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <span className="text-gray-700">📥 Check-in:</span>
                     <span className="font-semibold">
                       {bookingData.checkInDate
-                        ? new Date(bookingData.checkInDate).toLocaleDateString()
+                        ? new Date(bookingData.checkInDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                         : "N/A"}{" "}
-                      {formData.checkInTime}
+                      at {formData.checkInTime ? (() => {
+                        const [hours, minutes] = formData.checkInTime.split(':');
+                        const hour = parseInt(hours, 10);
+                        const ampm = hour >= 12 ? 'PM' : 'AM';
+                        const hour12 = hour % 12 || 12;
+                        return `${hour12}:${minutes} ${ampm}`;
+                      })() : "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-700">📤 Check-out:</span>
                     <span className="font-semibold">
                       {bookingData.checkOutDate
-                        ? new Date(bookingData.checkOutDate).toLocaleDateString()
+                        ? new Date(bookingData.checkOutDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                         : "N/A"}{" "}
-                      {formData.checkOutTime}
+                      at {formData.checkOutTime ? (() => {
+                        const [hours, minutes] = formData.checkOutTime.split(':');
+                        const hour = parseInt(hours, 10);
+                        const ampm = hour >= 12 ? 'PM' : 'AM';
+                        const hour12 = hour % 12 || 12;
+                        return `${hour12}:${minutes} ${ampm}`;
+                      })() : "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-700">Stay Type:</span>
-                    <span className="font-semibold">{bookingData.stayType?.duration || "N/A"}</span>
+                    <span className="font-semibold">{formData.stayType || "N/A"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-700">Guests:</span>

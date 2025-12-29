@@ -12,13 +12,28 @@ import {
   Users,
   X,
   Play,
+  Heart,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hooks";
 import { setSelectedRoom } from "@/redux/slices/bookingSlice";
+import { useSession } from "next-auth/react";
+import { useCheckWishlistStatusQuery, useAddToWishlistMutation, useRemoveFromWishlistMutation } from "@/redux/api/wishlistApi";
+import toast from "react-hot-toast";
 import AmenityBadge from "./AmenityBadge";
+import dynamic from "next/dynamic";
+
+// Dynamically import RoomMap to avoid SSR issues with Leaflet
+const RoomMap = dynamic(() => import("./RoomMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
+      <p className="text-gray-500 dark:text-gray-400">Loading map...</p>
+    </div>
+  ),
+});
 
 interface Room {
   id: string;
@@ -58,11 +73,23 @@ interface RoomsDetailsPageProps {
 const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { data: session } = useSession();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState("Living Area");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState("");
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+
+  // RTK Query hooks
+  const { data: wishlistStatus } = useCheckWishlistStatusQuery(
+    { userId: (session?.user as any)?.id, havenId: room.id },
+    { skip: !session?.user?.id }
+  );
+  const [addToWishlist, { isLoading: isAdding }] = useAddToWishlistMutation();
+  const [removeFromWishlist, { isLoading: isRemoving }] = useRemoveFromWishlistMutation();
+
+  const isInWishlist = wishlistStatus?.isInWishlist || false;
+  const isLoadingWishlist = isAdding || isRemoving;
 
   // Safe defaults
   const images = Array.isArray(room.images) ? room.images : [];
@@ -126,6 +153,36 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
       /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
     );
     return videoIdMatch ? `https://www.youtube.com/embed/${videoIdMatch[1]}` : url;
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!session?.user?.id) {
+      toast.error('Please login to add to wishlist');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      if (isInWishlist) {
+        // Remove from wishlist - need to get wishlist item id first
+        const result = await removeFromWishlist(wishlistStatus?.wishlistId).unwrap();
+        if (result.success) {
+          toast.success('Removed from wishlist');
+        }
+      } else {
+        // Add to wishlist
+        const result = await addToWishlist({
+          user_id: (session.user as any).id,
+          haven_id: room.id,
+        }).unwrap();
+        if (result.success) {
+          toast.success('Added to wishlist');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error toggling wishlist:', error);
+      toast.error(error?.data?.error || 'An error occurred. Please try again.');
+    }
   };
 
   const handleBookNow = () => {
@@ -374,6 +431,27 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                 </div>
               </div>
             )}
+
+            {/* Location Map */}
+            <div
+              className="mt-8 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
+              style={{ animationDelay: "400ms" }}
+            >
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <MapPin className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                Location
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                {room.tower && <span className="font-semibold">{room.tower}</span>}
+                {room.tower && room.location && <span>, </span>}
+                {room.location || 'Quezon City, Metro Manila'}
+              </p>
+              <RoomMap
+                roomName={room.name}
+                tower={room.tower}
+                location={room.location}
+              />
+            </div>
           </div>
 
           {/* Right Column */}
@@ -432,8 +510,17 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                 >
                   Book Now
                 </button>
-                <button className="w-full border-2 border-gray-300 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-400 text-gray-800 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 font-semibold py-3 rounded-lg transition-all duration-300">
-                  Add to Wishlist
+                <button
+                  onClick={handleWishlistToggle}
+                  disabled={isLoadingWishlist}
+                  className={`w-full border-2 font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
+                    isInWishlist
+                      ? 'bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-400 text-gray-800 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400'
+                  } ${isLoadingWishlist ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-white' : ''}`} />
+                  {isLoadingWishlist ? 'Loading...' : isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
                 </button>
               </div>
             </div>
