@@ -3,7 +3,7 @@ import { getAllActivityLogs, createActivityLog, deleteActivityLog } from "@/back
 import { createEdgeRouter } from "next-connect";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface RequestContext {}
+type RequestContext = Record<string, never>;
 
 const router = createEdgeRouter<NextRequest, RequestContext>();
 router.get(getAllActivityLogs);
