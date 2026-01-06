@@ -379,10 +379,10 @@ export default function BookingsPage() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={9} className="py-16 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
-                      <p className="mt-4 text-gray-600 dark:text-gray-400">Loading bookings...</p>
+                  <td colSpan={8} className="py-10 px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="inline-block w-5 h-5 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" />
+                      Loading inventory...
                     </div>
                   </td>
                 </tr>
