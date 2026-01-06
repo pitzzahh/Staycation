@@ -20,7 +20,9 @@ import {
   useSendMessageMutation,
   useMarkMessagesAsReadMutation,
 } from "@/redux/api/messagesApi";
+import { useGetEmployeesQuery } from "@/redux/api/employeeApi";
 import toast from "react-hot-toast";
+import NewMessageModal from "../Owners/Modals/NewMessageModal";
 
 interface MessagePageProps {
   onClose?: () => void;
@@ -33,6 +35,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch conversations
@@ -61,6 +64,17 @@ export default function MessagePage({ onClose }: MessagePageProps) {
 
   const conversations = conversationsData?.data || [];
   const messages = messagesData?.data || [];
+  const { data: employeesData } = useGetEmployeesQuery({});
+  const employees = employeesData?.data || [];
+
+  const employeeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    employees.forEach((emp: any) => {
+      const name = `${emp.first_name ?? ""} ${emp.last_name ?? ""}`.trim();
+      map[emp.id] = name || emp.email || emp.employment_id || "Employee";
+    });
+    return map;
+  }, [employees]);
 
   // Set first conversation as active on load
   useEffect(() => {
@@ -85,10 +99,32 @@ export default function MessagePage({ onClose }: MessagePageProps) {
     scrollToBottom();
   }, [messages]);
 
+  const getConversationDisplayName = (conversation: any | undefined | null) => {
+    if (!conversation) return "";
+    if (conversation.type === "guest") {
+      return conversation.name;
+    }
+
+    const otherParticipantIds = (conversation.participant_ids || []).filter(
+      (id: string) => id !== userId
+    );
+    const otherNames = otherParticipantIds
+      .map((id: string) => employeeMap[id])
+      .filter(Boolean);
+
+    if (otherNames.length > 0) {
+      return otherNames.join(", ");
+    }
+
+    return conversation.name;
+  };
+
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeId) ?? conversations[0],
     [activeId, conversations]
   );
+
+  const activeConversationName = getConversationDisplayName(activeConversation);
 
   const filteredConversations = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -198,6 +234,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
               <div className="ml-auto flex items-center gap-2">
                 <button
                   type="button"
+                  onClick={() => setIsNewMessageModalOpen(true)}
                   className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors"
                   title="New message"
                 >
@@ -231,6 +268,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
             <div className="flex-1 overflow-y-auto">
               {filteredConversations.map((c) => {
                 const isActive = c.id === activeId;
+                const conversationName = getConversationDisplayName(c);
                 const activeStatus = getActiveStatus(c.last_message_time, c.type);
                 return (
                   <button
@@ -253,7 +291,9 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {conversationName || c.name}
+                        </p>
                         <span className="text-xs text-gray-400">•</span>
                         <p className="text-xs text-gray-400 whitespace-nowrap">
                           {c.last_message_time ? formatTime(c.last_message_time) : ""}
@@ -283,10 +323,14 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                 <div className="h-16 px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center flex-shrink-0">
-                      {activeConversation.name.charAt(0).toUpperCase()}
+                      {(activeConversationName || activeConversation.name || "?")
+                        .charAt(0)
+                        .toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{activeConversation.name}</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
+                        {activeConversationName || activeConversation.name}
+                      </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {getActiveStatus(activeConversation.last_message_time, activeConversation.type).statusText}
                       </p>
@@ -313,9 +357,21 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                   ) : messages.length > 0 ? (
                     messages.map((m) => {
                       const isMe = m.sender_id === userId;
+                      const senderLabel = !isMe
+                        ? employeeMap[m.sender_id] ||
+                          m.sender_name ||
+                          (activeConversation?.type === "guest"
+                            ? activeConversation?.name
+                            : "Guest")
+                        : undefined;
                       return (
                         <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                           <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
+                            {!isMe && senderLabel && (
+                              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                {senderLabel}
+                              </span>
+                            )}
                             <div
                               className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
                                 isMe
@@ -340,7 +396,12 @@ export default function MessagePage({ onClose }: MessagePageProps) {
 
                 <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3">
                   <div className="flex items-end gap-2">
-                    <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Add">
+                    <button
+                      type="button"
+                      onClick={() => setIsNewMessageModalOpen(true)}
+                      className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors"
+                      title="New message"
+                    >
                       <Plus className="w-5 h-5 text-brand-primary" />
                     </button>
                     <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Attach">
@@ -389,6 +450,16 @@ export default function MessagePage({ onClose }: MessagePageProps) {
           </div>
         </div>
       </div>
+
+      <NewMessageModal
+        isOpen={isNewMessageModalOpen}
+        onClose={() => setIsNewMessageModalOpen(false)}
+        currentUserId={userId || ""}
+        onConversationCreated={(conversationId) => {
+          setActiveId(conversationId);
+          refetchConversations();
+        }}
+      />
     </div>
   );
 }
