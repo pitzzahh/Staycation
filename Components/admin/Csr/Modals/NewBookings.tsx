@@ -24,6 +24,7 @@ interface Haven {
   youtube_url?: string;
   six_hour_rate: number;
   ten_hour_rate: number;
+  weekday_rate: number;
   weekend_rate: number;
 }
 
@@ -68,20 +69,49 @@ export default function NewBookingModal({ onClose }: NewBookingModalProps) {
   // Parse havens data
   const havens: Haven[] = Array.isArray(havensData) ? havensData : [];
 
+  const calculateRoomRate = (selectedHaven?: Haven, checkInDate?: string, checkOutDate?: string) => {
+    if (!selectedHaven) return "";
+    if (!checkInDate || !checkOutDate) {
+      return selectedHaven.ten_hour_rate?.toString() ?? "";
+    }
+
+    const startDate = new Date(checkInDate);
+    const endDate = new Date(checkOutDate);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate <= startDate) {
+      return selectedHaven.ten_hour_rate?.toString() ?? "";
+    }
+
+    const weekdayRate = selectedHaven.weekday_rate ?? selectedHaven.ten_hour_rate;
+    const weekendRate = selectedHaven.weekend_rate ?? weekdayRate;
+
+    let total = 0;
+    const cursor = new Date(startDate);
+
+    while (cursor < endDate) {
+      const day = cursor.getDay();
+      const isWeekend = day === 5 || day === 6; // Friday & Saturday treated as weekend
+      total += isWeekend ? weekendRate : weekdayRate;
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return total.toString();
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
 
-    // Auto-fill room rate when a haven is selected
-    if (name === "roomName" && value) {
-      const selectedHaven = havens.find((h) => h.haven_name === value);
-      if (selectedHaven) {
-        setForm((prev) => ({
-          ...prev,
-          roomRate: selectedHaven.ten_hour_rate.toString(), // Default to 10-hour rate
-        }));
+    setForm((prev) => {
+      const updatedForm = { ...prev, [name]: value };
+
+      if (["roomName", "checkInDate", "checkOutDate"].includes(name)) {
+        const selectedHaven = havens.find((h) => h.haven_name === updatedForm.roomName);
+        const calculatedRate = calculateRoomRate(selectedHaven, updatedForm.checkInDate, updatedForm.checkOutDate);
+        updatedForm.roomRate = calculatedRate;
       }
-    }
+
+      return updatedForm;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -254,7 +284,7 @@ export default function NewBookingModal({ onClose }: NewBookingModalProps) {
                     </option>
                     {havens.map((haven) => (
                       <option key={haven.uuid_id} value={haven.haven_name}>
-                        {haven.haven_name} - {haven.tower} (₱{haven.ten_hour_rate.toLocaleString()})
+                        {haven.haven_name} - {haven.tower} (Weekday ₱{haven.weekday_rate.toLocaleString()} / Weekend ₱{haven.weekend_rate.toLocaleString()})
                       </option>
                     ))}
                   </select>
