@@ -152,6 +152,79 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
       ? employeeProfileImageById[activeConversationOtherParticipantIds[0]]
       : undefined;
 
+  const showSkeletonConversations = isLoadingConversations && conversations.length === 0;
+  const showSkeletonMessages = isLoadingMessages && messages.length === 0;
+
+  const Skeleton = ({ className }: { className: string }) => (
+    <div className={`animate-pulse bg-gray-200 dark:bg-gray-800 ${className}`} />
+  );
+
+  if (showSkeletonConversations) {
+    return (
+      <div className="space-y-6 animate-in fade-in duration-700">
+        <div className="flex items-center justify-between mb-4">
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-48 rounded" />
+            <Skeleton className="h-4 w-64 rounded" />
+          </div>
+          <Skeleton className="h-10 w-10 rounded-full" />
+        </div>
+
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
+            <div className="border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col h-[72vh]">
+              <div className="h-16 px-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-800">
+                <Skeleton className="h-5 w-24 rounded" />
+              </div>
+              <div className="p-4">
+                <Skeleton className="h-10 w-full rounded-full" />
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <div key={idx} className="px-4 py-3 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800">
+                    <Skeleton className="w-11 h-11 rounded-full" />
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <Skeleton className="h-4 w-40 rounded" />
+                      <Skeleton className="h-3 w-32 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-10 rounded" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 flex flex-col h-[72vh]">
+              <div className="h-16 px-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-800">
+                <Skeleton className="w-10 h-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-48 rounded" />
+                  <Skeleton className="h-3 w-32 rounded" />
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                {Array.from({ length: 8 }).map((_, idx) => (
+                  <div key={idx} className={`flex ${idx % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                    <div className={`max-w-[75%] flex flex-col gap-2 ${idx % 2 === 0 ? "items-start" : "items-end"}`}>
+                      <Skeleton className="h-10 w-48 rounded-2xl" />
+                      <Skeleton className="h-3 w-16 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-gray-200 dark:border-gray-800 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-10 flex-1 rounded-full" />
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const filteredConversations = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return conversations;
@@ -410,7 +483,16 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                 </div>
 
                 <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 px-4 py-4 space-y-3">
-                  {isLoadingMessages ? (
+                  {showSkeletonMessages ? (
+                    Array.from({ length: 6 }).map((_, idx) => (
+                      <div key={idx} className={`flex ${idx % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                        <div className={`max-w-[75%] flex flex-col gap-2 ${idx % 2 === 0 ? "items-start" : "items-end"}`}>
+                          <Skeleton className={`h-10 ${idx % 2 === 0 ? "w-48" : "w-40"} rounded-2xl`} />
+                          <Skeleton className="h-3 w-16 rounded" />
+                        </div>
+                      </div>
+                    ))
+                  ) : isLoadingMessages ? (
                     <div className="flex items-center justify-center h-full">
                       <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
                     </div>
