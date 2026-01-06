@@ -22,7 +22,7 @@ import {
 } from "@/redux/api/messagesApi";
 import { useGetEmployeesQuery } from "@/redux/api/employeeApi";
 import toast from "react-hot-toast";
-import NewMessageModal from "../Owners/Modals/NewMessageModal";
+import NewMessageModal from "./Modals/NewMessageModal";
 
 interface MessagePageProps {
   onClose?: () => void;
@@ -76,6 +76,16 @@ export default function MessagePage({ onClose }: MessagePageProps) {
     return map;
   }, [employees]);
 
+  const employeeProfileImageById = useMemo(() => {
+    const map: Record<string, string> = {};
+    employees.forEach((emp: any) => {
+      if (emp?.id && emp?.profile_image_url) {
+        map[emp.id] = emp.profile_image_url;
+      }
+    });
+    return map;
+  }, [employees]);
+
   // Set first conversation as active on load
   useEffect(() => {
     if (conversations.length > 0 && !activeId) {
@@ -125,6 +135,13 @@ export default function MessagePage({ onClose }: MessagePageProps) {
   );
 
   const activeConversationName = getConversationDisplayName(activeConversation);
+  const activeConversationOtherParticipantIds = userId
+    ? (activeConversation?.participant_ids || []).filter((id: string) => id !== userId)
+    : (activeConversation?.participant_ids || []);
+  const activeConversationAvatarUrl =
+    activeConversation?.type !== "guest" && activeConversationOtherParticipantIds.length === 1
+      ? employeeProfileImageById[activeConversationOtherParticipantIds[0]]
+      : undefined;
 
   const filteredConversations = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -210,14 +227,6 @@ export default function MessagePage({ onClose }: MessagePageProps) {
     return { isActive: false, statusText: "Offline" };
   };
 
-  if (isLoadingConversations) {
-    return (
-      <div className="flex items-center justify-center h-[72vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-      </div>
-    );
-  }
-
   return (
     <div className="animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-4">
@@ -266,54 +275,83 @@ export default function MessagePage({ onClose }: MessagePageProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {filteredConversations.map((c) => {
-                const isActive = c.id === activeId;
-                const conversationName = getConversationDisplayName(c);
-                const activeStatus = getActiveStatus(c.last_message_time, c.type);
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setActiveId(c.id)}
-                    className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-colors ${
-                      isActive
-                        ? "bg-brand-primaryLighter dark:bg-gray-800"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                    }`}
-                  >
-                    <div className="relative">
-                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center">
-                        {c.name.charAt(0).toUpperCase()}
+              {isLoadingConversations ? (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
+                </div>
+              ) : (
+                filteredConversations.map((c) => {
+                  const isActive = c.id === activeId;
+                  const conversationName = getConversationDisplayName(c);
+                  const activeStatus = getActiveStatus(c.last_message_time, c.type);
+                  const otherParticipantIds = userId
+                    ? (c.participant_ids || []).filter((id: string) => id !== userId)
+                    : (c.participant_ids || []);
+                  const avatarUrl =
+                    c.type !== "guest" && otherParticipantIds.length === 1
+                      ? employeeProfileImageById[otherParticipantIds[0]]
+                      : undefined;
+                  const avatarLetter = (conversationName || c.name || "?")
+                    .charAt(0)
+                    .toUpperCase();
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setActiveId(c.id)}
+                      className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-colors ${
+                        isActive
+                          ? "bg-brand-primaryLighter dark:bg-gray-800"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                      }`}
+                    >
+                      <div className="relative">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center">
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={conversationName || c.name || "Conversation"}
+                              className="w-11 h-11 rounded-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "";
+                                target.onerror = null;
+                              }}
+                            />
+                          ) : (
+                            avatarLetter
+                          )}
+                        </div>
+                        {activeStatus.isActive && (
+                          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                        )}
                       </div>
-                      {activeStatus.isActive && (
-                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                          {conversationName || c.name}
-                        </p>
-                        <span className="text-xs text-gray-400">•</span>
-                        <p className="text-xs text-gray-400 whitespace-nowrap">
-                          {c.last_message_time ? formatTime(c.last_message_time) : ""}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {conversationName || c.name}
+                          </p>
+                          <span className="text-xs text-gray-400">•</span>
+                          <p className="text-xs text-gray-400 whitespace-nowrap">
+                            {c.last_message_time ? formatTime(c.last_message_time) : ""}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {activeStatus.statusText}
                         </p>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {activeStatus.statusText}
-                      </p>
-                    </div>
 
-                    {(c.unread_count || 0) > 0 && (
-                      <div className="w-6 flex justify-end">
-                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-brand-primary text-white text-xs font-bold">
-                          {c.unread_count}
-                        </span>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+                      {(c.unread_count || 0) > 0 && (
+                        <div className="w-6 flex justify-end">
+                          <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-brand-primary text-white text-xs font-bold">
+                            {c.unread_count}
+                          </span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -322,10 +360,23 @@ export default function MessagePage({ onClose }: MessagePageProps) {
               <>
                 <div className="h-16 px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center flex-shrink-0">
-                      {(activeConversationName || activeConversation.name || "?")
-                        .charAt(0)
-                        .toUpperCase()}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {activeConversationAvatarUrl ? (
+                        <img
+                          src={activeConversationAvatarUrl}
+                          alt={activeConversationName || activeConversation.name || "Conversation"}
+                          className="w-10 h-10 object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "";
+                            target.onerror = null;
+                          }}
+                        />
+                      ) : (
+                        (activeConversationName || activeConversation.name || "?")
+                          .charAt(0)
+                          .toUpperCase()
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
@@ -360,9 +411,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                       const senderLabel = !isMe
                         ? employeeMap[m.sender_id] ||
                           m.sender_name ||
-                          (activeConversation?.type === "guest"
-                            ? activeConversation?.name
-                            : "Guest")
+                          (activeConversation?.type === "guest" ? "Guest" : "Staff")
                         : undefined;
                       return (
                         <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
