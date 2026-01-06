@@ -5,7 +5,8 @@ import FeatureSectionMain from "@/Components/Features/FeatureSectionMain";
 
 
 const getAllHavens = async () => {
-  const res = await fetch(`${process.env.API_URL}/api/haven`, {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/haven`, {
     cache: 'no-cache'
   });
 

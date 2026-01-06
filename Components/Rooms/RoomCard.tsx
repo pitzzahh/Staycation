@@ -3,7 +3,6 @@
 import { Star, User, MapPin, Video, X } from "lucide-react";
 import RoomImageGallery from "./RoomImageGallery";
 import AmenityBadge from "./AmenityBadge";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

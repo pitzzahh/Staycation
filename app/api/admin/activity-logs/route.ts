@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAllActivityLogs, createActivityLog, deleteActivityLog } from "@/backend/controller/activityLogController";
 import { createEdgeRouter } from "next-connect";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface RequestContext {}
 
 const router = createEdgeRouter<NextRequest, RequestContext>();

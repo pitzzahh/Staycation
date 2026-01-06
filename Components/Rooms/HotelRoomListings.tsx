@@ -35,12 +35,35 @@ interface Room {
   youtubeUrl?: string;
 }
 
+interface Haven {
+  uuid_id?: string;
+  id?: string;
+  haven_name?: string;
+  name?: string;
+  six_hour_rate?: number;
+  weekday_rate?: number;
+  weekend_rate?: number;
+  images?: Array<{ url: string }>;
+  rating?: number;
+  review_count?: number;
+  capacity?: number;
+  amenities?: Record<string, boolean>;
+  description?: string;
+  full_description?: string;
+  beds?: string;
+  room_size?: string;
+  location?: string;
+  tower?: string;
+  photo_tours?: Array<{ category: string; url: string }>;
+  youtube_url?: string;
+}
+
 interface HotelRoomListingsProps {
-  initialHavens : any[];
+  initialHavens: Haven[];
 }
 
 const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
-  const { data, isLoading, isError } = useGetHavensQuery({});
+  const { isError } = useGetHavensQuery({});
   const [sortBy, setSortBy] = useState<string>("recommended");
   // const [rooms] = useState<Room[]>([
   //   {
@@ -330,17 +353,17 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
   //   },
   // ]);
 
-  const rooms: Room[] = initialHavens.map((haven: any) => ({
-    id: haven.uuid_id ?? haven.id,
+  const rooms: Room[] = initialHavens.map((haven: Haven) => ({
+    id: haven.uuid_id ?? haven.id ?? '',
     name: haven.haven_name ?? haven.name ?? "Unnamed Haven",
     price: `₱${haven.six_hour_rate ?? haven.weekday_rate ?? haven.weekend_rate ?? "N/A"}`,
     pricePerNight: "per night",
-    images: haven.images?.map((img: any) => img.url) ?? [],
+    images: haven.images?.map((img) => img.url) ?? [],
     rating: haven.rating ?? 4.5,
     reviews: haven.review_count ?? 0,
     capacity: haven.capacity ?? 2,
     amenities: Object.entries(haven.amenities || {})
-      .filter(([_, value]) => value === true)
+      .filter(([, value]) => value === true)
       .map(([key]) => key),
     description: haven.description ?? "",
     fullDescription: haven.full_description,
@@ -349,11 +372,11 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
     location: haven.location,
     tower: haven.tower,
     photoTour: haven.photo_tours
-      ? haven.photo_tours.reduce((acc: any, item: any) => {
+      ? haven.photo_tours.reduce((acc: Record<string, string[]>, item) => {
           acc[item.category] = acc[item.category] || [];
           acc[item.category].push(item.url);
           return acc;
-        }, {})
+        }, {} as Record<string, string[]>)
       : {},
     youtubeUrl: haven.youtube_url,
   })) ?? [];
