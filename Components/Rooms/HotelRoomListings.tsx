@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import RoomCard from "./RoomCard";
-import { SlidersHorizontal, ChevronRight } from "lucide-react";
+import { SlidersHorizontal, ChevronRight, ChevronLeft } from "lucide-react";
 import { useGetHavensQuery } from "@/redux/api/roomApi";
+import { useRouter } from "next/navigation";
 
 interface Room {
   id: string;
@@ -67,6 +68,9 @@ interface HotelRoomListingsProps {
 const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
   const { isError } = useGetHavensQuery({});
   const [sortBy, setSortBy] = useState<string>("recommended");
+  const [currentPage, setCurrentPage] = useState<Record<string, number>>({});
+  const router = useRouter();
+  const ROOMS_PER_PAGE = 5;
   // const [rooms] = useState<Room[]>([
   //   {
   //     id: "1",
@@ -404,6 +408,19 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
     return aNum - bNum;
   });
 
+  const handlePageChange = (havenNumber: string, page: number) => {
+    setCurrentPage(prev => ({
+      ...prev,
+      [havenNumber]: page
+    }));
+  };
+
+  const handleHavenClick = (havenNumber: string) => {
+    // Navigate to haven-specific page
+    const havenId = havenNumber.replace('Haven ', '');
+    router.push(`/havens/${havenId}`);
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-6 sm:py-8">
       <div className="max-w-[2520px] mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
@@ -448,26 +465,95 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
         )}
 
         {/* Room Groups by Haven */}
-        {sortedHavenNumbers.map((havenNumber) => (
-          <div key={havenNumber} className="mb-12">
-            {/* Haven Header */}
-            <div className="mb-6 flex items-center gap-3">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                {havenNumber}
-              </h2>
-              <ChevronRight className="w-5 h-5 text-brand-primary" />
-            </div>
+        {sortedHavenNumbers.map((havenNumber) => {
+          const havenRooms = groupedRooms[havenNumber];
+          const page = currentPage[havenNumber] || 1;
+          const totalPages = Math.ceil(havenRooms.length / ROOMS_PER_PAGE);
+          const startIndex = (page - 1) * ROOMS_PER_PAGE;
+          const endIndex = startIndex + ROOMS_PER_PAGE;
+          const displayedRooms = havenRooms.slice(startIndex, endIndex);
 
-            {/* Room Grid for this Haven */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-8">
-              {groupedRooms[havenNumber].map((room) => (
-                <div key={room.id}>
-                  <RoomCard room={room} mode="browse" />
+          return (
+            <div key={havenNumber} className="mb-12">
+              {/* Haven Header - Clickable */}
+              <div
+                className="mb-6 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                onClick={() => handleHavenClick(havenNumber)}
+              >
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  {havenNumber}
+                </h2>
+                <ChevronRight className="w-5 h-5 text-brand-primary" />
+              </div>
+
+              {/* Room Grid for this Haven */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-8">
+                {displayedRooms.map((room) => (
+                  <div key={room.id}>
+                    <RoomCard room={room} mode="browse" />
+                  </div>
+                ))}
+              </div>
+
+              {/* Pagination Dots for this Haven */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-3 mt-8">
+                  {/* Previous Button Icon */}
+                  <button
+                    onClick={() => handlePageChange(havenNumber, Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className={`p-2 rounded-full transition-all duration-200 ${
+                      page === 1
+                        ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed opacity-50'
+                        : 'bg-brand-primary hover:bg-brand-primaryDark'
+                    }`}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className={`w-5 h-5 ${
+                      page === 1
+                        ? 'text-gray-400 dark:text-gray-500'
+                        : 'text-white'
+                    }`} />
+                  </button>
+
+                  {/* Page Dots */}
+                  <div className="flex gap-2 items-center">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(havenNumber, pageNum)}
+                        className={`transition-all duration-200 rounded-full ${
+                          page === pageNum
+                            ? 'w-8 h-3 bg-brand-primary'
+                            : 'w-3 h-3 bg-gray-300 dark:bg-gray-600 hover:bg-brand-primary/50 dark:hover:bg-brand-primary/50'
+                        }`}
+                        aria-label={`Go to page ${pageNum}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Next Button Icon */}
+                  <button
+                    onClick={() => handlePageChange(havenNumber, Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className={`p-2 rounded-full transition-all duration-200 ${
+                      page === totalPages
+                        ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed opacity-50'
+                        : 'bg-brand-primary hover:bg-brand-primaryDark'
+                    }`}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className={`w-5 h-5 ${
+                      page === totalPages
+                        ? 'text-gray-400 dark:text-gray-500'
+                        : 'text-white'
+                    }`} />
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Show more button - Airbnb style */}
         {rooms.length > 20 && (

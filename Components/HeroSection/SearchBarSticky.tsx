@@ -172,52 +172,56 @@ const SearchBarSticky = () => {
 
   return (
     <div
-      className={`fixed left-0 right-0 z-40 w-full transition-all duration-500 ease-in-out border-b border-gray-200 dark:border-gray-700 bg-[#fcfcfc] ${
+      className={`fixed left-0 right-0 z-40 w-full transition-all duration-500 ease-in-out bg-gray-50 dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 ${
         isScrolled
           ? 'top-16 py-3'
           : 'top-16 py-6 sm:py-8 md:py-10'
       }`}
     >
-      {/* Search Card - Individual Input Fields Style */}
-      <div className={`max-w-[65%] mx-auto bg-white dark:bg-gray-900 rounded-xl transition-all duration-500 ease-in-out ${
-        isScrolled ? 'p-3 sm:p-3 md:p-3' : 'p-4 sm:p-5 md:p-6'
+      {/* Search Card - Airbnb Style */}
+      <div className={`max-w-6xl mx-auto transition-all duration-500 ease-in-out ${
+        isScrolled ? 'px-4' : 'px-4 sm:px-6'
       }`}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-          {/* Location Selector */}
-          <div className="relative">
-            <LocationSelector
-              selectedLocation={selectedLocation}
-              onLocationSelect={(location) => {
-                setSelectedLocation(location);
-                setLocationOpen(false);
-              }}
-              isOpen={locationOpen}
-              onToggle={() => setLocationOpen(!locationOpen)}
-              locations={locations}
-            />
-          </div>
+        <div className={`bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 ${
+          isScrolled ? 'p-2' : 'p-3'
+        }`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 items-center">
+            {/* Location Selector */}
+            <div className="relative px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+              <LocationSelector
+                selectedLocation={selectedLocation}
+                onLocationSelect={(location) => {
+                  setSelectedLocation(location);
+                  setLocationOpen(false);
+                }}
+                isOpen={locationOpen}
+                onToggle={() => setLocationOpen(!locationOpen)}
+                locations={locations}
+              />
+            </div>
 
-          {/* Date Range Picker - Check In & Check Out */}
-          <div className="relative">
-            <DateRangePicker
-              checkInDate={checkInDate}
-              checkOutDate={checkOutDate}
-              onCheckInChange={setCheckInDate}
-              onCheckOutChange={setCheckOutDate}
-            />
-          </div>
+            {/* Date Range Picker - Check In & Check Out */}
+            <div className="relative px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+              <DateRangePicker
+                checkInDate={checkInDate}
+                checkOutDate={checkOutDate}
+                onCheckInChange={setCheckInDate}
+                onCheckOutChange={setCheckOutDate}
+              />
+            </div>
 
-          {/* Guest Selector */}
-          <div className="relative">
-            <GuestSelector
-              guests={guests}
-              onGuestChange={handleGuestChange}
-            />
-          </div>
+            {/* Guest Selector */}
+            <div className="relative px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+              <GuestSelector
+                guests={guests}
+                onGuestChange={handleGuestChange}
+              />
+            </div>
 
-          {/* Search Button */}
-          <div className="relative">
-            <SearchButton onSearch={handleSearch} />
+            {/* Search Button */}
+            <div className="relative px-4 py-2 flex items-center justify-center">
+              <SearchButton onSearch={handleSearch} />
+            </div>
           </div>
         </div>
       </div>
