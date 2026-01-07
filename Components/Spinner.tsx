@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import LoadingAnimation from "./LoadingAnimation";
 
 interface SpinnerProps {
@@ -25,6 +26,19 @@ const Spinner = ({ label, variant = "default" }: SpinnerProps) => {
             } rounded-full animate-spin absolute`}></div>
           </div>
           <p className="text-gray-700 dark:text-gray-300 font-semibold">
+=======
+interface SpinnerProps {
+    label: string;
+}
+
+const Spinner = ({ label }:SpinnerProps) => {
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 rounded-2xl animate-fade-in">
+        <div className="bg-white rounded-lg p-8 text-center animate-scale-in">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-700 font-semibold">
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
             {label}
           </p>
         </div>

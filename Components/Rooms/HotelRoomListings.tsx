@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import RoomCard from "./RoomCard";
+<<<<<<< HEAD
 import { SlidersHorizontal, ChevronRight } from "lucide-react";
+=======
+import { SlidersHorizontal } from "lucide-react";
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 import { useGetHavensQuery } from "@/redux/api/roomApi";
 
 interface Room {
@@ -21,7 +25,10 @@ interface Room {
   roomSize?: string;
   location?: string;
   tower?: string;
+<<<<<<< HEAD
   floor?: string;
+=======
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   photoTour?: {
     livingArea?: string[];
     kitchenette?: string[];
@@ -36,6 +43,7 @@ interface Room {
   youtubeUrl?: string;
 }
 
+<<<<<<< HEAD
 interface Haven {
   uuid_id?: string;
   id?: string;
@@ -66,6 +74,14 @@ interface HotelRoomListingsProps {
 
 const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
   const { isError } = useGetHavensQuery({});
+=======
+interface HotelRoomListingsProps {
+  initialHavens : any[];
+}
+
+const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
+  const { data, isLoading, isError } = useGetHavensQuery({});
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   const [sortBy, setSortBy] = useState<string>("recommended");
   // const [rooms] = useState<Room[]>([
   //   {
@@ -355,17 +371,30 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
   //   },
   // ]);
 
+<<<<<<< HEAD
   const rooms: Room[] = initialHavens.map((haven: Haven) => ({
     id: haven.uuid_id ?? haven.id ?? '',
     name: haven.haven_name ?? haven.name ?? "Unnamed Haven",
     price: `₱${haven.six_hour_rate ?? haven.weekday_rate ?? haven.weekend_rate ?? "N/A"}`,
     pricePerNight: "per night",
     images: haven.images?.map((img) => img.url) ?? [],
+=======
+  const rooms: Room[] = initialHavens.map((haven: any) => ({
+    id: haven.uuid_id ?? haven.id,
+    name: haven.haven_name ?? haven.name ?? "Unnamed Haven",
+    price: `₱${haven.six_hour_rate ?? haven.weekday_rate ?? haven.weekend_rate ?? "N/A"}`,
+    pricePerNight: "per night",
+    images: haven.images?.map((img: any) => img.url) ?? [],
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     rating: haven.rating ?? 4.5,
     reviews: haven.review_count ?? 0,
     capacity: haven.capacity ?? 2,
     amenities: Object.entries(haven.amenities || {})
+<<<<<<< HEAD
       .filter(([, value]) => value === true)
+=======
+      .filter(([_, value]) => value === true)
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       .map(([key]) => key),
     description: haven.description ?? "",
     fullDescription: haven.full_description,
@@ -373,6 +402,7 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
     roomSize: haven.room_size,
     location: haven.location,
     tower: haven.tower,
+<<<<<<< HEAD
     floor: haven.floor,
     photoTour: haven.photo_tours
       ? haven.photo_tours.reduce((acc: Record<string, string[]>, item) => {
@@ -380,10 +410,19 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
           acc[item.category].push(item.url);
           return acc;
         }, {} as Record<string, string[]>)
+=======
+    photoTour: haven.photo_tours
+      ? haven.photo_tours.reduce((acc: any, item: any) => {
+          acc[item.category] = acc[item.category] || [];
+          acc[item.category].push(item.url);
+          return acc;
+        }, {})
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       : {},
     youtubeUrl: haven.youtube_url,
   })) ?? [];
 
+<<<<<<< HEAD
   // Group rooms by haven number
   const groupedRooms = rooms.reduce((acc, room) => {
     // Extract haven number from room name or location
@@ -437,12 +476,38 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
               <option>Deluxe Room</option>
               <option>Suite</option>
               <option>Family Room</option>
+=======
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Filter Section */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          {/* Available Rooms Text */}
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
+            Available Rooms
+          </h2>
+
+          {/* Filter Dropdown */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <SlidersHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="flex-1 sm:flex-initial px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 text-sm sm:text-base"
+            >
+              <option value="recommended">Recommended</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="rating">Highest Rating</option>
+              <option value="capacity">Capacity</option>
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
             </select>
           </div>
         </div>
 
         {isError && (
           <div className="text-center py-20 text-red-500">
+<<<<<<< HEAD
             Failed to load rooms
           </div>
         )}
@@ -477,6 +542,24 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
             </button>
           </div>
         )}
+=======
+              Failed to load rooms
+          </div>
+        )}
+
+        {/* Room Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {rooms.map((room, index) => (
+            <div
+              key={room.id}
+              className="animate-in fade-in slide-in-from-bottom duration-500"
+              style={{ animationDelay: `${(index + 1) * 100}ms` }}
+            >
+              <RoomCard room={room} mode="browse" />
+            </div>
+          ))}
+        </div>
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       </div>
     </div>
   );

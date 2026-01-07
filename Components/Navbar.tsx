@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
+<<<<<<< HEAD
 interface User {
   name?: string;
   email?: string;
@@ -22,6 +23,8 @@ interface User {
   profile_image_url?: string;
 }
 
+=======
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -58,6 +61,7 @@ const Navbar = () => {
     };
   }, [isProfileOpen]);
 
+<<<<<<< HEAD
   // Hide navbar on certain pages
   const shouldHideNavbar = pathname === "/login" || 
                            pathname === "/admin/login" || 
@@ -78,6 +82,44 @@ const Navbar = () => {
               className="w-10 h-10 object-contain"
             />
             <span className="text-xl font-bold text-brand-primary">Staycation</span>
+=======
+  // Hide navbar on Login page
+  if (pathname === "/login") {
+    return null;
+  }
+
+  // if (pathname === "/my-bookings") {
+  //   return null;
+  // }
+
+  // Hide navbar on Admin Login page
+  if (pathname === "/admin/login") {
+    return null;
+  }
+
+  if (pathname === "/admin/owners") {
+    return null;
+  }
+
+  if (pathname === "/admin/csr") {
+    return null;
+  }
+
+  return (
+    <nav className="fixed w-full h-16 px-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-50 transition-colors duration-300">
+      <div className="h-full flex items-center justify-between max-w-7xl mx-auto">
+        {/* Logo with animation */}
+        <Link href={"/"}>
+          <div className="flex items-center gap-3 transform hover:scale-105 transition-transform duration-300 cursor-pointer">
+            <img
+              src="/Images/shlogo.png"
+              alt="Staycation Logo"
+              className="w-10 h-10 object-contain"
+            />
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-orange-500">
+              Staycation
+            </span>
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
           </div>
         </Link>
 
@@ -99,9 +141,15 @@ const Navbar = () => {
                   <span
                     className={`${
                       isActive
+<<<<<<< HEAD
                         ? "text-brand-primary dark:text-brand-primaryLight font-semibold"
                         : "text-gray-700 dark:text-gray-300 hover:text-brand-primary dark:hover:text-brand-primaryLight"
                     } font-medium`}
+=======
+                        ? "text-orange-600 dark:text-orange-400 font-semibold"
+                        : "text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400"
+                    } transition-colors duration-300 font-medium`}
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                   >
                     {item}
                   </span>
@@ -134,12 +182,19 @@ const Navbar = () => {
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-2 border-orange-200 transition-all duration-300 transform hover:scale-105"
               >
+<<<<<<< HEAD
                 {(session.user as User).profile_image_url ||
                 (session.user as User).image ? (
                   <img
                     src={(session.user as User).profile_image_url ||
                     (session.user as User).image}
                     alt={(session.user as User).name || "User"}
+=======
+                {((session.user as any).profile_image_url || session.user.image) ? (
+                  <img
+                    src={(session.user as any).profile_image_url || session.user.image}
+                    alt={session.user.name || "User"}
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
@@ -148,7 +203,11 @@ const Navbar = () => {
                   </div>
                 )}
                 <span className="font-semibold text-gray-800 max-w-32 truncate">
+<<<<<<< HEAD
                   {(session.user as User).name}
+=======
+                  {session.user.name}
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                 </span>
                 <ChevronDown
                   className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${
@@ -162,12 +221,19 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
                   <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-700 dark:to-gray-700 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
+<<<<<<< HEAD
                       {(session.user as User).profile_image_url ||
                       (session.user as User).image ? (
                         <img
                           src={(session.user as User).profile_image_url ||
                           (session.user as User).image}
                           alt={(session.user as User).name || "User"}
+=======
+                      {((session.user as any).profile_image_url || session.user.image) ? (
+                        <img
+                          src={(session.user as any).profile_image_url || session.user.image}
+                          alt={session.user.name || "User"}
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                           className="w-12 h-12 rounded-full object-cover"
                         />
                       ) : (
@@ -225,7 +291,11 @@ const Navbar = () => {
             </div>
           ) : (
             <Link href="/login">
+<<<<<<< HEAD
               <button className="bg-brand-primary hover:bg-brand-primaryDark text-white px-6 py-2 rounded-full font-medium transition-all duration-300">
+=======
+              <button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-2 rounded-full font-medium transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95">
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                 Sign In
               </button>
             </Link>
@@ -339,12 +409,19 @@ const Navbar = () => {
               <div className="space-y-3">
                 {/* User Info */}
                 <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-700 dark:to-gray-700 rounded-lg border-2 border-orange-200 dark:border-gray-600">
+<<<<<<< HEAD
                   {(session.user as User).profile_image_url ||
                   (session.user as User).image ? (
                     <img
                       src={(session.user as User).profile_image_url ||
                       (session.user as User).image}
                       alt={(session.user as User).name || "User"}
+=======
+                  {((session.user as any).profile_image_url || session.user.image) ? (
+                    <img
+                      src={(session.user as any).profile_image_url || session.user.image}
+                      alt={session.user.name || "User"}
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (

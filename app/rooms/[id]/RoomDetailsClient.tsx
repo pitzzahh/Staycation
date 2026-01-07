@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import RoomsDetailsPage from "@/Components/Rooms/RoomsDetailsPage";
 
+<<<<<<< HEAD
 interface HavenData {
   uuid_id: string;
   haven_name: string;
@@ -24,6 +25,10 @@ interface HavenData {
 
 interface RoomDetailsClientProps {
   room: HavenData;
+=======
+interface RoomDetailsClientProps {
+  room: any;
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 }
 
 export default function RoomDetailsClient({ room: haven }: RoomDetailsClientProps) {
@@ -39,12 +44,20 @@ export default function RoomDetailsClient({ room: haven }: RoomDetailsClientProp
     name: haven.haven_name,
     price: `₱${haven.six_hour_rate}`,
     pricePerNight: 'per night',
+<<<<<<< HEAD
     images: haven.images?.map((img) => img.url) ?? [],
+=======
+    images: haven.images?.map((img: any) => img.url) ?? [],
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     rating: haven.rating ?? 4.5,
     reviews: haven.review_count ?? 0,
     capacity: haven.capacity,
     amenities: Object.entries(haven.amenities || {})
+<<<<<<< HEAD
       .filter(([, value]) => value === true)
+=======
+      .filter(([_, value]) => value === true)
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       .map(([key]) => key),
     description: haven.description,
     fullDescription: haven.full_description || haven.description,
@@ -53,11 +66,19 @@ export default function RoomDetailsClient({ room: haven }: RoomDetailsClientProp
     location: haven.location,
     tower: haven.tower,
     photoTour: haven.photo_tours
+<<<<<<< HEAD
       ? haven.photo_tours.reduce((acc: Record<string, string[]>, item) => {
           acc[item.category] = acc[item.category] || [];
           acc[item.category].push(item.url);
           return acc;
         }, {} as Record<string, string[]>)
+=======
+      ? haven.photo_tours.reduce((acc: any, item: any) => {
+          acc[item.category] = acc[item.category] || [];
+          acc[item.category].push(item.url);
+          return acc;
+        }, {})
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       : {},
     youtubeUrl: haven.youtube_url,
   };

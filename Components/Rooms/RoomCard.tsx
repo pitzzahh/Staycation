@@ -1,8 +1,15 @@
 "use client";
 
+<<<<<<< HEAD
 import { Star, User, MapPin, Video, X, Heart } from "lucide-react";
 import RoomImageGallery from "./RoomImageGallery";
 import AmenityBadge from "./AmenityBadge";
+=======
+import { Star, User, MapPin, Video, X } from "lucide-react";
+import RoomImageGallery from "./RoomImageGallery";
+import AmenityBadge from "./AmenityBadge";
+import Link from "next/link";
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -22,7 +29,10 @@ interface Room {
   roomSize?: string;
   location?: string;
   tower?: string;
+<<<<<<< HEAD
   floor?: string;
+=======
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   youtubeUrl?: string;
 }
 interface RoomCardsProps {
@@ -32,7 +42,10 @@ interface RoomCardsProps {
 const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
   const router = useRouter();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+<<<<<<< HEAD
   const [isFavorite, setIsFavorite] = useState(false);
+=======
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
   const handleSelect = () => {
     // Navigate to room details for booking
@@ -63,6 +76,7 @@ const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
   };
 
   return (
+<<<<<<< HEAD
     <div className="group cursor-pointer">
       {/* Image Gallery - Clickable with Airbnb-style rounded corners */}
       <div onClick={handleImageClick} className="relative overflow-hidden rounded-xl mb-3">
@@ -150,6 +164,105 @@ const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
             </button>
           </div>
         )}
+=======
+    <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 animate-fade-in slide-in-from-bottom duration-500">
+      {/* Image Gallery - Clickable */}
+      <div onClick={handleImageClick} className="cursor-pointer">
+        <RoomImageGallery images={room.images} />
+      </div>
+
+      {/* Content */}
+      <div className="p-4 sm:p-6">
+        {/* Rating and Revies */}
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, index) => (
+              <Star
+                key={index}
+                className={`w-4 h-4 ${
+                  index < Math.floor(room.rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300 dark:text-gray-600"
+                }`}
+              />
+            ))}
+          </div>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {room.rating} ({room.reviews} reviews)
+          </span>
+        </div>
+
+        {/* Room Name */}
+        <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-2 line-clamp-2">
+          {room.name}
+        </h3>
+
+        {/* Location */}
+        {room.location && room.tower && (
+          <div className="flex items-center gap-1 mb-2">
+            <MapPin className="w-4 h-4 text-orange-500" />
+            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              {room.tower}, {room.location}
+            </span>
+          </div>
+        )}
+
+        {/* Description */}
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+          {room.description}
+        </p>
+
+        {/* Amenities */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {(Array.isArray(room.amenities) ? room.amenities : [])
+            .slice(0, 2)
+            .map((amenity, index) => (
+              <AmenityBadge key={index} amenity={amenity} />
+            ))}
+        </div>
+
+        {/* Capacity */}
+        <div className="flex items-center gap-2 mb-4 text-sm text-gray-600 dark:text-gray-300">
+          <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <span>Up to {room.capacity} guests</span>
+        </div>
+
+        {/* Price and Button */}
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Starting from</p>
+            <p className="text-2xl sm:text-3xl font-bold text-orange-400">
+              {room.price}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{room.pricePerNight}</p>
+          </div>
+
+          {/* Conditional Button based on mode */}
+          {mode === "select" ? (
+            // SELECT button for filtered search results
+            <button
+              onClick={handleSelect}
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 text-sm sm:text-base whitespace-nowrap shadow-md hover:shadow-lg"
+            >
+              SELECT
+            </button>
+          ) : (
+            // VIDEO LINKS button for homepage browse
+            <button
+              onClick={handleVideoClick}
+              disabled={!room.youtubeUrl}
+              className={`flex items-center gap-2 font-semibold px-4 py-2 rounded-lg transition-all duration-300 transform text-sm sm:text-base whitespace-nowrap ${
+                room.youtubeUrl
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:scale-105 active:scale-95 shadow-md hover:shadow-lg'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <Video className="w-4 h-4" />
+              Video Links
+            </button>
+          )}
+        </div>
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       </div>
 
       {/* Video Modal */}
@@ -165,7 +278,11 @@ const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
             {/* Close Button */}
             <button
               onClick={closeVideoModal}
+<<<<<<< HEAD
               className="absolute top-4 right-4 z-10 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-colors"
+=======
+              className="absolute top-4 right-4 z-10 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-colors shadow-lg"
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
             >
               <X className="w-6 h-6" />
             </button>

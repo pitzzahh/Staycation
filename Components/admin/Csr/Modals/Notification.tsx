@@ -51,6 +51,7 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+<<<<<<< HEAD
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
@@ -59,6 +60,8 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
 
   useEffect(() => {
     if (!isMounted) return;
+=======
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     function updatePosition() {
       if (!anchorRef?.current) {
         setPosition({ top: 96, right: 16 });
@@ -81,10 +84,16 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
       window.removeEventListener("resize", updatePosition);
       document.removeEventListener("scroll", updatePosition, true);
     };
+<<<<<<< HEAD
   }, [anchorRef, isMounted]);
 
   useEffect(() => {
     if (!isMounted) return;
+=======
+  }, [anchorRef]);
+
+  useEffect(() => {
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
       if (
@@ -98,10 +107,21 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+<<<<<<< HEAD
   }, [anchorRef, onClose, isMounted]);
 
   useEffect(() => {
     if (!isMounted) return;
+=======
+  }, [anchorRef, onClose]);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     setItems((prev) => {
       const prevMap = new Map(prev.map((n) => [n.id, n]));
       return notifications.map((n) => {
@@ -114,6 +134,11 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
     });
   }, [notifications]);
 
+<<<<<<< HEAD
+=======
+  if (!isMounted) return null;
+
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   const unreadCount = items.filter((n) => !n.read).length;
   const visibleItems = filter === "unread" ? items.filter((n) => !n.read) : items;
 

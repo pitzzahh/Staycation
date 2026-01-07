@@ -69,6 +69,7 @@ export const authOptions: NextAuthOptions = {
               ]
             );
             console.log('✅ Activity log created for login');
+<<<<<<< HEAD
           } catch (logError: unknown) {
             const error = logError as { message?: string; code?: string; detail?: string };
             console.error('❌ Failed to create activity log:', logError);
@@ -76,6 +77,14 @@ export const authOptions: NextAuthOptions = {
               message: error?.message,
               code: error?.code,
               detail: error?.detail
+=======
+          } catch (logError: any) {
+            console.error('❌ Failed to create activity log:', logError);
+            console.error('Error details:', {
+              message: logError?.message,
+              code: logError?.code,
+              detail: logError?.detail
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
             });
             // Don't fail the login if activity log creation fails
           }
@@ -87,11 +96,18 @@ export const authOptions: NextAuthOptions = {
             name: `${user.first_name} ${user.last_name}`,
             role: user.role,
           };
+<<<<<<< HEAD
         } catch (error: unknown) {
           const authError = error as { message?: string; stack?: string };
           console.error("❌ Auth error:", authError.message);
           console.error("Stack:", authError.stack);
 
+=======
+        } catch (error: any) {
+          console.error("❌ Auth error:", error.message);
+          console.error("Stack:", error.stack);
+          
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
           // Re-throw the error so NextAuth can handle it
           throw error;
         }
@@ -126,8 +142,13 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+<<<<<<< HEAD
         token.role = (user as { role?: string }).role;
         console.log("✅ JWT token created with role:", (user as { role?: string }).role);
+=======
+        token.role = (user as any).role;
+        console.log("✅ JWT token created with role:", (user as any).role);
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       }
       return token;
     },
@@ -160,7 +181,11 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (token.role) {
+<<<<<<< HEAD
           (session.user as { role?: string }).role = token.role as string;
+=======
+          (session.user as any).role = token.role as string;
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
           console.log("✅ Session created with role:", token.role);
         }
       }

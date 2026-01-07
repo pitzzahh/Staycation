@@ -5,7 +5,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
+<<<<<<< HEAD
   MapPin,
+=======
+  Mail,
+  MapPin,
+  Phone,
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   Star,
   Users,
   X,
@@ -13,7 +19,11 @@ import {
   Heart,
 } from "lucide-react";
 import Image from "next/image";
+<<<<<<< HEAD
 import { useState } from "react";
+=======
+import { useState, useEffect } from "react";
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hooks";
 import { setSelectedRoom } from "@/redux/slices/bookingSlice";
@@ -177,10 +187,16 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
           toast.success('Added to wishlist');
         }
       }
+<<<<<<< HEAD
     } catch (error: unknown) {
       const apiError = error as { data?: { error?: string } };
       console.error('Error toggling wishlist:', error);
       toast.error(apiError?.data?.error || 'An error occurred. Please try again.');
+=======
+    } catch (error: any) {
+      console.error('Error toggling wishlist:', error);
+      toast.error(error?.data?.error || 'An error occurred. Please try again.');
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     }
   };
 

@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { DatePicker as HeroDatePicker } from "@nextui-org/date-picker";
 import { parseDate, toZoned } from "@internationalized/date";
+<<<<<<< HEAD
 import { Calendar } from "lucide-react";
+=======
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
 interface DatePickerProps {
   label: string;
@@ -13,7 +16,10 @@ interface DatePickerProps {
 
 const DatePicker = ({ label, date, onDateChange }: DatePickerProps) => {
   const [selectedDate, setSelectedDate] = useState<any>(null);
+<<<<<<< HEAD
   const [isHovered, setIsHovered] = useState(false);
+=======
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
   // Update selectedDate whenever `date` prop changes
   useEffect(() => {
@@ -26,6 +32,7 @@ const DatePicker = ({ label, date, onDateChange }: DatePickerProps) => {
     }
   }, [date]);
 
+<<<<<<< HEAD
   // Format date for display
   const formatDisplayDate = (dateString: string) => {
     if (!dateString) return "";
@@ -82,8 +89,30 @@ const DatePicker = ({ label, date, onDateChange }: DatePickerProps) => {
           size="lg"
         />
       </div>
+=======
+  return (
+    <div className="relative">
+      <HeroDatePicker
+        label={label}
+        value={selectedDate}
+        onChange={(newDate) => {
+          setSelectedDate(newDate);
+          if (newDate) onDateChange(newDate.toString());
+        }}
+        className="w-full"
+        classNames={{
+          inputWrapper:
+            "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md",
+          input: "text-white placeholder-white/60",
+        }}
+      />
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     </div>
   );
 };
 
+<<<<<<< HEAD
 export default DatePicker;
+=======
+export default DatePicker;
+>>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
