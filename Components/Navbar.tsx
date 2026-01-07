@@ -67,19 +67,17 @@ const Navbar = () => {
   if (!mounted || shouldHideNavbar) return null;
 
   return (
-    <nav className="fixed w-full h-16 px-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-50 transition-colors duration-300">
+    <nav className="fixed w-full h-16 px-6 bg-white dark:bg-gray-900 border-b border-brand-primary/20 dark:border-brand-primary/30 z-50">
       <div className="h-full flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo with animation */}
         <Link href={"/"}>
-          <div className="flex items-center gap-3 transform hover:scale-105 transition-transform duration-300 cursor-pointer">
+          <div className="flex items-center gap-3 cursor-pointer">
             <img
               src="/haven_logo.png"
               alt="Staycation Haven Logo"
               className="w-10 h-10 object-contain"
             />
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-orange-500">
-              Staycation
-            </span>
+            <span className="text-xl font-bold text-brand-primary">Staycation</span>
           </div>
         </Link>
 
@@ -101,9 +99,9 @@ const Navbar = () => {
                   <span
                     className={`${
                       isActive
-                        ? "text-orange-600 dark:text-orange-400 font-semibold"
-                        : "text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400"
-                    } transition-colors duration-300 font-medium`}
+                        ? "text-brand-primary dark:text-brand-primaryLight font-semibold"
+                        : "text-gray-700 dark:text-gray-300 hover:text-brand-primary dark:hover:text-brand-primaryLight"
+                    } font-medium`}
                   >
                     {item}
                   </span>
@@ -227,7 +225,7 @@ const Navbar = () => {
             </div>
           ) : (
             <Link href="/login">
-              <button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-2 rounded-full font-medium transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95">
+              <button className="bg-brand-primary hover:bg-brand-primaryDark text-white px-6 py-2 rounded-full font-medium transition-all duration-300">
                 Sign In
               </button>
             </Link>
