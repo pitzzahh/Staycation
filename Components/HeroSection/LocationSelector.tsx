@@ -71,7 +71,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
         <div className="flex-1 text-left min-w-0">
           <span className="block text-xs text-gray-500">Location</span>
           <span className="block text-sm sm:text-base font-semibold text-gray-900 truncate">
-            {selectedLocation ? `${selectedLocation.name} - ${selectedLocation.branch}` : "Where are you going?"}
+            {selectedLocation ? `${selectedLocation.name} - ${selectedLocation.branch}` : "Where?"}
           </span>
         </div>
         <ChevronDown className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-transform duration-200 ${
