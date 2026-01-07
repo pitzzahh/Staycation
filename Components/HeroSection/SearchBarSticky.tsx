@@ -172,74 +172,52 @@ const SearchBarSticky = () => {
 
   return (
     <div
-      className={`fixed left-0 right-0 z-40 px-3 sm:px-4 md:px-6 lg:px-8 transition-all duration-500 ease-in-out bg-cover bg-center ${
+      className={`fixed left-0 right-0 z-40 w-full transition-all duration-500 ease-in-out border-b border-gray-200 dark:border-gray-700 bg-[#fcfcfc] ${
         isScrolled
-          ? 'top-16 shadow-lg py-2'
+          ? 'top-16 py-3'
           : 'top-16 py-6 sm:py-8 md:py-10'
       }`}
-      style={{
-        backgroundImage: "url('/Images/bg.jpg')",
-        backgroundPosition: 'center',
-        backgroundSize: 'cover'
-      }}
     >
-      {/* Dark Overlay with transition */}
-      <div className={`absolute inset-0 transition-opacity duration-500 ${
-        isScrolled ? 'bg-black/30' : 'bg-black/40'
-      }`}></div>
+      {/* Search Card - Individual Input Fields Style */}
+      <div className={`max-w-[65%] mx-auto bg-white dark:bg-gray-900 rounded-xl transition-all duration-500 ease-in-out ${
+        isScrolled ? 'p-3 sm:p-3 md:p-3' : 'p-4 sm:p-5 md:p-6'
+      }`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+          {/* Location Selector */}
+          <div className="relative">
+            <LocationSelector
+              selectedLocation={selectedLocation}
+              onLocationSelect={(location) => {
+                setSelectedLocation(location);
+                setLocationOpen(false);
+              }}
+              isOpen={locationOpen}
+              onToggle={() => setLocationOpen(!locationOpen)}
+              locations={locations}
+            />
+          </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 flex flex-col justify-center h-full">
-        {/* Title Section - only visible when not scrolled */}
-        <div className={`text-center mb-4 sm:mb-6 transition-all duration-500 ${
-          isScrolled ? 'hidden' : 'opacity-100'
-        }`}>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
-            Find Your Perfect Haven
-          </h1>
-          <p className="text-sm sm:text-base text-gray-100">
-            Discover comfortable stays at unbeatable prices
-          </p>
-        </div>
-
-        {/* Search Card - Improved mobile responsiveness */}
-        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-xl transition-all duration-500 ease-in-out ${
-          isScrolled ? 'p-2 sm:p-3 md:p-3' : 'p-3 sm:p-4 md:p-5'
-        }`}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-            {/* Location Selector */}
-            <div className="sm:col-span-1">
-              <LocationSelector
-                selectedLocation={selectedLocation}
-                onLocationSelect={(location) => {
-                  setSelectedLocation(location);
-                  setLocationOpen(false);
-                }}
-                isOpen={locationOpen}
-                onToggle={() => setLocationOpen(!locationOpen)}
-                locations={locations}
-              />
-            </div>
-
-            {/* Date Range Picker - Check In & Check Out */}
+          {/* Date Range Picker - Check In & Check Out */}
+          <div className="relative">
             <DateRangePicker
               checkInDate={checkInDate}
               checkOutDate={checkOutDate}
               onCheckInChange={setCheckInDate}
               onCheckOutChange={setCheckOutDate}
             />
+          </div>
 
-            {/* Guest Selector */}
-            <div className="sm:col-span-1">
-              <GuestSelector
-                guests={guests}
-                onGuestChange={handleGuestChange}
-              />
-            </div>
+          {/* Guest Selector */}
+          <div className="relative">
+            <GuestSelector
+              guests={guests}
+              onGuestChange={handleGuestChange}
+            />
+          </div>
 
-            {/* Search Button */}
-            <div className="sm:col-span-2 lg:col-span-1">
-              <SearchButton onSearch={handleSearch} />
-            </div>
+          {/* Search Button */}
+          <div className="relative">
+            <SearchButton onSearch={handleSearch} />
           </div>
         </div>
       </div>
