@@ -73,8 +73,8 @@ const Navbar = () => {
         <Link href={"/"}>
           <div className="flex items-center gap-3 transform hover:scale-105 transition-transform duration-300 cursor-pointer">
             <img
-              src="/Images/shlogo.png"
-              alt="Staycation Logo"
+              src="/haven_logo.png"
+              alt="Staycation Haven Logo"
               className="w-10 h-10 object-contain"
             />
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-orange-500">
