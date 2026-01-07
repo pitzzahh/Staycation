@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { MessageSquare, Loader2, ArrowRight, Check } from "lucide-react";
+import { MessageSquare, ArrowRight, Check } from "lucide-react";
 
 interface MessagePreview {
   id: string;
@@ -58,6 +58,12 @@ export default function MessageModal({
   const [position, setPosition] = useState({ top: 96, right: 16 });
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Set mounted state after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
   useEffect(() => {
     function updatePosition() {
       if (!anchorRef?.current) {
@@ -96,11 +102,6 @@ export default function MessageModal({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorRef, onClose]);
-
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
 
   if (!isMounted) return null;
 

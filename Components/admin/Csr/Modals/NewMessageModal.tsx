@@ -14,6 +14,14 @@ interface NewMessageModalProps {
   onConversationCreated?: (conversationId: string) => void;
 }
 
+interface Employee {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  role?: string;
+}
+
 export default function NewMessageModal({
   isOpen,
   onClose,
@@ -22,19 +30,19 @@ export default function NewMessageModal({
 }: NewMessageModalProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [search, setSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<Employee | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { data: employeesData, isLoading } = useGetEmployeesQuery({});
   const [createConversation, { isLoading: isCreating }] = useCreateConversationMutation();
 
-  const employees = employeesData?.data || [];
+  const employees = useMemo(() => employeesData?.data || [], [employeesData?.data]);
 
   const filteredEmployees = useMemo(() => {
     const term = search.trim().toLowerCase();
     return employees
-      .filter((emp: any) => emp.id !== currentUserId)
-      .filter((emp: any) => {
+      .filter((emp: Employee) => emp.id !== currentUserId)
+      .filter((emp: Employee) => {
         if (!term) return true;
         const fullName = `${emp.first_name ?? ""} ${emp.last_name ?? ""}`.toLowerCase();
         const role = (emp.role ?? "").toLowerCase();
@@ -43,10 +51,13 @@ export default function NewMessageModal({
       });
   }, [employees, currentUserId, search]);
 
+  // Set mounted state after component mounts
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
+
+  if (!isMounted || !isOpen) return null;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -85,13 +96,14 @@ export default function NewMessageModal({
       setSelectedUser(null);
       setSearch("");
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create conversation:", error);
-      toast.error(error?.data?.error || "Failed to create conversation");
+      const errorMessage = error && typeof error === 'object' && 'data' in error 
+        ? (error as { data?: { error?: string } }).data?.error 
+        : "Failed to create conversation";
+      toast.error(errorMessage || "Failed to create conversation");
     }
   };
-
-  if (!isOpen || !isMounted) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[9995] flex items-center justify-center p-4">

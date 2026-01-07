@@ -15,6 +15,13 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
+interface User {
+  name?: string;
+  email?: string;
+  image?: string;
+  profile_image_url?: string;
+}
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -51,27 +58,13 @@ const Navbar = () => {
     };
   }, [isProfileOpen]);
 
-  // Hide navbar on Login page
-  if (pathname === "/login") {
-    return null;
-  }
+  // Hide navbar on certain pages
+  const shouldHideNavbar = pathname === "/login" || 
+                           pathname === "/admin/login" || 
+                           pathname === "/admin/owners" || 
+                           pathname === "/admin/csr";
 
-  // if (pathname === "/my-bookings") {
-  //   return null;
-  // }
-
-  // Hide navbar on Admin Login page
-  if (pathname === "/admin/login") {
-    return null;
-  }
-
-  if (pathname === "/admin/owners") {
-    return null;
-  }
-
-  if (pathname === "/admin/csr") {
-    return null;
-  }
+  if (!mounted || shouldHideNavbar) return null;
 
   return (
     <nav className="fixed w-full h-16 px-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-50 transition-colors duration-300">
@@ -143,10 +136,12 @@ const Navbar = () => {
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-2 border-orange-200 transition-all duration-300 transform hover:scale-105"
               >
-                {((session.user as any).profile_image_url || session.user.image) ? (
+                {(session.user as User).profile_image_url ||
+                (session.user as User).image ? (
                   <img
-                    src={(session.user as any).profile_image_url || session.user.image}
-                    alt={session.user.name || "User"}
+                    src={(session.user as User).profile_image_url ||
+                    (session.user as User).image}
+                    alt={(session.user as User).name || "User"}
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
@@ -155,7 +150,7 @@ const Navbar = () => {
                   </div>
                 )}
                 <span className="font-semibold text-gray-800 max-w-32 truncate">
-                  {session.user.name}
+                  {(session.user as User).name}
                 </span>
                 <ChevronDown
                   className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${
@@ -169,10 +164,12 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
                   <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-700 dark:to-gray-700 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
-                      {((session.user as any).profile_image_url || session.user.image) ? (
+                      {(session.user as User).profile_image_url ||
+                      (session.user as User).image ? (
                         <img
-                          src={(session.user as any).profile_image_url || session.user.image}
-                          alt={session.user.name || "User"}
+                          src={(session.user as User).profile_image_url ||
+                          (session.user as User).image}
+                          alt={(session.user as User).name || "User"}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                       ) : (
@@ -344,10 +341,12 @@ const Navbar = () => {
               <div className="space-y-3">
                 {/* User Info */}
                 <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-700 dark:to-gray-700 rounded-lg border-2 border-orange-200 dark:border-gray-600">
-                  {((session.user as any).profile_image_url || session.user.image) ? (
+                  {(session.user as User).profile_image_url ||
+                  (session.user as User).image ? (
                     <img
-                      src={(session.user as any).profile_image_url || session.user.image}
-                      alt={session.user.name || "User"}
+                      src={(session.user as User).profile_image_url ||
+                      (session.user as User).image}
+                      alt={(session.user as User).name || "User"}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (

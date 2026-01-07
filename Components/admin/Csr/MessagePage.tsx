@@ -29,9 +29,41 @@ interface MessagePageProps {
   initialConversationId?: string | null;
 }
 
+interface Employee {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  employment_id?: string;
+  profile_image_url?: string;
+}
+
+interface Message {
+  id: string;
+  sender_id: string;
+  sender_name?: string;
+  message_text: string;
+  created_at: string;
+}
+
+interface Conversation {
+  id: string;
+  name?: string;
+  type: string;
+  participant_ids?: string[];
+  last_message?: string;
+  last_message_time?: string;
+  unread_count?: number;
+}
+
+// Skeleton component defined outside the main component
+const Skeleton = ({ className }: { className: string }) => (
+  <div className={`animate-pulse bg-gray-200 dark:bg-gray-800 ${className}`} />
+);
+
 export default function MessagePage({ onClose, initialConversationId }: MessagePageProps) {
   const { data: session } = useSession();
-  const userId = (session?.user as any)?.id;
+  const userId = (session?.user as { id?: string })?.id;
 
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -63,14 +95,14 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [markAsRead] = useMarkMessagesAsReadMutation();
 
-  const conversations = conversationsData?.data || [];
-  const messages = messagesData?.data || [];
+  const conversations = useMemo(() => conversationsData?.data || [], [conversationsData?.data]);
+  const messages = useMemo(() => messagesData?.data || [], [messagesData?.data]);
   const { data: employeesData } = useGetEmployeesQuery({});
-  const employees = employeesData?.data || [];
+  const employees = useMemo(() => employeesData?.data || [], [employeesData?.data]);
 
   const employeeMap = useMemo(() => {
     const map: Record<string, string> = {};
-    employees.forEach((emp: any) => {
+    employees.forEach((emp: Employee) => {
       const name = `${emp.first_name ?? ""} ${emp.last_name ?? ""}`.trim();
       map[emp.id] = name || emp.email || emp.employment_id || "Employee";
     });
@@ -79,7 +111,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
 
   const employeeProfileImageById = useMemo(() => {
     const map: Record<string, string> = {};
-    employees.forEach((emp: any) => {
+    employees.forEach((emp: Employee) => {
       if (emp?.id && emp?.profile_image_url) {
         map[emp.id] = emp.profile_image_url;
       }
@@ -92,8 +124,12 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     if (conversations.length === 0) return;
 
     if (initialConversationId && !activeId) {
-      const exists = conversations.some((c: any) => c.id === initialConversationId);
-      setActiveId(exists ? initialConversationId : conversations[0].id);
+      const exists = conversations.some((c: Conversation) => c.id === initialConversationId);
+      if (exists) {
+        setActiveId(initialConversationId);
+      } else {
+        setActiveId(conversations[0].id);
+      }
       return;
     }
 
@@ -118,7 +154,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     scrollToBottom();
   }, [messages]);
 
-  const getConversationDisplayName = (conversation: any | undefined | null) => {
+  const getConversationDisplayName = (conversation: Conversation | undefined | null) => {
     if (!conversation) return "";
     if (conversation.type === "guest") {
       return conversation.name;
@@ -154,10 +190,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
 
   const showSkeletonConversations = isLoadingConversations && conversations.length === 0;
   const showSkeletonMessages = isLoadingMessages && messages.length === 0;
-
-  const Skeleton = ({ className }: { className: string }) => (
-    <div className={`animate-pulse bg-gray-200 dark:bg-gray-800 ${className}`} />
-  );
 
   if (showSkeletonConversations) {
     return (
@@ -228,9 +260,9 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
   const filteredConversations = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return conversations;
-    return conversations.filter((c) => {
+    return conversations.filter((c: Conversation) => {
       return (
-        c.name.toLowerCase().includes(term) ||
+        c.name?.toLowerCase().includes(term) ||
         (c.last_message && c.last_message.toLowerCase().includes(term)) ||
         c.type.toLowerCase().includes(term)
       );
@@ -252,9 +284,12 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
       setDraft("");
       refetchMessages();
       refetchConversations();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to send message:", error);
-      toast.error(error?.data?.error || "Failed to send message");
+      const errorMessage = error && typeof error === 'object' && 'data' in error 
+        ? (error as { data?: { error?: string } }).data?.error 
+        : "Failed to send message";
+      toast.error(errorMessage || "Failed to send message");
     }
   };
 
@@ -497,7 +532,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                       <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
                     </div>
                   ) : messages.length > 0 ? (
-                    messages.map((m) => {
+                    messages.map((m: Message) => {
                       const isMe = m.sender_id === userId;
                       const senderLabel = !isMe
                         ? employeeMap[m.sender_id] ||

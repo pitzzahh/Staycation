@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Calendar, Mail, Phone, User, UserPlus, X, DollarSign, CreditCard, Users, Clock } from "lucide-react";
+import { Calendar, Mail, Phone, User, X, Users, Clock } from "lucide-react";
 import { useCreateBookingMutation } from "@/redux/api/bookingsApi";
 import { useGetHavensQuery } from "@/redux/api/roomApi";
 import toast from "react-hot-toast";
@@ -36,6 +36,14 @@ export default function NewBookingModal({ onClose }: NewBookingModalProps) {
   const [createBooking, { isLoading }] = useCreateBookingMutation();
   const { data: havensData, isLoading: isLoadingHavens } = useGetHavensQuery({});
 
+  // Set mounted state after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  if (!isMounted) return null;
+
   const [form, setForm] = useState({
     guestFirstName: "",
     guestLastName: "",
@@ -60,11 +68,6 @@ export default function NewBookingModal({ onClose }: NewBookingModalProps) {
     status: "pending",
     notes: "",
   });
-
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
 
   // Parse havens data
   const havens: Haven[] = Array.isArray(havensData) ? havensData : [];

@@ -46,10 +46,13 @@ interface ViewBookingsProps {
 export default function ViewBookings({ booking, onClose }: ViewBookingsProps) {
   const [isMounted, setIsMounted] = useState(false);
 
+  // Set mounted state after component mounts
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
+
+  if (!isMounted) return null;
 
   const guestName = `${booking.guest_first_name} ${booking.guest_last_name}`;
   const totalGuests = booking.adults + booking.children + booking.infants;
