@@ -14,7 +14,6 @@ interface NewMessageModalProps {
   onConversationCreated?: (conversationId: string) => void;
 }
 
-<<<<<<< HEAD
 interface Employee {
   id: string;
   first_name?: string;
@@ -23,8 +22,6 @@ interface Employee {
   role?: string;
 }
 
-=======
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 export default function NewMessageModal({
   isOpen,
   onClose,
@@ -33,32 +30,19 @@ export default function NewMessageModal({
 }: NewMessageModalProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [search, setSearch] = useState("");
-<<<<<<< HEAD
   const [selectedUser, setSelectedUser] = useState<Employee | null>(null);
-=======
-  const [selectedUser, setSelectedUser] = useState<any>(null);
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { data: employeesData, isLoading } = useGetEmployeesQuery({});
   const [createConversation, { isLoading: isCreating }] = useCreateConversationMutation();
 
-<<<<<<< HEAD
   const employees = useMemo(() => employeesData?.data || [], [employeesData?.data]);
-=======
-  const employees = employeesData?.data || [];
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
   const filteredEmployees = useMemo(() => {
     const term = search.trim().toLowerCase();
     return employees
-<<<<<<< HEAD
       .filter((emp: Employee) => emp.id !== currentUserId)
       .filter((emp: Employee) => {
-=======
-      .filter((emp: any) => emp.id !== currentUserId)
-      .filter((emp: any) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
         if (!term) return true;
         const fullName = `${emp.first_name ?? ""} ${emp.last_name ?? ""}`.toLowerCase();
         const role = (emp.role ?? "").toLowerCase();
@@ -67,20 +51,14 @@ export default function NewMessageModal({
       });
   }, [employees, currentUserId, search]);
 
-<<<<<<< HEAD
   // Set mounted state after component mounts
-=======
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
 
-<<<<<<< HEAD
   if (!isMounted || !isOpen) return null;
 
-=======
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
@@ -118,7 +96,6 @@ export default function NewMessageModal({
       setSelectedUser(null);
       setSearch("");
       onClose();
-<<<<<<< HEAD
     } catch (error: unknown) {
       console.error("Failed to create conversation:", error);
       const errorMessage = error && typeof error === 'object' && 'data' in error 
@@ -128,16 +105,6 @@ export default function NewMessageModal({
     }
   };
 
-=======
-    } catch (error: any) {
-      console.error("Failed to create conversation:", error);
-      toast.error(error?.data?.error || "Failed to create conversation");
-    }
-  };
-
-  if (!isOpen || !isMounted) return null;
-
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   return createPortal(
     <div className="fixed inset-0 z-[9995] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" aria-hidden="true" />

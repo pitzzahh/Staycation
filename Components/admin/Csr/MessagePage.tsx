@@ -29,7 +29,6 @@ interface MessagePageProps {
   initialConversationId?: string | null;
 }
 
-<<<<<<< HEAD
 interface Employee {
   id: string;
   first_name?: string;
@@ -65,11 +64,6 @@ const Skeleton = ({ className }: { className: string }) => (
 export default function MessagePage({ onClose, initialConversationId }: MessagePageProps) {
   const { data: session } = useSession();
   const userId = (session?.user as { id?: string })?.id;
-=======
-export default function MessagePage({ onClose, initialConversationId }: MessagePageProps) {
-  const { data: session } = useSession();
-  const userId = (session?.user as any)?.id;
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -101,7 +95,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [markAsRead] = useMarkMessagesAsReadMutation();
 
-<<<<<<< HEAD
   const conversations = useMemo(() => conversationsData?.data || [], [conversationsData?.data]);
   const messages = useMemo(() => messagesData?.data || [], [messagesData?.data]);
   const { data: employeesData } = useGetEmployeesQuery({});
@@ -110,16 +103,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
   const employeeMap = useMemo(() => {
     const map: Record<string, string> = {};
     employees.forEach((emp: Employee) => {
-=======
-  const conversations = conversationsData?.data || [];
-  const messages = messagesData?.data || [];
-  const { data: employeesData } = useGetEmployeesQuery({});
-  const employees = employeesData?.data || [];
-
-  const employeeMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    employees.forEach((emp: any) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       const name = `${emp.first_name ?? ""} ${emp.last_name ?? ""}`.trim();
       map[emp.id] = name || emp.email || emp.employment_id || "Employee";
     });
@@ -128,11 +111,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
 
   const employeeProfileImageById = useMemo(() => {
     const map: Record<string, string> = {};
-<<<<<<< HEAD
     employees.forEach((emp: Employee) => {
-=======
-    employees.forEach((emp: any) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       if (emp?.id && emp?.profile_image_url) {
         map[emp.id] = emp.profile_image_url;
       }
@@ -145,17 +124,12 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     if (conversations.length === 0) return;
 
     if (initialConversationId && !activeId) {
-<<<<<<< HEAD
       const exists = conversations.some((c: Conversation) => c.id === initialConversationId);
       if (exists) {
         setActiveId(initialConversationId);
       } else {
         setActiveId(conversations[0].id);
       }
-=======
-      const exists = conversations.some((c: any) => c.id === initialConversationId);
-      setActiveId(exists ? initialConversationId : conversations[0].id);
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       return;
     }
 
@@ -180,11 +154,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     scrollToBottom();
   }, [messages]);
 
-<<<<<<< HEAD
   const getConversationDisplayName = (conversation: Conversation | undefined | null) => {
-=======
-  const getConversationDisplayName = (conversation: any | undefined | null) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     if (!conversation) return "";
     if (conversation.type === "guest") {
       return conversation.name;
@@ -218,7 +188,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
       ? employeeProfileImageById[activeConversationOtherParticipantIds[0]]
       : undefined;
 
-<<<<<<< HEAD
   const showSkeletonConversations = isLoadingConversations && conversations.length === 0;
   const showSkeletonMessages = isLoadingMessages && messages.length === 0;
 
@@ -294,14 +263,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     return conversations.filter((c: Conversation) => {
       return (
         c.name?.toLowerCase().includes(term) ||
-=======
-  const filteredConversations = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return conversations;
-    return conversations.filter((c) => {
-      return (
-        c.name.toLowerCase().includes(term) ||
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
         (c.last_message && c.last_message.toLowerCase().includes(term)) ||
         c.type.toLowerCase().includes(term)
       );
@@ -323,18 +284,12 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
       setDraft("");
       refetchMessages();
       refetchConversations();
-<<<<<<< HEAD
     } catch (error: unknown) {
       console.error("Failed to send message:", error);
       const errorMessage = error && typeof error === 'object' && 'data' in error 
         ? (error as { data?: { error?: string } }).data?.error 
         : "Failed to send message";
       toast.error(errorMessage || "Failed to send message");
-=======
-    } catch (error: any) {
-      console.error("Failed to send message:", error);
-      toast.error(error?.data?.error || "Failed to send message");
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     }
   };
 
@@ -563,7 +518,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                 </div>
 
                 <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 px-4 py-4 space-y-3">
-<<<<<<< HEAD
                   {showSkeletonMessages ? (
                     Array.from({ length: 6 }).map((_, idx) => (
                       <div key={idx} className={`flex ${idx % 2 === 0 ? "justify-start" : "justify-end"}`}>
@@ -574,18 +528,11 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                       </div>
                     ))
                   ) : isLoadingMessages ? (
-=======
-                  {isLoadingMessages ? (
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                     <div className="flex items-center justify-center h-full">
                       <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
                     </div>
                   ) : messages.length > 0 ? (
-<<<<<<< HEAD
                     messages.map((m: Message) => {
-=======
-                    messages.map((m) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                       const isMe = m.sender_id === userId;
                       const senderLabel = !isMe
                         ? employeeMap[m.sender_id] ||

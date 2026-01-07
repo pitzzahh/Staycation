@@ -2,11 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-<<<<<<< HEAD
 import { MessageSquare, ArrowRight, Check } from "lucide-react";
-=======
-import { MessageSquare, Loader2, ArrowRight, Check } from "lucide-react";
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
 interface MessagePreview {
   id: string;
@@ -43,13 +39,10 @@ const formatTimestamp = (timestamp?: string) => {
   });
 };
 
-<<<<<<< HEAD
 const Skeleton = ({ className }: { className: string }) => (
   <div className={`animate-pulse bg-gray-200 dark:bg-gray-700 ${className}`} />
 );
 
-=======
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 export default function MessageModal({
   conversations,
   currentUserId,
@@ -65,15 +58,12 @@ export default function MessageModal({
   const [position, setPosition] = useState({ top: 96, right: 16 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-<<<<<<< HEAD
   // Set mounted state after component mounts
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
 
-=======
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   useEffect(() => {
     function updatePosition() {
       if (!anchorRef?.current) {
@@ -113,14 +103,6 @@ export default function MessageModal({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorRef, onClose]);
 
-<<<<<<< HEAD
-=======
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
-
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   if (!isMounted) return null;
 
   const getConversationDisplayName = (conversation: MessagePreview) => {
@@ -192,7 +174,6 @@ export default function MessageModal({
 
           <div className="max-h-[70vh] overflow-y-auto">
             {isLoading ? (
-<<<<<<< HEAD
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
                 {Array.from({ length: 5 }).map((_, idx) => (
                   <div key={idx} className="px-6 py-4 flex items-start gap-3">
@@ -209,10 +190,6 @@ export default function MessageModal({
                     </div>
                   </div>
                 ))}
-=======
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
               </div>
             ) : topConversations.length === 0 ? (
               <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400">

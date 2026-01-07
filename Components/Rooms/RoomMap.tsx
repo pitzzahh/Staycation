@@ -3,10 +3,6 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-<<<<<<< HEAD
-=======
-import 'leaflet/dist/leaflet.css';
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
 interface RoomMapProps {
   roomName: string;
@@ -20,12 +16,8 @@ const RoomMap = ({ roomName, tower, location }: RoomMapProps) => {
 
   useEffect(() => {
     // Fix for default marker icon issue in Leaflet with Next.js
-<<<<<<< HEAD
     const prototype = L.Icon.Default.prototype as { _getIconUrl?: unknown };
     delete prototype._getIconUrl;
-=======
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
       iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -34,11 +26,7 @@ const RoomMap = ({ roomName, tower, location }: RoomMapProps) => {
   }, []);
 
   return (
-<<<<<<< HEAD
     <div className="w-full h-[400px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-=======
-    <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       <MapContainer
         center={defaultPosition}
         zoom={15}

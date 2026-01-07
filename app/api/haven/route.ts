@@ -2,11 +2,7 @@ import { getAllHavens } from "@/backend/controller/roomController";
 import { NextRequest, NextResponse } from "next/server";
 import { createEdgeRouter } from "next-connect";
 
-<<<<<<< HEAD
 type RequestContext = Record<string, never>;
-=======
-interface RequestContext {}
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
 const router = createEdgeRouter<NextRequest, RequestContext>();
 router.get(getAllHavens);

@@ -11,7 +11,6 @@ interface RoomImageGalleryProps {
 const RoomImageGallery = ({ images }: RoomImageGalleryProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-<<<<<<< HEAD
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -19,23 +18,12 @@ const RoomImageGallery = ({ images }: RoomImageGalleryProps) => {
 
   const prevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
-=======
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevImage = () => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     setCurrentImageIndex((prev) =>
       prev === 0 ? images.length - 1 : prev - 1
     );
   };
   return (
-<<<<<<< HEAD
     <div className="relative w-full aspect-[4/3] bg-gray-200 dark:bg-gray-700 overflow-hidden group">
-=======
-    <div className="relative w-full h-64 sm:h-72 bg-gray-200 rounded-t-lg sm:rounded-lg overflow-hidden group">
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       {/* Images Slider */}
       <div
         className="w-full h-full flex transition-transform duration-500"
@@ -80,7 +68,6 @@ const RoomImageGallery = ({ images }: RoomImageGalleryProps) => {
         {images.map((_, index) => (
           <button
             key={index}
-<<<<<<< HEAD
             onClick={(e) => {
               e.stopPropagation();
               setCurrentImageIndex(index);
@@ -89,13 +76,6 @@ const RoomImageGallery = ({ images }: RoomImageGalleryProps) => {
               index === currentImageIndex
                 ? "bg-brand-primary w-6"
                 : "bg-white/60 hover:bg-brand-primaryLight"
-=======
-            onClick={() => setCurrentImageIndex(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentImageIndex
-                ? "bg-gradient-to-r from-yellow-500 to-orange-500 w-6"
-                : "bg-white/60 hover:bg-orange-300"
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
             }`}
             aria-label={`Go to image ${index + 1}`}
           />

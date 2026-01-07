@@ -1,16 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-<<<<<<< HEAD
 import { Calendar, MapPin, Clock, Users, ChevronRight } from 'lucide-react';
-=======
-import { Calendar, MapPin, Clock, Users, ChevronRight, Filter, X } from 'lucide-react';
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 import { useGetUserBookingsQuery, useUpdateBookingStatusMutation } from '@/redux/api/bookingsApi';
 
-<<<<<<< HEAD
 interface Booking {
   id: string;
   booking_id: string;
@@ -37,12 +32,6 @@ interface MyBookingsPageProps {
   initialData: {
     success: boolean;
     data: Booking[];
-=======
-interface MyBookingsPageProps {
-  initialData: {
-    success: boolean;
-    data: any[];
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   };
   userId: string;
 }
@@ -60,22 +49,14 @@ const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
   };
 
   // RTK Query hooks - fetch all bookings, filter on client side
-<<<<<<< HEAD
   const { data: bookingsData, refetch } = useGetUserBookingsQuery(
-=======
-  const { data: bookingsData, isLoading, error, refetch } = useGetUserBookingsQuery(
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     { userId, status: undefined } // Always fetch all bookings
   );
 
   const [updateBookingStatus, { isLoading: isUpdating }] = useUpdateBookingStatusMutation();
 
   // Map database status to display status
-<<<<<<< HEAD
   const getDisplayStatus = (booking: Booking) => {
-=======
-  const getDisplayStatus = (booking: any) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
 
@@ -125,11 +106,7 @@ const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
     const dataSource = bookingsData?.data || initialData?.data || [];
     if (filterStatus === 'all') return dataSource;
 
-<<<<<<< HEAD
     return dataSource.filter((booking: Booking) => {
-=======
-    return dataSource.filter((booking: any) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
       const displayStatus = getDisplayStatus(booking);
       return displayStatus === filterStatus;
     });
@@ -249,11 +226,7 @@ const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
           </div>
         ) : (
           <div className="space-y-6">
-<<<<<<< HEAD
             {bookings.map((booking: Booking) => {
-=======
-            {bookings.map((booking: any) => {
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
               const displayStatus = getDisplayStatus(booking);
               // Get first image from room_images array, fallback to default
               const firstImage = Array.isArray(booking.room_images) && booking.room_images.length > 0

@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import AnalyticsClient from "./AnalyticsClient";
-<<<<<<< HEAD
 import LoadingAnimation from "@/Components/LoadingAnimation";
-=======
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 import type { AnalyticsSummary, RevenueByRoom, MonthlyRevenue } from "@/backend/controller/analyticsController";
 
 const AnalyticsPage = () => {
@@ -42,16 +39,7 @@ const AnalyticsPage = () => {
   }, []);
 
   if (loading || !summary) {
-<<<<<<< HEAD
     return <LoadingAnimation fullScreen={false} />;
-=======
-    return (
-      <div className="flex justify-center items-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-        <span className="ml-3 text-gray-600">Loading analytics...</span>
-      </div>
-    );
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
   }
 
   return (

@@ -24,7 +24,6 @@ import {
 import toast from "react-hot-toast";
 import NewMessageModal from "./Modals/NewMessageModal";
 
-<<<<<<< HEAD
 interface Conversation {
   id: string;
   name?: string;
@@ -46,11 +45,6 @@ interface Message {
 export default function MessagesPage() {
   const { data: session } = useSession();
   const userId = (session?.user as { id?: string })?.id;
-=======
-export default function MessagesPage() {
-  const { data: session } = useSession();
-  const userId = (session?.user as any)?.id;
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -82,13 +76,8 @@ export default function MessagesPage() {
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [markAsRead] = useMarkMessagesAsReadMutation();
 
-<<<<<<< HEAD
   const conversations = useMemo(() => conversationsData?.data || [], [conversationsData?.data]);
   const messages = useMemo(() => messagesData?.data || [], [messagesData?.data]);
-=======
-  const conversations = conversationsData?.data || [];
-  const messages = messagesData?.data || [];
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
 
   // Set first conversation as active on load
   useEffect(() => {
@@ -121,15 +110,9 @@ export default function MessagesPage() {
   const filteredConversations = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return conversations;
-<<<<<<< HEAD
     return conversations.filter((c: Conversation) => {
       return (
         c.name?.toLowerCase().includes(term) ||
-=======
-    return conversations.filter((c) => {
-      return (
-        c.name.toLowerCase().includes(term) ||
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
         (c.last_message && c.last_message.toLowerCase().includes(term)) ||
         c.type.toLowerCase().includes(term)
       );
@@ -152,18 +135,12 @@ export default function MessagesPage() {
       // Refetch to get the latest messages
       refetchMessages();
       refetchConversations();
-<<<<<<< HEAD
     } catch (error: unknown) {
       console.error("Failed to send message:", error);
       const errorMessage = error && typeof error === 'object' && 'data' in error 
         ? (error as { data?: { error?: string } }).data?.error 
         : "Failed to send message";
       toast.error(errorMessage || "Failed to send message");
-=======
-    } catch (error: any) {
-      console.error("Failed to send message:", error);
-      toast.error(error?.data?.error || "Failed to send message");
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
     }
   };
 

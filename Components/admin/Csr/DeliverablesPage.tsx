@@ -270,11 +270,7 @@ export default function DeliverablesPage() {
             <select
               value={filterStatus}
               onChange={(e) => {
-<<<<<<< HEAD
                 setFilterStatus(e.target.value as "all" | DeliverableStatus);
-=======
-                setFilterStatus(e.target.value as any);
->>>>>>> b8f4705e6ee02db94bf978711bf630a15c420c81
                 setCurrentPage(1);
               }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-orange-500"
