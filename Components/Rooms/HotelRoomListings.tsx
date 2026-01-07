@@ -411,14 +411,34 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           {/* Results Count */}
           <h2 className="text-sm text-gray-600 dark:text-gray-400">
-            {rooms.length} stays
+            {rooms.length} havens
           </h2>
 
           {/* Filter Dropdown - Airbnb style */}
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-500">
-            <SlidersHorizontal className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-500">
+              <SlidersHorizontal className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters</span>
+            </button>
+            
+            {/* Price Range Filter */}
+            <select className="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-300">
+              <option>Price Range</option>
+              <option>Under ₱2,000</option>
+              <option>₱2,000 - ₱5,000</option>
+              <option>₱5,000 - ₱10,000</option>
+              <option>Above ₱10,000</option>
+            </select>
+            
+            {/* Room Type Filter */}
+            <select className="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-300">
+              <option>Room Type</option>
+              <option>Standard Room</option>
+              <option>Deluxe Room</option>
+              <option>Suite</option>
+              <option>Family Room</option>
+            </select>
+          </div>
         </div>
 
         {isError && (
