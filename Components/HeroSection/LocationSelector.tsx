@@ -58,28 +58,28 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       {/* Trigger */}
       <button
         onClick={onToggle}
-        className={`group w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white border rounded-full transition-all duration-200 focus:outline-none
-          ${isOpen ? "border-[#8B4513]" : "border-gray-300 hover:border-[#8B4513]"}`}
+        className={`group w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white dark:bg-gray-800 border rounded-full transition-all duration-200 focus:outline-none
+          ${isOpen ? "border-[#8B4513]" : "border-gray-300 dark:border-gray-600 hover:border-[#8B4513]"}`}
       >
-        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 group-hover:text-[#8B4513] transition-colors" />
+        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400 group-hover:text-[#8B4513] transition-colors" />
 
         <div className="flex-1 text-left min-w-0">
-          <span className="block text-xs text-gray-500">Location</span>
-          <span className="block text-sm sm:text-base font-semibold text-gray-900 truncate">
+          <span className="block text-xs text-gray-500 dark:text-gray-400">Location</span>
+          <span className="block text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
             {selectedLocation ? selectedLocation.name : "Where?"}
           </span>
         </div>
 
         <ChevronDown
           className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200
-            ${isOpen ? "rotate-180 text-[#8B4513]" : "text-gray-500"}`}
+            ${isOpen ? "rotate-180 text-[#8B4513]" : "text-gray-500 dark:text-gray-400"}`}
         />
       </button>
 
       {/* Dropdown */}
       {isOpen && (
         <div
-          className="absolute top-full mt-1 z-50 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          className="absolute top-full mt-1 z-50 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {locations.length > 0 ? (
@@ -91,7 +91,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
                   key={location.id}
                   onClick={() => handleLocationSelect(location)}
                   className={`px-4 py-3 flex items-center gap-3 cursor-pointer transition-all
-                    ${isSelected ? "bg-amber-50" : "hover:bg-gray-50"}`}
+                    ${isSelected ? "bg-amber-50 dark:bg-amber-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-700/50"}`}
                 >
                   <MapPin
                     className={`w-3 h-3 ${
@@ -102,14 +102,14 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
                   <div className="flex flex-col">
                     <span
                       className={`font-medium ${
-                        isSelected ? "text-[#8B4513]" : "text-gray-900"
+                        isSelected ? "text-[#8B4513]" : "text-gray-900 dark:text-white"
                       }`}
                     >
                       {location.name}
                     </span>
 
                     {location.branch && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {location.branch}
                       </span>
                     )}
@@ -118,7 +118,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               );
             })
           ) : (
-            <div className="px-4 py-4 text-center text-sm text-gray-500">
+            <div className="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
               Loading locations...
             </div>
           )}

@@ -8,6 +8,7 @@ import GuestSelector from "./GuestSelector";
 import StayTypeSelectorModal from "./StayTypeSelectorModal";
 import ValidationModal from "./ValidationModal";
 import { useRouter } from "next/navigation";
+import { MapPin, Calendar as CalendarIcon, Users, Sparkles, Home, Search, TrendingUp } from "lucide-react";
 import {
   setLocation as setReduxLocation,
   setCheckInDate as setReduxCheckInDate,
@@ -163,21 +164,21 @@ const SearchBarSticky = () => {
 
   return (
     <div
-      className={`fixed left-0 right-0 z-40 w-full transition-all duration-500 ease-in-out bg-white border-b border-gray-200 dark:bg-gray-900 ${
+      className={`fixed left-0 right-0 z-40 w-full transition-all duration-500 ease-in-out bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm ${
         isScrolled
-          ? 'top-14 sm:top-16 py-2'
+          ? 'top-14 sm:top-16 py-2 pb-4 sm:pb-5'
           : 'top-14 sm:top-16 py-3 sm:py-4 md:py-6 lg:py-8'
       }`}
     >
       {/* Search Card - Responsive Design */}
-      <div className={`max-w-5xl mx-auto transition-all duration-500 ease-in-out ${
+      <div className={`max-w-5xl mx-auto transition-all duration-500 ease-in-out relative ${
         isScrolled ? 'px-3 sm:px-4' : 'px-3 sm:px-4 md:px-6'
       }`}>
         {/* Mobile: Single Find Room Button */}
         <div className="sm:hidden">
           <button
             onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-            className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white font-medium py-3 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+            className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white font-medium py-3 px-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-[1.02]"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -195,9 +196,13 @@ const SearchBarSticky = () => {
 
           {/* Expanded Search Fields - Mobile Only */}
           {isSearchExpanded && (
-            <div className="mt-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-3 space-y-3">
+            <div className="mt-3 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
               {/* Location Selector */}
               <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-4 h-4 text-brand-primary" />
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Location</span>
+                </div>
                 <LocationSelector
                   selectedLocation={selectedLocation}
                   onLocationSelect={(location) => {
@@ -212,6 +217,10 @@ const SearchBarSticky = () => {
 
               {/* Date Range Picker */}
               <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <CalendarIcon className="w-4 h-4 text-brand-primary" />
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Dates</span>
+                </div>
                 <DateRangePicker
                   checkInDate={checkInDate}
                   checkOutDate={checkOutDate}
@@ -222,6 +231,10 @@ const SearchBarSticky = () => {
 
               {/* Guest Selector */}
               <div className="pb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="w-4 h-4 text-brand-primary" />
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Guests</span>
+                </div>
                 <GuestSelector
                   guests={guests}
                   onGuestChange={handleGuestChange}
@@ -249,9 +262,14 @@ const SearchBarSticky = () => {
 
         {/* Tablet: Compact Search Bar */}
         <div className="hidden sm:flex md:hidden">
-          <div className={`w-full bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 ${
+          <div className={`w-full bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 relative overflow-visible ${
             isScrolled ? 'p-2' : 'p-3'
           }`}>
+            {/* Floating badge */}
+            <div className="absolute -top-2 left-4 bg-brand-primary text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+              <Sparkles className="w-2.5 h-2.5" />
+              <span>Search</span>
+            </div>
             <div className="grid grid-cols-2 gap-0 items-center">
               {/* Location Selector */}
               <div className="relative px-3 py-2 border-r border-gray-200 dark:border-gray-700">
@@ -292,9 +310,14 @@ const SearchBarSticky = () => {
 
         {/* Desktop: Full Search Bar */}
         <div className="hidden md:block">
-          <div className={`bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 ${
+          <div className={`bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 relative overflow-visible ${
             isScrolled ? 'p-2' : 'p-3'
           }`}>
+            {/* Floating badge */}
+            <div className="absolute -top-2 left-6 bg-brand-primary text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1">
+              <Sparkles className="w-2.5 h-2.5" />
+              <span>Find Your Haven</span>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 items-center">
               {/* Location Selector */}
               <div className="relative px-3 md:px-4 py-2 border-r border-gray-200 dark:border-gray-700">

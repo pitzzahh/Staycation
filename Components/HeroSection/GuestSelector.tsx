@@ -82,7 +82,7 @@ const GuestSelector = ({ guests, onGuestChange }: GuestSelectorProps) => {
     <div ref={containerRef} className="relative w-full h-12 sm:h-14">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 rounded-full hover:border-[#8B4513] transition-all duration-200 focus:outline-none"
+        className="w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full hover:border-[#8B4513] transition-all duration-200 focus:outline-none"
         onMouseEnter={(e) => {
           if (!isOpen) {
             e.currentTarget.style.borderColor = '#8B4513';
@@ -97,16 +97,16 @@ const GuestSelector = ({ guests, onGuestChange }: GuestSelectorProps) => {
           borderColor: isOpen ? '#8B4513' : undefined
         }}
       >
-        <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 group-hover:text-[#8B4513] flex-shrink-0 transition-colors duration-200" />
+        <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400 group-hover:text-[#8B4513] flex-shrink-0 transition-colors duration-200" />
         <div className="flex-1 text-left min-w-0">
-          <p className="text-xs text-gray-500 truncate">Who</p>
-          <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">
+          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Who</p>
+          <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
             {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
           </p>
         </div>
         <ChevronDown
           className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-transform duration-300 ${
-            isOpen ? 'rotate-180 text-brand-primary' : 'text-gray-500'
+            isOpen ? 'rotate-180 text-brand-primary' : 'text-gray-500 dark:text-gray-400'
           }`}
         />
       </button>

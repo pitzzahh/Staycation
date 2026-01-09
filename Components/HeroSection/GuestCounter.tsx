@@ -15,11 +15,11 @@ const GuestCounter = ({label, description, count, onIncrement, onDecrement, minV
   const isMinimum = count <= minValue;
 
   return (
-    <div className="flex items-center justify-between py-4 border-b border-gray-200 last:border-b-0">
+    <div className="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
         <div className="flex-1">
-            <p className="text-sm sm:text-base font-semibold text-gray-900">{label}</p>
+            <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{label}</p>
             {description && (
-                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{description}</p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>
             )}
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
@@ -28,13 +28,13 @@ const GuestCounter = ({label, description, count, onIncrement, onDecrement, minV
                 disabled={isMinimum}
                 className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300
                     ${isMinimum
-                        ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                        ? 'border-gray-200 dark:border-gray-600 text-gray-300 dark:text-gray-500 cursor-not-allowed'
                         : 'border-orange-400 text-orange-500 hover:bg-gradient-to-r hover:from-yellow-500 hover:to-orange-500 hover:text-white hover:border-transparent active:scale-95 hover:shadow-md'
                     }`}
             >
                 <Minus className="w-4 h-4" strokeWidth={2.5}/>
             </button>
-            <span className="w-8 text-center font-semibold text-sm sm:text-base bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-orange-600">
+            <span className="w-8 text-center font-semibold text-sm sm:text-base bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-orange-600 dark:from-yellow-400 dark:to-orange-400">
                 {count}
             </span>
             <button

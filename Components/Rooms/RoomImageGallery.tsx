@@ -100,11 +100,12 @@ const RoomImageGallery = ({ images, autoPlayInterval = 3000 }: RoomImageGalleryP
               e.stopPropagation();
               setCurrentImageIndex(index);
             }}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            className={`rounded-full transition-all duration-300 shadow-lg ${
               index === currentImageIndex
-                ? "bg-brand-primary w-6"
-                : "bg-white/60 hover:bg-brand-primaryLight"
+                ? "bg-brand-primary w-6 h-2"
+                : "bg-white/60 hover:bg-white w-2 h-2"
             }`}
+            style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)' }}
             aria-label={`Go to image ${index + 1}`}
           />
         ))}
