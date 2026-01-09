@@ -62,8 +62,7 @@ const Navbar = () => {
   }, [isProfileOpen]);
 
   // Hide navbar on certain pages
-  const shouldHideNavbar = pathname === "/login" || 
-                           pathname === "/admin/login" || 
+  const shouldHideNavbar = pathname === "/admin/login" || 
                            pathname === "/admin/owners" || 
                            pathname === "/admin/csr";
 
