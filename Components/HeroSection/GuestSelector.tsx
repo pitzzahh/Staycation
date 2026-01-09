@@ -112,7 +112,7 @@ const GuestSelector = ({ guests, onGuestChange }: GuestSelectorProps) => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-lg z-50 p-4">
+        <div className="absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-lg z-50 p-3 sm:p-4 w-full sm:w-80">
           {renderGuestCounter("Adults", "Ages 18 or above", "adults", 1)}
           {renderGuestCounter("Children", "Ages 4 – 17", "children", 0)}
           {renderGuestCounter("Infants", "Ages 0 – 3", "infants", 0)}

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Building2,
   Heart,
@@ -10,7 +8,13 @@ import {
   Clock,
   MapPin,
 } from "lucide-react";
-import Footer from "@/Components/Footer";
+import SidebarLayout from "@/Components/SidebarLayout";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Staycation Haven | About",
+  description: "Learn about Staycation Haven - your premier destination for flexible, comfortable, and affordable urban staycations in Quezon City.",
+};
 
 const AboutPage = () => {
   const stats = [
@@ -86,142 +90,121 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <SidebarLayout>
       {/* Hero Section */}
-      <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center animate-in fade-in slide-in-from-bottom duration-700">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-orange-600 to-yellow-600 dark:from-orange-400 dark:to-yellow-400 bg-clip-text text-transparent">
-                About Staycation Haven
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
-              Your premier destination for flexible, comfortable, and affordable
-              urban staycations. We transform ordinary spaces into extraordinary
-              experiences.
-            </p>
-          </div>
+      <div className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            About Staycation Haven
+          </h1>
+          <p className="text-lg md:text-xl opacity-90 max-w-3xl mx-auto">
+            Your premier destination for flexible, comfortable, and affordable
+            urban staycations. We transform ordinary spaces into extraordinary
+            experiences.
+          </p>
         </div>
-      </section>
+      </div>
 
-      {/* Stats Section */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className="text-center p-6 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-gray-700 dark:to-gray-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in slide-in-from-bottom"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex justify-center mb-4 text-orange-500 dark:text-orange-400">
-                  {stat.icon}
-                </div>
-                <div className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
-                  {stat.label}
-                </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="text-center p-6 rounded-xl bg-orange-50 border border-orange-200 hover:border-brand-primary transition-all duration-300"
+            >
+              <div className="flex justify-center mb-4 text-brand-primary">
+                {stat.icon}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Our Story Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-in fade-in slide-in-from-left duration-700">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-6">
-                Our Story
-              </h2>
-              <div className="space-y-4 text-gray-600 dark:text-gray-400 leading-relaxed">
-                <p>
-                  Founded in 2020, Staycation Haven was born from a simple idea:
-                  not everyone needs a full 24-hour hotel stay. Whether
-                  you&#39;re traveling through the city, need a comfortable
-                  place to rest between meetings, or want a quick getaway
-                  without breaking the bank, we&#39;re here for you.
-                </p>
-                <p>
-                  We&#39;ve revolutionized urban accommodation by offering
-                  flexible booking options – from 6-hour quick stays to
-                  multi-day retreats. Our havens are designed with modern
-                  travelers in mind, combining comfort, convenience, and
-                  affordability.
-                </p>
-                <p>
-                  Today, we&#39;re proud to serve thousands of guests across
-                  multiple premium locations, maintaining our commitment to
-                  quality, cleanliness, and exceptional service.
-                </p>
+              <div className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                {stat.value}
+              </div>
+              <div className="text-sm sm:text-base text-gray-600">
+                {stat.label}
               </div>
             </div>
-            <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-right duration-700">
-              <img
-                src="/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg"
-                alt="Staycation Haven Interior"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
 
-      {/* Our Values Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
-              Our Values
+        {/* Our Story Section */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-12">
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+              Our Story
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              The principles that guide us in delivering exceptional staycation
-              experiences
-            </p>
+            <div className="space-y-4 text-gray-600 leading-relaxed">
+              <p>
+                Founded in 2020, Staycation Haven was born from a simple idea:
+                not everyone needs a full 24-hour hotel stay. Whether you're
+                traveling through the city, need a comfortable place to rest
+                between meetings, or want a quick getaway without breaking the
+                bank, we're here for you.
+              </p>
+              <p>
+                We've revolutionized urban accommodation by offering flexible
+                booking options – from 6-hour quick stays to multi-day retreats.
+                Our havens are designed with modern travelers in mind, combining
+                comfort, convenience, and affordability.
+              </p>
+              <p>
+                Today, we're proud to serve thousands of guests across multiple
+                premium locations, maintaining our commitment to quality,
+                cleanliness, and exceptional service.
+              </p>
+            </div>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="relative h-96 rounded-2xl overflow-hidden border-2 border-gray-200">
+            <img
+              src="/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg"
+              alt="Staycation Haven Interior"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Our Values Section */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Our Values
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            The principles that guide us in delivering exceptional staycation
+            experiences
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8">
             {values.map((value, index) => (
               <div
                 key={index}
-                className="text-center p-6 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in slide-in-from-bottom"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="text-center p-6 rounded-xl border border-gray-200 hover:border-brand-primary transition-all duration-300"
               >
                 <div className="flex justify-center mb-4">{value.icon}</div>
-                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
                   {value.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed">
                   {value.description}
                 </p>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* Team Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
-              Meet Our Team
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Dedicated professionals committed to making your stay exceptional
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
+        {/* Team Section */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Meet Our Team
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Dedicated professionals committed to making your stay exceptional
+          </p>
+          <div className="grid md:grid-cols-3 gap-8 mt-8">
             {team.map((member, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 animate-in fade-in slide-in-from-bottom"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-brand-primary transition-all duration-300"
               >
-                <div className="h-64 bg-gradient-to-br from-orange-200 to-yellow-200 dark:from-orange-900/30 dark:to-yellow-900/30 flex items-center justify-center">
+                <div className="h-64 bg-orange-50 flex items-center justify-center">
                   <img
                     src={member.image}
                     alt={member.name}
@@ -229,36 +212,31 @@ const AboutPage = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">
                     {member.name}
                   </h3>
-                  <p className="text-orange-600 dark:text-orange-400 font-semibold mb-3">
+                  <p className="text-brand-primary font-semibold mb-3">
                     {member.role}
                   </p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">{member.description}</p>
+                  <p className="text-gray-600 text-sm">{member.description}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* Mission Statement */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-orange-600 to-yellow-600">
-        <div className="max-w-4xl mx-auto text-center text-white">
+        {/* Mission Statement */}
+        <div className="bg-brand-primary text-white rounded-xl p-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">Our Mission</h2>
-          <p className="text-lg sm:text-xl leading-relaxed opacity-95">
+          <p className="text-lg sm:text-xl leading-relaxed">
             To redefine urban accommodation by providing flexible, high-quality
             staycation options that fit modern lifestyles. We believe everyone
             deserves a comfortable retreat, whether for a few hours or several
             days, without compromising on quality or breaking the bank.
           </p>
         </div>
-      </section>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+      </div>
+    </SidebarLayout>
   );
 };
 
