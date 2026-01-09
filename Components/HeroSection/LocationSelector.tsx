@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  MapPin,
-  ChevronDown,
-} from "lucide-react";
+import { MapPin, ChevronDown } from "lucide-react";
 
 interface Location {
   id: number;
@@ -29,10 +26,13 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // ✅ Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         if (isOpen) {
           onToggle();
         }
@@ -40,71 +40,81 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [isOpen, onToggle]);
 
+  const handleLocationSelect = (location: Location) => {
+    onLocationSelect(location);
+    onToggle(); // close after selection
+  };
+
   return (
     <div ref={containerRef} className="relative w-full h-12 sm:h-14">
+      {/* Trigger */}
       <button
         onClick={onToggle}
-        className="w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 rounded-full hover:border-[#8B4513] transition-all duration-200 focus:outline-none"
-        onMouseEnter={(e) => {
-          if (!isOpen) {
-            e.currentTarget.style.borderColor = '#8B4513';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isOpen) {
-            e.currentTarget.style.borderColor = '';
-          }
-        }}
-        style={{
-          borderColor: isOpen ? '#8B4513' : undefined
-        }}
+        className={`group w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white border rounded-full transition-all duration-200 focus:outline-none
+          ${isOpen ? "border-[#8B4513]" : "border-gray-300 hover:border-[#8B4513]"}`}
       >
-        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 group-hover:text-[#8B4513] flex-shrink-0 transition-colors duration-200" />
+        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 group-hover:text-[#8B4513] transition-colors" />
+
         <div className="flex-1 text-left min-w-0">
           <span className="block text-xs text-gray-500">Location</span>
           <span className="block text-sm sm:text-base font-semibold text-gray-900 truncate">
-            {selectedLocation ? `${selectedLocation.name} - ${selectedLocation.branch}` : "Where?"}
+            {selectedLocation ? selectedLocation.name : "Where?"}
           </span>
         </div>
-        <ChevronDown className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-transform duration-200 ${
-          isOpen ? 'rotate-180 text-brand-primary' : 'text-gray-500'
-        }`} />
+
+        <ChevronDown
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200
+            ${isOpen ? "rotate-180 text-[#8B4513]" : "text-gray-500"}`}
+        />
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div
+          className="absolute top-full mt-1 z-50 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
           {locations.length > 0 ? (
             locations.map((location) => {
-              const isSelected = selectedLocation?.id === location.id && 
-                                 selectedLocation?.name === location.name && 
-                                 selectedLocation?.branch === location.branch;
-              
+              const isSelected = selectedLocation?.id === location.id;
+
               return (
-                <button
-                  key={`${location.id}-${location.name}-${location.branch}`}
-                  onClick={() => onLocationSelect(location)}
-                  className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-all duration-200 flex items-center gap-3 border-b border-gray-100 last:border-b-0
-                    ${isSelected ? 'bg-amber-50 border-l-4 border-l-[#8B4513] rounded-r-md' : ''}`}
+                <div
+                  key={location.id}
+                  onClick={() => handleLocationSelect(location)}
+                  className={`px-4 py-3 flex items-center gap-3 cursor-pointer transition-all
+                    ${isSelected ? "bg-amber-50" : "hover:bg-gray-50"}`}
                 >
-                  <MapPin className={`w-4 h-4 ${isSelected ? 'text-[#8B4513]' : 'text-gray-500'}`} />
-                  <div>
-                    <span className={`block font-medium ${isSelected ? 'text-[#8B4513]' : 'text-gray-900'}`}>
+                  <MapPin
+                    className={`w-3 h-3 ${
+                      isSelected ? "text-[#8B4513]" : "text-gray-500"
+                    }`}
+                  />
+
+                  <div className="flex flex-col">
+                    <span
+                      className={`font-medium ${
+                        isSelected ? "text-[#8B4513]" : "text-gray-900"
+                      }`}
+                    >
                       {location.name}
                     </span>
-                    <span className={`block text-sm ${isSelected ? 'text-amber-700' : 'text-gray-600'}`}>
-                      {location.branch}
-                    </span>
+
+                    {location.branch && (
+                      <span className="text-xs text-gray-500">
+                        {location.branch}
+                      </span>
+                    )}
                   </div>
-                </button>
+                </div>
               );
             })
           ) : (
