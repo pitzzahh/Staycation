@@ -47,6 +47,7 @@ const SearchBarSticky = () => {
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [selectedStay, setSelectedStay] = useState<StayType | null>(null);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(false);
   const [guests, setGuests] = useState<Guests>({
     adults: 1,
     children: 0,
@@ -63,24 +64,34 @@ const SearchBarSticky = () => {
           const response = await res.json();
           const havens = response?.data || [];
 
-          // Extract unique locations (haven_name + tower)
-          const uniqueLocations = havens.reduce((acc: Location[], haven: {
+          // Extract unique haven numbers (e.g., "Haven 1", "Haven 2")
+          const havenMap = new Map<string, Location>();
+
+          havens.forEach((haven: {
             id?: number;
             haven_name?: string;
             tower?: string;
           }) => {
-            const locationKey = `${haven.haven_name}-${haven.tower}`;
-            const exists = acc.find(loc => `${loc.name}-${loc.branch}` === locationKey);
+            if (haven.haven_name) {
+              // Extract haven number from haven_name (e.g., "Haven 1" from "Haven 1 - Tower A")
+              const havenNumber = haven.haven_name.match(/Haven\s+\d+/i)?.[0] || haven.haven_name;
 
-            if (!exists && haven.haven_name && haven.tower) {
-              acc.push({
-                id: haven.id || acc.length + 1,
-                name: haven.haven_name,
-                branch: haven.tower
-              });
+              if (!havenMap.has(havenNumber)) {
+                havenMap.set(havenNumber, {
+                  id: haven.id || havenMap.size + 1,
+                  name: havenNumber,
+                  branch: '' // Empty branch since we're only showing haven number
+                });
+              }
             }
-            return acc;
-          }, []);
+          });
+
+          const uniqueLocations = Array.from(havenMap.values()).sort((a, b) => {
+            // Sort by haven number
+            const numA = parseInt(a.name.match(/\d+/)?.[0] || '0');
+            const numB = parseInt(b.name.match(/\d+/)?.[0] || '0');
+            return numA - numB;
+          });
 
           setLocations(uniqueLocations);
         }
@@ -131,96 +142,196 @@ const SearchBarSticky = () => {
   const dispatch = useAppDispatch();
 
   const handleSearch = () => {
-    // Validation checks
-    const missingFields: string[] = [];
-
+    // Validation - only check for location
     if (!selectedLocation) {
-      missingFields.push("location");
-    }
-    if (!checkInDate) {
-      missingFields.push("check-in date");
-    }
-    if (!checkOutDate) {
-      missingFields.push("check-out date");
-    }
-
-    if (missingFields.length > 0) {
-      let message = "Please select ";
-      if (missingFields.length === 1) {
-        message += `a ${missingFields[0]}.`;
-      } else if (missingFields.length === 2) {
-        message += `${missingFields[0]} and ${missingFields[1]}.`;
-      } else {
-        message += `${missingFields[0]}, ${missingFields[1]}, and ${missingFields[2]}.`;
-      }
-
+      const message = "Please select a location.";
       setValidationMessage(message);
       setIsValidationModalOpen(true);
       return;
     }
 
-    //Save to redux before opening modal
+    // Save to redux and navigate to rooms page
     dispatch(setReduxLocation(selectedLocation));
     dispatch(setReduxCheckInDate(checkInDate));
     dispatch(setReduxCheckOutDate(checkOutDate));
     dispatch(setReduxGuests(guests));
-    dispatch(setIsFromSearch(true))
+    dispatch(setIsFromSearch(true));
 
-    // All fields are valid, proceed
-    setIsStayTypeModalOpen(true);
+    // Navigate to rooms page with filter applied
+    router.push('/rooms');
   }
 
   return (
     <div
-      className={`fixed left-0 right-0 z-40 w-full transition-all duration-500 ease-in-out bg-gray-50 dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 ${
+      className={`fixed left-0 right-0 z-40 w-full transition-all duration-500 ease-in-out bg-white border-b border-gray-200 dark:bg-gray-900 ${
         isScrolled
-          ? 'top-16 py-3'
-          : 'top-16 py-6 sm:py-8 md:py-10'
+          ? 'top-14 sm:top-16 py-2'
+          : 'top-14 sm:top-16 py-3 sm:py-4 md:py-6 lg:py-8'
       }`}
     >
-      {/* Search Card - Airbnb Style */}
-      <div className={`max-w-6xl mx-auto transition-all duration-500 ease-in-out ${
-        isScrolled ? 'px-4' : 'px-4 sm:px-6'
+      {/* Search Card - Responsive Design */}
+      <div className={`max-w-5xl mx-auto transition-all duration-500 ease-in-out ${
+        isScrolled ? 'px-3 sm:px-4' : 'px-3 sm:px-4 md:px-6'
       }`}>
-        <div className={`bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 ${
-          isScrolled ? 'p-2' : 'p-3'
-        }`}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 items-center">
-            {/* Location Selector */}
-            <div className="relative px-4 py-2 border-r border-gray-200 dark:border-gray-700">
-              <LocationSelector
-                selectedLocation={selectedLocation}
-                onLocationSelect={(location) => {
-                  setSelectedLocation(location);
-                  setLocationOpen(false);
-                }}
-                isOpen={locationOpen}
-                onToggle={() => setLocationOpen(!locationOpen)}
-                locations={locations}
-              />
-            </div>
+        {/* Mobile: Single Find Room Button */}
+        <div className="sm:hidden">
+          <button
+            onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+            className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white font-medium py-3 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span className="text-sm">Find Room</span>
+            <svg 
+              className={`w-3 h-3 transition-transform duration-300 ${isSearchExpanded ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
 
-            {/* Date Range Picker - Check In & Check Out */}
-            <div className="relative px-4 py-2 border-r border-gray-200 dark:border-gray-700">
-              <DateRangePicker
-                checkInDate={checkInDate}
-                checkOutDate={checkOutDate}
-                onCheckInChange={setCheckInDate}
-                onCheckOutChange={setCheckOutDate}
-              />
-            </div>
+          {/* Expanded Search Fields - Mobile Only */}
+          {isSearchExpanded && (
+            <div className="mt-3 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-3 space-y-3">
+              {/* Location Selector */}
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
+                <LocationSelector
+                  selectedLocation={selectedLocation}
+                  onLocationSelect={(location) => {
+                    setSelectedLocation(location);
+                    setLocationOpen(false);
+                  }}
+                  isOpen={locationOpen}
+                  onToggle={() => setLocationOpen(!locationOpen)}
+                  locations={locations}
+                />
+              </div>
 
-            {/* Guest Selector */}
-            <div className="relative px-4 py-2 border-r border-gray-200 dark:border-gray-700">
-              <GuestSelector
-                guests={guests}
-                onGuestChange={handleGuestChange}
-              />
-            </div>
+              {/* Date Range Picker */}
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
+                <DateRangePicker
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
+                  onCheckInChange={setCheckInDate}
+                  onCheckOutChange={setCheckOutDate}
+                />
+              </div>
 
-            {/* Search Button */}
-            <div className="relative px-4 py-2 flex items-center justify-center">
-              <SearchButton onSearch={handleSearch} />
+              {/* Guest Selector */}
+              <div className="pb-3">
+                <GuestSelector
+                  guests={guests}
+                  onGuestChange={handleGuestChange}
+                />
+              </div>
+
+              {/* Search Button */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsSearchExpanded(false)}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-full transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSearch}
+                  className="flex-1 bg-brand-primary hover:bg-brand-primaryDark text-white font-medium py-2 px-4 rounded-full transition-colors text-sm"
+                >
+                  Search Rooms
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Tablet: Compact Search Bar */}
+        <div className="hidden sm:flex md:hidden">
+          <div className={`w-full bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 ${
+            isScrolled ? 'p-2' : 'p-3'
+          }`}>
+            <div className="grid grid-cols-2 gap-0 items-center">
+              {/* Location Selector */}
+              <div className="relative px-3 py-2 border-r border-gray-200 dark:border-gray-700">
+                <LocationSelector
+                  selectedLocation={selectedLocation}
+                  onLocationSelect={(location) => {
+                    setSelectedLocation(location);
+                    setLocationOpen(false);
+                  }}
+                  isOpen={locationOpen}
+                  onToggle={() => setLocationOpen(!locationOpen)}
+                  locations={locations}
+                />
+              </div>
+
+              {/* Date Range Picker */}
+              <div className="relative px-3 py-2">
+                <DateRangePicker
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
+                  onCheckInChange={setCheckInDate}
+                  onCheckOutChange={setCheckOutDate}
+                />
+              </div>
+
+              {/* Search Button - Takes full width on tablet */}
+              <div className="col-span-2 relative px-3 py-2 flex items-center justify-center mt-2">
+                <button
+                  onClick={handleSearch}
+                  className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white font-medium py-2 px-4 rounded-full transition-colors text-sm"
+                >
+                  Search Rooms
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: Full Search Bar */}
+        <div className="hidden md:block">
+          <div className={`bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 ${
+            isScrolled ? 'p-2' : 'p-3'
+          }`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 items-center">
+              {/* Location Selector */}
+              <div className="relative px-3 md:px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+                <LocationSelector
+                  selectedLocation={selectedLocation}
+                  onLocationSelect={(location) => {
+                    setSelectedLocation(location);
+                    setLocationOpen(false);
+                  }}
+                  isOpen={locationOpen}
+                  onToggle={() => setLocationOpen(!locationOpen)}
+                  locations={locations}
+                />
+              </div>
+
+              {/* Date Range Picker - Check In & Check Out */}
+              <div className="relative px-3 md:px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+                <DateRangePicker
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
+                  onCheckInChange={setCheckInDate}
+                  onCheckOutChange={setCheckOutDate}
+                />
+              </div>
+
+              {/* Guest Selector */}
+              <div className="relative px-3 md:px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+                <GuestSelector
+                  guests={guests}
+                  onGuestChange={handleGuestChange}
+                />
+              </div>
+
+              {/* Search Button */}
+              <div className="relative px-3 md:px-4 py-2 flex items-center justify-center">
+                <SearchButton onSearch={handleSearch} />
+              </div>
             </div>
           </div>
         </div>
