@@ -4,6 +4,7 @@ import "./globals.css";
 import UIProviders from "@/Components/UIProviders";
 import Navbar from "../Components/Navbar";
 import { Proviers } from '@/Components/Providers'
+import MessageButton from "@/Components/MessageButton";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,6 +36,7 @@ export default function RootLayout({
           <Proviers>
             <Navbar />
             {children}
+            <MessageButton />
           </Proviers>
         </UIProviders>
       </body>
