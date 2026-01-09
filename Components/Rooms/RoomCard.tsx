@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, User, MapPin, Video, X, Heart } from "lucide-react";
+import { Star, User, MapPin, Video, X, Heart, Sparkles } from "lucide-react";
 import RoomImageGallery from "./RoomImageGallery";
 import AmenityBadge from "./AmenityBadge";
 import { useRouter } from "next/navigation";
@@ -129,11 +129,14 @@ const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
             </span>
           </div>
 
-          {/* Price Per Night */}
-          <p className="text-sm">
-            <span className="font-semibold text-gray-700 dark:text-gray-300">{room.price}</span>
-            <span className="text-gray-600 dark:text-gray-400 font-normal"> {room.pricePerNight}</span>
-          </p>
+          {/* Price Per Night with Special Offer Icon */}
+          <div className="flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-brand-primary dark:text-brand-primary" />
+            <p className="text-sm">
+              <span className="font-semibold text-gray-700 dark:text-gray-300">{room.price}</span>
+              <span className="text-gray-600 dark:text-gray-400 font-normal"> {room.pricePerNight}</span>
+            </p>
+          </div>
         </div>
 
         {/* Action Button - Only for select mode */}
