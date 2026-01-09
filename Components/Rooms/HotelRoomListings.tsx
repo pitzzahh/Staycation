@@ -1,10 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import RoomCard from "./RoomCard";
-import { SlidersHorizontal, ChevronRight, ChevronLeft } from "lucide-react";
+import { SlidersHorizontal, ChevronRight, ChevronLeft, Eye } from "lucide-react";
 import { useGetHavensQuery } from "@/redux/api/roomApi";
 import { useRouter } from "next/navigation";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { setIsFromSearch } from "@/redux/slices/bookingSlice";
+
+// Custom scrollbar styles
+const scrollbarStyles = `
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
 
 interface Room {
   id: string;
@@ -65,301 +78,58 @@ interface HotelRoomListingsProps {
   initialHavens: Haven[];
 }
 
-const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
+const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
   const { isError } = useGetHavensQuery({});
   const [sortBy, setSortBy] = useState<string>("recommended");
   const [currentPage, setCurrentPage] = useState<Record<string, number>>({});
+  const [filteredHavens, setFilteredHavens] = useState<Haven[]>(initialHavens);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const ROOMS_PER_PAGE = 5;
-  // const [rooms] = useState<Room[]>([
-  //   {
-  //     id: "1",
-  //     name: "6-Hour Short Stay",
-  //     price: "₱999",
-  //     pricePerNight: "6 hours",
-  //     images: [
-  //       "/Images/haven_9_Living Area_haven_5_jpg_30.jpg",
-  //       "/Images/haven9_Living_Area_haven_4_1763025826_3659.jpg",
-  //       "/Images/haven9_Full_Bathroom_haven_7_1763025826_8427.jpg",
-  //     ],
-  //     rating: 4.8,
-  //     reviews: 245,
-  //     capacity: 2,
-  //     amenities: ["WiFi", "AC", "TV", "Comfortable Bed"],
-  //     description:
-  //       "Perfect for a quick rest or day stay with all essential amenities.",
-  //     fullDescription:
-  //       "Our 6-Hour Short Stay is ideal for travelers needing a quick rest or day stay. Enjoy comfortable accommodations with all modern amenities in a cozy setting at Haven 9, Tower A.",
-  //     beds: "Queen Size Bed",
-  //     roomSize: "28 sq.m",
-  //     location: "Haven 9",
-  //     tower: "Tower A",
-  //     photoTour: {
-  //       livingArea: [
-  //         "/Images/haven_9_Living Area_haven_5_jpg_30.jpg",
-  //         "/Images/haven9_Living_Area_haven_4_1763025826_3659.jpg",
-  //         "/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg",
-  //       ],
-  //       kitchenette: [
-  //         "/Images/haven9_Kitchenette_haven_7_1763025826_3190.jpg",
-  //       ],
-  //       fullBathroom: [
-  //         "/Images/haven9_Full_Bathroom_haven_7_1763025826_8427.jpg",
-  //       ],
-  //       bedroom: [
-  //         "/Images/haven9_Living_Area_haven_4_1764219962_3222.jpg",
-  //       ],
-  //     },
-  //     youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "10-Hour Extended Stay",
-  //     price: "₱1,599",
-  //     pricePerNight: "10 hours",
-  //     images: [
-  //       "/Images/haven_9_Living Area_haven_5_jpg_31.jpg",
-  //       "/Images/haven9_Kitchenette_haven_7_1763025826_3190.jpg",
-  //       "/Images/haven9_Living_Area_haven_4_1764219962_3222.jpg",
-  //     ],
-  //     rating: 4.9,
-  //     reviews: 189,
-  //     capacity: 2,
-  //     amenities: ["WiFi", "AC", "Kitchen", "Living Area"],
-  //     description:
-  //       "Extended stay option with kitchenette and comfortable living space.",
-  //     fullDescription:
-  //       "Our 10-Hour Extended Stay offers more time to relax and unwind. Features a kitchenette and spacious living area, perfect for those who need a longer stay at Haven 67, Tower A.",
-  //     beds: "King Size Bed",
-  //     roomSize: "35 sq.m",
-  //     location: "Haven 67",
-  //     tower: "Tower A",
-  //     photoTour: {
-  //       livingArea: [
-  //         "/Images/haven_9_Living Area_haven_5_jpg_31.jpg",
-  //         "/Images/haven9_Living_Area_haven_4_1764219962_3222.jpg",
-  //       ],
-  //       kitchenette: [
-  //         "/Images/haven9_Kitchenette_haven_7_1763025826_3190.jpg",
-  //       ],
-  //       diningArea: [
-  //         "/Images/haven_9_Dining Area_haven_7_jpg_35.jpg",
-  //       ],
-  //       garage: [
-  //         "/Images/haven_9_Garage_haven_4_jpg_37.jpg",
-  //       ],
-  //     },
-  //     youtubeUrl: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "21-Hour Full Day",
-  //     price: "₱1,799",
-  //     pricePerNight: "21 hours",
-  //     images: [
-  //       "/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg",
-  //       "/Images/haven_9_Dining Area_haven_7_jpg_35.jpg",
-  //       "/Images/haven9_Pool_Black_and_Orange_Illustrative_Happy_Halloween_Instagram_Post_1763025712_1833.jpg",
-  //     ],
-  //     rating: 5,
-  //     reviews: 312,
-  //     capacity: 3,
-  //     amenities: ["WiFi", "AC", "Kitchen", "Dining Area"],
-  //     description:
-  //       "Almost a full day experience with premium amenities and spacious layout.",
-  //     fullDescription:
-  //       "Enjoy 21 hours of comfort in our spacious haven. Features full kitchen, dining area, and modern furnishings perfect for a full day stay at Haven 1, Tower D.",
-  //     beds: "1 King + 1 Single Bed",
-  //     roomSize: "45 sq.m",
-  //     location: "Haven 1",
-  //     tower: "Tower D",
-  //     photoTour: {
-  //       livingArea: [
-  //         "/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg",
-  //         "/Images/haven_9_Living Area_haven_5_jpg_30.jpg",
-  //       ],
-  //       diningArea: [
-  //         "/Images/haven_9_Dining Area_haven_7_jpg_35.jpg",
-  //       ],
-  //       pool: [
-  //         "/Images/haven9_Pool_Black_and_Orange_Illustrative_Happy_Halloween_Instagram_Post_1763025712_1833.jpg",
-  //       ],
-  //       exterior: [
-  //         "/Images/haven_9_Exterior_haven_5_jpg_38.jpg",
-  //       ],
-  //       garage: [
-  //         "/Images/haven_9_Garage_haven_4_jpg_37.jpg",
-  //       ],
-  //       fullBathroom: [
-  //         "/Images/haven9_Full_Bathroom_haven_7_1763025826_8427.jpg",
-  //       ],
-  //     },
-  //     youtubeUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
-  //   },
-  //   {
-  //     id: "4",
-  //     name: "Weekday Special",
-  //     price: "₱1,999",
-  //     pricePerNight: "Mon-Thu",
-  //     images: [
-  //       "/Images/haven_9_Living Area_haven_5_jpg_30.jpg",
-  //       "/Images/haven9_Full_Bathroom_haven_7_1763025826_8427.jpg",
-  //       "/Images/haven9_Kitchenette_haven_7_1763025826_3190.jpg",
-  //     ],
-  //     rating: 4.6,
-  //     reviews: 567,
-  //     capacity: 2,
-  //     amenities: ["WiFi", "AC", "Workstation", "Comfortable Bed"],
-  //     description:
-  //       "Perfect weekday rate for business travelers and mid-week getaways.",
-  //     fullDescription:
-  //       "Our Weekday Special offers the best value from Monday to Thursday. Ideal for business travelers with a comfortable workstation and all essential amenities at Haven 2, Tower D.",
-  //     beds: "Queen Bed",
-  //     roomSize: "30 sq.m",
-  //     location: "Haven 2",
-  //     tower: "Tower D",
-  //   },
-  //   {
-  //     id: "5",
-  //     name: "Weekend Haven",
-  //     price: "₱2,499",
-  //     pricePerNight: "Fri-Sat",
-  //     images: [
-  //       "/Images/haven9_Living_Area_haven_4_1764219962_3222.jpg",
-  //       "/Images/haven_9_Dining Area_haven_7_jpg_35.jpg",
-  //       "/Images/haven_9_Garage_haven_4_jpg_37.jpg",
-  //     ],
-  //     rating: 4.7,
-  //     reviews: 421,
-  //     capacity: 2,
-  //     amenities: ["WiFi", "AC", "Premium Bedding", "Entertainment"],
-  //     description:
-  //       "Weekend special rate with premium amenities for a perfect getaway.",
-  //     fullDescription:
-  //       "Make the most of your weekend with our Friday-Saturday special. Features premium bedding, entertainment options, and modern amenities at Haven 3, Tower D.",
-  //     beds: "King Size Bed",
-  //     roomSize: "32 sq.m",
-  //     location: "Haven 3",
-  //     tower: "Tower D",
-  //   },
-  //   {
-  //     id: "6",
-  //     name: "Multi-Day Suite",
-  //     price: "₱1,899",
-  //     pricePerNight: "per night",
-  //     images: [
-  //       "/Images/haven_9_Exterior_haven_5_jpg_38.jpg",
-  //       "/Images/haven9_Pool_Black_and_Orange_Illustrative_Happy_Halloween_Instagram_Post_1763025712_1833.jpg",
-  //       "/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg",
-  //     ],
-  //     rating: 5,
-  //     reviews: 98,
-  //     capacity: 4,
-  //     amenities: ["WiFi", "AC", "Full Kitchen", "Living Room", "Pool Access"],
-  //     description:
-  //       "Perfect for extended stays with custom rates and flexible schedules.",
-  //     fullDescription:
-  //       "Our Multi-Day Suite is designed for guests planning longer stays. Enjoy spacious accommodations with full kitchen, living room, and pool access. Custom rates available for extended bookings at Haven 4, Tower D.",
-  //     beds: "1 King + 2 Single Beds",
-  //     roomSize: "50 sq.m",
-  //     location: "Haven 4",
-  //     tower: "Tower D",
-  //   },
-  //   {
-  //     id: "7",
-  //     name: "Luxury Haven 5",
-  //     price: "₱2,299",
-  //     pricePerNight: "per night",
-  //     images: [
-  //       "/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg",
-  //       "/Images/haven_9_Dining Area_haven_7_jpg_35.jpg",
-  //       "/Images/haven9_Kitchenette_haven_7_1763025826_3190.jpg",
-  //     ],
-  //     rating: 4.9,
-  //     reviews: 156,
-  //     capacity: 3,
-  //     amenities: ["WiFi", "AC", "Kitchenette", "Dining Area", "Smart TV"],
-  //     description:
-  //       "Modern luxury haven with premium furnishings and smart home features.",
-  //     fullDescription:
-  //       "Experience modern luxury at Haven 5. Features smart home technology, premium furnishings, and a fully equipped kitchenette for your convenience at Tower D.",
-  //     beds: "1 King + 1 Queen Bed",
-  //     roomSize: "42 sq.m",
-  //     location: "Haven 5",
-  //     tower: "Tower D",
-  //   },
-  //   {
-  //     id: "8",
-  //     name: "Family Haven 6",
-  //     price: "₱2,799",
-  //     pricePerNight: "per night",
-  //     images: [
-  //       "/Images/haven_9_Living Area_haven_5_jpg_31.jpg",
-  //       "/Images/haven9_Living_Area_haven_4_1764219962_3222.jpg",
-  //       "/Images/haven9_Full_Bathroom_haven_7_1763025826_8427.jpg",
-  //     ],
-  //     rating: 4.8,
-  //     reviews: 203,
-  //     capacity: 5,
-  //     amenities: ["WiFi", "AC", "Full Kitchen", "2 Bathrooms", "Kids Area"],
-  //     description:
-  //       "Spacious family haven with multiple rooms and kid-friendly amenities.",
-  //     fullDescription:
-  //       "Perfect for families, Haven 6 offers spacious accommodations with separate kids area, two bathrooms, and full kitchen facilities at Tower D.",
-  //     beds: "2 King Beds + 1 Single",
-  //     roomSize: "60 sq.m",
-  //     location: "Haven 6",
-  //     tower: "Tower D",
-  //   },
-  //   {
-  //     id: "9",
-  //     name: "Premium Haven 7",
-  //     price: "₱2,199",
-  //     pricePerNight: "per night",
-  //     images: [
-  //       "/Images/haven9_Pool_Black_and_Orange_Illustrative_Happy_Halloween_Instagram_Post_1763025712_1833.jpg",
-  //       "/Images/haven_9_Garage_haven_4_jpg_37.jpg",
-  //       "/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg",
-  //     ],
-  //     rating: 4.7,
-  //     reviews: 178,
-  //     capacity: 2,
-  //     amenities: ["WiFi", "AC", "Pool View", "Balcony", "Mini Bar"],
-  //     description:
-  //       "Premium room with stunning pool views and private balcony.",
-  //     fullDescription:
-  //       "Enjoy breathtaking pool views from your private balcony at Haven 7. Features modern amenities and a mini bar for your convenience at Tower D.",
-  //     beds: "King Size Bed",
-  //     roomSize: "38 sq.m",
-  //     location: "Haven 7",
-  //     tower: "Tower D",
-  //   },
-  //   {
-  //     id: "10",
-  //     name: "Cozy Haven 8",
-  //     price: "₱1,699",
-  //     pricePerNight: "per night",
-  //     images: [
-  //       "/Images/haven_9_Living Area_haven_5_jpg_30.jpg",
-  //       "/Images/haven9_Kitchenette_haven_7_1763025826_3190.jpg",
-  //       "/Images/haven9_Living_Area_haven_4_1763025826_3659.jpg",
-  //     ],
-  //     rating: 4.6,
-  //     reviews: 289,
-  //     capacity: 2,
-  //     amenities: ["WiFi", "AC", "Kitchenette", "Work Desk"],
-  //     description:
-  //       "Comfortable and affordable haven perfect for couples and solo travelers.",
-  //     fullDescription:
-  //       "Haven 8 offers great value with modern comforts. Features a kitchenette and work desk, ideal for both leisure and business stays at Tower D.",
-  //     beds: "Queen Bed",
-  //     roomSize: "30 sq.m",
-  //     location: "Haven 8",
-  //     tower: "Tower D",
-  //   },
-  // ]);
+  const scrollContainerRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const rooms: Room[] = initialHavens.map((haven: Haven) => ({
+  // Get search parameters from Redux
+  const searchLocation = useAppSelector((state) => state.booking.location);
+  const isFromSearch = useAppSelector((state) => state.booking.isFromSearch);
+
+  // Set responsive behavior
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
+  // Filter havens based on location when coming from search
+  useEffect(() => {
+    if (isFromSearch && searchLocation) {
+      const filtered = initialHavens.filter((haven) => {
+        const havenName = haven.haven_name || haven.name || '';
+
+        // Extract haven number from full haven_name (e.g., "Haven 1" from "Haven 1 - Tower A")
+        const havenNumber = havenName.match(/Haven\s+\d+/i)?.[0] || havenName;
+
+        // Match by haven number only (e.g., "Haven 1" matches all towers)
+        return havenNumber === searchLocation.name;
+      });
+      setFilteredHavens(filtered);
+    } else {
+      setFilteredHavens(initialHavens);
+    }
+  }, [searchLocation, isFromSearch, initialHavens]);
+
+  const rooms: Room[] = filteredHavens.map((haven: Haven) => ({
     id: haven.uuid_id ?? haven.id ?? '',
     name: haven.haven_name ?? haven.name ?? "Unnamed Haven",
     price: `₱${haven.six_hour_rate ?? haven.weekday_rate ?? haven.weekend_rate ?? "N/A"}`,
@@ -421,150 +191,277 @@ const HotelRoomListings = ({ initialHavens  }: HotelRoomListingsProps) => {
     router.push(`/havens/${havenId}`);
   };
 
+  // Function to get rooms for current page
+  const getCurrentPageRooms = (havenNumber: string) => {
+    const havenRooms = groupedRooms[havenNumber];
+    const page = currentPage[havenNumber] || 1;
+    const totalPages = Math.ceil(havenRooms.length / ROOMS_PER_PAGE);
+    const startIndex = (page - 1) * ROOMS_PER_PAGE;
+    const endIndex = startIndex + ROOMS_PER_PAGE;
+    
+    return {
+      displayedRooms: havenRooms.slice(startIndex, endIndex),
+      currentPage: page,
+      totalPages: totalPages,
+      hasMoreRooms: havenRooms.length > ROOMS_PER_PAGE,
+      remainingRooms: havenRooms.length - ROOMS_PER_PAGE
+    };
+  };
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 py-6 sm:py-8">
-      <div className="max-w-[2520px] mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
-        {/* Header Section - Airbnb style */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          {/* Results Count */}
-          <h2 className="text-sm text-gray-600 dark:text-gray-400">
-            {rooms.length} havens
-          </h2>
-
-          {/* Filter Dropdown - Airbnb style */}
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-500">
-              <SlidersHorizontal className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters</span>
-            </button>
-            
-            {/* Price Range Filter */}
-            <select className="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-300">
-              <option>Price Range</option>
-              <option>Under ₱2,000</option>
-              <option>₱2,000 - ₱5,000</option>
-              <option>₱5,000 - ₱10,000</option>
-              <option>Above ₱10,000</option>
-            </select>
-            
-            {/* Room Type Filter */}
-            <select className="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-300">
-              <option>Room Type</option>
-              <option>Standard Room</option>
-              <option>Deluxe Room</option>
-              <option>Suite</option>
-              <option>Family Room</option>
-            </select>
-          </div>
-        </div>
-
-        {isError && (
-          <div className="text-center py-20 text-red-500">
-            Failed to load rooms
-          </div>
-        )}
-
-        {/* Room Groups by Haven */}
-        {sortedHavenNumbers.map((havenNumber) => {
-          const havenRooms = groupedRooms[havenNumber];
-          const page = currentPage[havenNumber] || 1;
-          const totalPages = Math.ceil(havenRooms.length / ROOMS_PER_PAGE);
-          const startIndex = (page - 1) * ROOMS_PER_PAGE;
-          const endIndex = startIndex + ROOMS_PER_PAGE;
-          const displayedRooms = havenRooms.slice(startIndex, endIndex);
-
-          return (
-            <div key={havenNumber} className="mb-12">
-              {/* Haven Header - Clickable */}
-              <div
-                className="mb-6 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity w-fit"
-                onClick={() => handleHavenClick(havenNumber)}
+    <>
+      <style jsx>{scrollbarStyles}</style>
+      <div className="min-h-screen bg-white dark:bg-gray-900 py-6 sm:py-8">
+        <div className="w-full">
+          {/* Active Filter Indicator */}
+          {isFromSearch && searchLocation && (
+            <div className="mb-4 flex items-center gap-2 px-4 py-2 bg-brand-primary/10 border border-brand-primary/30 rounded-lg w-fit">
+              <span className="text-sm font-medium text-brand-primary">
+                Showing results for: {searchLocation.name} - {searchLocation.branch}
+              </span>
+              <button
+                onClick={() => {
+                  setFilteredHavens(initialHavens);
+                  dispatch(setIsFromSearch(false));
+                }}
+                className="text-xs text-brand-primary hover:text-brand-primaryDark underline"
               >
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {havenNumber}
-                </h2>
-                <ChevronRight className="w-5 h-5 text-brand-primary" />
+                Clear filter
+              </button>
+            </div>
+          )}
+
+          {/* Header Section - Airbnb style */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            {/* Results Count */}
+            <h2 className="text-sm text-gray-600 dark:text-gray-400">
+              {rooms.length} {rooms.length === 1 ? 'haven' : 'havens'}
+              {isFromSearch && searchLocation && (
+                <span className="ml-1">
+                  in {searchLocation.name} - {searchLocation.branch}
+                </span>
+              )}
+            </h2>
+
+            {/* Filter Dropdown - Airbnb style */}
+            <div className="flex items-center gap-3">
+              <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-500">
+                <SlidersHorizontal className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters</span>
+              </button>
+            </div>
+          </div>
+
+          {isError && (
+            <div className="text-center py-20 text-red-500">
+              Failed to load rooms
+            </div>
+          )}
+
+          {/* No Results Message */}
+          {rooms.length === 0 && !isError && (
+            <div className="text-center py-20">
+              <div className="mb-4">
+                <svg
+                  className="mx-auto h-24 w-24 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
+                </svg>
               </div>
-
-              {/* Room Grid for this Haven */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-8">
-                {displayedRooms.map((room) => (
-                  <div key={room.id}>
-                    <RoomCard room={room} mode="browse" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagination Dots for this Haven */}
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-3 mt-8">
-                  {/* Previous Button Icon */}
-                  <button
-                    onClick={() => handlePageChange(havenNumber, Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className={`p-2 rounded-full transition-all duration-200 ${
-                      page === 1
-                        ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed opacity-50'
-                        : 'bg-brand-primary hover:bg-brand-primaryDark'
-                    }`}
-                    aria-label="Previous page"
-                  >
-                    <ChevronLeft className={`w-5 h-5 ${
-                      page === 1
-                        ? 'text-gray-400 dark:text-gray-500'
-                        : 'text-white'
-                    }`} />
-                  </button>
-
-                  {/* Page Dots */}
-                  <div className="flex gap-2 items-center">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(havenNumber, pageNum)}
-                        className={`transition-all duration-200 rounded-full ${
-                          page === pageNum
-                            ? 'w-8 h-3 bg-brand-primary'
-                            : 'w-3 h-3 bg-gray-300 dark:bg-gray-600 hover:bg-brand-primary/50 dark:hover:bg-brand-primary/50'
-                        }`}
-                        aria-label={`Go to page ${pageNum}`}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Next Button Icon */}
-                  <button
-                    onClick={() => handlePageChange(havenNumber, Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className={`p-2 rounded-full transition-all duration-200 ${
-                      page === totalPages
-                        ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed opacity-50'
-                        : 'bg-brand-primary hover:bg-brand-primaryDark'
-                    }`}
-                    aria-label="Next page"
-                  >
-                    <ChevronRight className={`w-5 h-5 ${
-                      page === totalPages
-                        ? 'text-gray-400 dark:text-gray-500'
-                        : 'text-white'
-                    }`} />
-                  </button>
-                </div>
+              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                No havens found
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                {isFromSearch && searchLocation
+                  ? `We couldn't find any havens matching "${searchLocation.name} - ${searchLocation.branch}"`
+                  : "No havens available at the moment"}
+              </p>
+              {isFromSearch && searchLocation && (
+                <button
+                  onClick={() => {
+                    setFilteredHavens(initialHavens);
+                    dispatch(setIsFromSearch(false));
+                  }}
+                  className="px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-colors"
+                >
+                  View all havens
+                </button>
               )}
             </div>
-          );
-        })}
+          )}
 
-        {/* Show more button - Airbnb style */}
-        {rooms.length > 20 && (
-          <div className="flex justify-center mt-12">
-            <button className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100">
-              Show more
-            </button>
-          </div>
-        )}
+          {/* Room Groups by Haven */}
+          {sortedHavenNumbers.map((havenNumber) => {
+            const havenRooms = groupedRooms[havenNumber];
+            const { displayedRooms, currentPage, totalPages, hasMoreRooms, remainingRooms } = getCurrentPageRooms(havenNumber);
+            
+            // Only show pagination if there are more than 5 rooms
+            const showPagination = hasMoreRooms;
+
+            return (
+              <div key={havenNumber} className="mb-12">
+                {/* Haven Header - Clickable WITH PAGE NUMBER */}
+                <div
+                  className="mb-6 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity w-full"
+                  onClick={() => handleHavenClick(havenNumber)}
+                >
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {havenNumber}
+                    </h2>
+                    <ChevronRight className="w-5 h-5 text-brand-primary" />
+                  </div>
+                  
+                  {/* Page info - KEEP THIS */}
+                  {showPagination && (
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile Layout with Show All Overlay */}
+                {isMobile ? (
+                  <div className="relative">
+                    <div 
+                      ref={(el) => scrollContainerRefs.current[havenNumber] = el}
+                      className="overflow-x-auto scrollbar-hide pb-4"
+                    >
+                      <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
+                        {displayedRooms.map((room, index) => (
+                          <div 
+                            key={room.id} 
+                            className="flex-shrink-0 w-[200px] sm:w-[240px] relative"
+                          >
+                            {/* Show All overlay on last room - MOBILE ONLY */}
+                            {hasMoreRooms && index === displayedRooms.length - 1 && (
+                              <div className="absolute top-0 left-0 right-0 h-48 rounded-t-2xl overflow-hidden">
+                                {/* Dark overlay over image */}
+                                <div className="absolute inset-0 bg-black/50 z-10 flex flex-col items-center justify-center p-4">
+                                  <div className="text-center text-white mb-3">
+                                    <Eye className="w-8 h-8 mx-auto mb-1" />
+                                    <p className="font-semibold text-sm">+{remainingRooms} more</p>
+                                    <p className="text-xs opacity-90">View all rooms</p>
+                                  </div>
+                                  <button
+                                    onClick={() => handleHavenClick(havenNumber)}
+                                    className="px-4 py-2 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors text-xs"
+                                  >
+                                    Show All
+                                  </button>
+                                </div>
+                                {/* Keep the image visible but darkened */}
+                                {room.images && room.images[0] && (
+                                  <div className="h-full w-full">
+                                    <img
+                                      src={room.images[0]}
+                                      alt={room.name}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {/* Pass the room to RoomCard - it will handle the rest */}
+                            <RoomCard room={room} mode="browse" compact={true} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Scroll indicator for mobile */}
+                    {displayedRooms.length > 2 && (
+                      <div className="mt-2 text-center">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Scroll horizontally to view more rooms →
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Desktop Layout with Pagination */
+                  <>
+                    {/* Grid layout for desktop/tablet */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                      {displayedRooms.map((room) => (
+                        <div key={room.id}>
+                          <RoomCard room={room} mode="browse" compact={false} />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination Controls - Desktop Only (icons only with dots) */}
+                    {showPagination && (
+                      <div className="flex justify-center items-center gap-3 mt-6">
+                        {/* Previous Button */}
+                        <button
+                          onClick={() => handlePageChange(havenNumber, Math.max(1, currentPage - 1))}
+                          disabled={currentPage === 1}
+                          className={`p-2 rounded-full transition-all duration-200 ${
+                            currentPage === 1
+                              ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed opacity-50'
+                              : 'bg-brand-primary hover:bg-brand-primaryDark'
+                          }`}
+                          aria-label="Previous page"
+                        >
+                          <ChevronLeft className={`w-5 h-5 ${
+                            currentPage === 1
+                              ? 'text-gray-400 dark:text-gray-500'
+                              : 'text-white'
+                          }`} />
+                        </button>
+
+                        {/* Page Dots */}
+                        <div className="flex gap-2 items-center">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                            <button
+                              key={pageNum}
+                              onClick={() => handlePageChange(havenNumber, pageNum)}
+                              className={`transition-all duration-200 rounded-full ${
+                                currentPage === pageNum
+                                  ? 'w-8 h-3 bg-brand-primary'
+                                  : 'w-3 h-3 bg-gray-300 dark:bg-gray-600 hover:bg-brand-primary/50 dark:hover:bg-brand-primary/50'
+                              }`}
+                              aria-label={`Go to page ${pageNum}`}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Next Button */}
+                        <button
+                          onClick={() => handlePageChange(havenNumber, Math.min(totalPages, currentPage + 1))}
+                          disabled={currentPage === totalPages}
+                          className={`p-2 rounded-full transition-all duration-200 ${
+                            currentPage === totalPages
+                              ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed opacity-50'
+                              : 'bg-brand-primary hover:bg-brand-primaryDark'
+                          }`}
+                          aria-label="Next page"
+                        >
+                          <ChevronRight className={`w-5 h-5 ${
+                            currentPage === totalPages
+                              ? 'text-gray-400 dark:text-gray-500'
+                              : 'text-white'
+                          }`} />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
