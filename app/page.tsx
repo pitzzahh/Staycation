@@ -1,8 +1,6 @@
-import pool from '../backend/config/db';
+import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import Link from 'next/link';
-import HeroSectionMain from '@/Components/HeroSection/HeroSectionMain';
-import Footer from '@/Components/Footer';
+import pool from '../backend/config/db';
 
 export const metadata: Metadata = {
   title: "Staycation Haven | Premium Staycation Experiences",
@@ -20,10 +18,5 @@ export default async function Home() {
     console.error('❌ Database connection failed:', error);
   }
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <HeroSectionMain />
-      <Footer />
-    </div>
-  );
+  return redirect('/rooms');
 }
