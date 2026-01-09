@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Spinner from "./Spinner";
 import toast from "react-hot-toast";
+import Footer from "./Footer";
 
 interface AddOns {
   poolPass: number;
@@ -581,23 +582,23 @@ const handleSubmit = async (e: React.FormEvent) => {
           animation: shake 0.5s ease-in-out;
         }
       `}</style>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pt-24 sm:pt-28 pb-8 sm:pb-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-orange-600 transition-colors mb-6 group"
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-brand-primary dark:hover:text-brand-primary transition-colors mb-6"
         >
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-5 h-5" />
           <span className="font-medium">Back</span>
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
             {currentStep === 1 ? "Guest Information" : "Confirm Your Booking"}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
             {currentStep === 1
               ? "Please fill in your details"
               : "Review your booking and complete payment"}
@@ -605,40 +606,40 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-center mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div
-              className={`flex items-center gap-2 ${
-                currentStep === 1 ? "text-orange-600" : "text-green-600"
+              className={`flex items-center gap-1.5 sm:gap-2 ${
+                currentStep === 1 ? "text-brand-primary dark:text-brand-primary" : "text-green-600 dark:text-green-500"
               }`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-sm sm:text-base ${
                   currentStep === 1
-                    ? "bg-orange-600 text-white"
-                    : "bg-green-600 text-white"
+                    ? "bg-brand-primary text-white"
+                    : "bg-green-600 dark:bg-green-500 text-white"
                 }`}
               >
                 {currentStep === 1 ? "1" : "✓"}
               </div>
-              <span className="font-medium">Guest Info</span>
+              <span className="font-medium text-sm sm:text-base">Guest Info</span>
             </div>
-            <div className="w-16 h-1 bg-gray-300"></div>
+            <div className="w-12 sm:w-16 h-1 bg-gray-300 dark:bg-gray-600"></div>
             <div
-              className={`flex items-center gap-2 ${
-                currentStep === 2 ? "text-orange-600" : "text-gray-400"
+              className={`flex items-center gap-1.5 sm:gap-2 ${
+                currentStep === 2 ? "text-brand-primary dark:text-brand-primary" : "text-gray-400 dark:text-gray-500"
               }`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-sm sm:text-base ${
                   currentStep === 2
-                    ? "bg-orange-600 text-white"
-                    : "bg-gray-300 text-gray-600"
+                    ? "bg-brand-primary text-white"
+                    : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400"
                 }`}
               >
                 2
               </div>
-              <span className="font-medium">Confirmation</span>
+              <span className="font-medium text-sm sm:text-base">Confirmation</span>
             </div>
           </div>
         </div>
@@ -646,23 +647,23 @@ const handleSubmit = async (e: React.FormEvent) => {
         <form onSubmit={handleSubmit} className="relative overflow-hidden">
           {/* STEP 1: Guest Information */}
           {currentStep === 1 && (
-            <div className="space-y-6 slide-in-from-right">
+            <div className="space-y-4 sm:space-y-6 slide-in-from-right">
               {/* Guest Information */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  <User className="w-6 h-6 text-orange-500" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6 flex items-center gap-2">
+                  <User className="w-5 h-5 sm:w-6 sm:h-6 text-brand-primary dark:text-brand-primary" />
                   Guest Information
                 </h2>
 
                 {/* Main Guest Header */}
-                <div className="flex items-center gap-2 mb-4 text-orange-600">
+                <div className="flex items-center gap-2 mb-4 text-brand-primary dark:text-brand-primary">
                   <User className="w-5 h-5" />
-                  <h3 className="font-semibold">Adult 1 (Main Guest)</h3>
+                  <h3 className="font-semibold text-sm sm:text-base">Adult 1 (Main Guest)</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div ref={(el) => { errorRefs.current.firstName = el; }}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       First Name *
                     </label>
                     <input
@@ -674,8 +675,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                         setErrors(prev => ({...prev, firstName: ''}));
                       }}
                       required
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                        errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                        errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                       }`}
                       placeholder="Enter first name"
                     />
@@ -688,7 +689,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
 
                   <div ref={(el) => { errorRefs.current.lastName = el; }}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Last Name *
                     </label>
                     <input
@@ -700,8 +701,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                         setErrors(prev => ({...prev, lastName: ''}));
                       }}
                       required
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                        errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                        errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                       }`}
                       placeholder="Enter last name"
                     />
@@ -714,7 +715,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
 
                   <div ref={(el) => { errorRefs.current.age = el; }}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Age *
                     </label>
                     <input
@@ -728,8 +729,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                       required
                       min="1"
                       max="120"
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                        errors.age ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                        errors.age ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                       }`}
                       placeholder="Enter age"
                     />
@@ -742,7 +743,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
 
                   <div ref={(el) => { errorRefs.current.gender = el; }}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Gender *
                     </label>
                     <select
@@ -753,8 +754,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                         setErrors(prev => ({...prev, gender: ''}));
                       }}
                       required
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white transition-colors ${
-                        errors.gender ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors ${
+                        errors.gender ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                       }`}
                     >
                       <option value="">Select Gender</option>
@@ -771,8 +772,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
 
                   <div ref={(el) => { errorRefs.current.email = el; }}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-orange-500" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-brand-primary dark:text-brand-primary" />
                       Email Address *
                     </label>
                     <input
@@ -784,8 +785,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                         setErrors(prev => ({...prev, email: ''}));
                       }}
                       required
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                        errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                        errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                       }`}
                       placeholder="Enter email"
                     />
@@ -798,8 +799,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
 
                   <div ref={(el) => { errorRefs.current.phone = el; }}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-orange-500" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-brand-primary dark:text-brand-primary" />
                       Phone Number *
                     </label>
                     <input
@@ -811,8 +812,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                         setErrors(prev => ({...prev, phone: ''}));
                       }}
                       required
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                        errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                        errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                       }`}
                       placeholder="e.g., 182918212"
                     />
@@ -825,8 +826,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <User className="w-4 h-4 text-blue-500" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                      <User className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                       Facebook Name or Link
                     </label>
                     <input
@@ -834,10 +835,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                       name="facebookLink"
                       value={formData.facebookLink}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                       placeholder="e.g., Juan Dela Cruz or facebook.com/juandelacruz"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Alternative contact in case email is incorrect
                     </p>
                   </div>
@@ -845,16 +846,16 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                 {/* Valid ID Upload Section */}
                 <div ref={(el) => { errorRefs.current.validId = el; }} className={`mt-6 p-4 border-2 border-dashed rounded-lg ${
-                  errors.validId ? 'bg-red-50 border-red-300' : 'bg-blue-50 border-blue-300'
+                  errors.validId ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-500' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-500'
                 }`}>
                   <div className="flex items-center gap-2 mb-3">
-                    <CreditCard className={`w-5 h-5 ${errors.validId ? 'text-red-600' : 'text-blue-600'}`} />
-                    <h3 className={`font-semibold ${errors.validId ? 'text-red-800' : 'text-blue-800'}`}>
+                    <CreditCard className={`w-5 h-5 ${errors.validId ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`} />
+                    <h3 className={`font-semibold text-sm sm:text-base ${errors.validId ? 'text-red-800 dark:text-red-300' : 'text-blue-800 dark:text-blue-300'}`}>
                       Valid ID (Required for guests 10+ years old)
                     </h3>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Accepted: Driver&apos;s License, Passport, National ID, School ID
                   </p>
 
@@ -868,13 +869,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                     />
                     <label
                       htmlFor="valid-id"
-                      className="cursor-pointer inline-flex flex-col items-center justify-center p-6 bg-white rounded-lg hover:bg-gray-50 transition-colors border-2 border-gray-200"
+                      className="cursor-pointer inline-flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors border-2 border-gray-200 dark:border-gray-600"
                     >
-                      <Upload className="w-12 h-12 text-blue-500 mb-3" />
-                      <p className="text-blue-600 font-medium mb-1">
+                      <Upload className="w-12 h-12 text-blue-500 dark:text-blue-400 mb-3" />
+                      <p className="text-blue-600 dark:text-blue-400 font-medium mb-1">
                         Click to upload ID photo
                       </p>
-                      <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, JPEG up to 5MB</p>
                     </label>
 
                     {formData.validIdPreview && (
@@ -904,10 +905,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                 const guestType = isAdult ? `Adult ${guestNumber}` : `Child ${guestNumber - (formData.adults - 1)}`;
 
                 return (
-                  <div key={index} className="bg-white rounded-xl shadow-lg p-6">
-                    <div className="flex items-center gap-2 mb-4 text-orange-600">
+                  <div key={index} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                    <div className="flex items-center gap-2 mb-4 text-brand-primary dark:text-brand-primary">
                       <User className="w-5 h-5" />
-                      <h3 className="font-semibold">{guestType}</h3>
+                      <h3 className="font-semibold text-sm sm:text-base">{guestType}</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -923,8 +924,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                             setErrors(prev => ({...prev, [`guest${index}FirstName`]: ''}));
                           }}
                           required
-                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                            errors[`guest${index}FirstName`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                            errors[`guest${index}FirstName`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                           }`}
                           placeholder="Enter first name"
                         />
@@ -948,8 +949,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                             setErrors(prev => ({...prev, [`guest${index}LastName`]: ''}));
                           }}
                           required
-                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                            errors[`guest${index}LastName`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                            errors[`guest${index}LastName`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                           }`}
                           placeholder="Enter last name"
                         />
@@ -975,8 +976,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                           required
                           min="1"
                           max="120"
-                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                            errors[`guest${index}Age`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                            errors[`guest${index}Age`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                           }`}
                           placeholder="Enter age"
                         />
@@ -999,8 +1000,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                             setErrors(prev => ({...prev, [`guest${index}Gender`]: ''}));
                           }}
                           required
-                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white ${
-                            errors[`guest${index}Gender`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                            errors[`guest${index}Gender`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-brand-primary'
                           }`}
                         >
                           <option value="">Select Gender</option>
@@ -1020,16 +1021,16 @@ const handleSubmit = async (e: React.FormEvent) => {
                     {/* Valid ID Upload for Additional Guest if 10+ */}
                     {parseInt(guest.age) >= 10 && (
                       <div ref={(el) => { errorRefs.current[`guest${index}ValidId`] = el; }} className={`mt-6 p-4 border-2 border-dashed rounded-lg ${
-                        errors[`guest${index}ValidId`] ? 'bg-red-50 border-red-300' : 'bg-blue-50 border-blue-300'
+                        errors[`guest${index}ValidId`] ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-500' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-500'
                       }`}>
                         <div className="flex items-center gap-2 mb-3">
-                          <CreditCard className="w-5 h-5 text-blue-600" />
-                          <h3 className="font-semibold text-blue-800">
+                          <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          <h3 className="font-semibold text-sm sm:text-base text-blue-800 dark:text-blue-300">
                             Valid ID (Required for guests 10+ years old)
                           </h3>
                         </div>
 
-                        <p className="text-sm text-gray-600 mb-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                           Accepted: Driver&apos;s License, Passport, National ID, School ID
                         </p>
 
@@ -1043,13 +1044,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                           />
                           <label
                             htmlFor={`valid-id-${index}`}
-                            className="cursor-pointer inline-flex flex-col items-center justify-center p-6 bg-white rounded-lg hover:bg-gray-50 transition-colors border-2 border-gray-200"
+                            className="cursor-pointer inline-flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors border-2 border-gray-200 dark:border-gray-600"
                           >
-                            <Upload className="w-12 h-12 text-blue-500 mb-3" />
-                            <p className="text-blue-600 font-medium mb-1">
+                            <Upload className="w-12 h-12 text-blue-500 dark:text-blue-400 mb-3" />
+                            <p className="text-blue-600 dark:text-blue-400 font-medium mb-1">
                               Click to upload ID photo
                             </p>
-                            <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, JPEG up to 5MB</p>
                           </label>
 
                           {guest.validIdPreview && (
@@ -1076,15 +1077,15 @@ const handleSubmit = async (e: React.FormEvent) => {
               })}
 
               {/* Number of Guests */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Users className="w-6 h-6 text-orange-500" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-brand-primary dark:text-brand-primary" />
                   Number of Guests (Max 4 guests)
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Adults
                     </label>
                     <input
@@ -1094,12 +1095,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                       onChange={handleInputChange}
                       min="1"
                       max="4"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Children
                     </label>
                     <input
@@ -1109,12 +1110,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                       onChange={handleInputChange}
                       min="0"
                       max="4"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Infants
                     </label>
                     <input
@@ -1124,40 +1125,40 @@ const handleSubmit = async (e: React.FormEvent) => {
                       onChange={handleInputChange}
                       min="0"
                       max="4"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                   Total Guests (Adults + Children): {formData.adults + formData.children} / 4
                   {formData.infants > 0 && ` + ${formData.infants} infant${formData.infants > 1 ? 's' : ''}`}
                 </p>
               </div>
 
               {/* Booking Details */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  <Calendar className="w-6 h-6 text-orange-500" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-brand-primary dark:text-brand-primary" />
                   Booking Details
                 </h2>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Selected Haven
                       </label>
-                      <div className="px-4 py-2 bg-gray-100 rounded-lg flex items-center gap-2">
-                        <Home className="w-5 h-5 text-orange-500" />
-                        <span className="font-medium">
+                      <div className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center gap-2">
+                        <Home className="w-5 h-5 text-brand-primary dark:text-brand-primary" />
+                        <span className="font-medium text-gray-900 dark:text-white">
                           {bookingData.selectedRoom?.name || bookingData.location?.name || "Not selected"}
                         </span>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Stay Type *
                       </label>
                       <select
@@ -1165,7 +1166,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                         value={formData.stayType}
                         onChange={handleStayTypeChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
                         <option value="">Select stay type</option>
                         <option value="10 Hours - ₱1,599">10 Hours - ₱1,599</option>
@@ -1256,7 +1257,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
 
                     <div ref={(el) => { errorRefs.current.checkInTime = el; }}>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Check-in Time *
                       </label>
                       <input
@@ -1305,7 +1306,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                           setErrors(prev => ({...prev, checkInTime: ''}));
                         }}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                       {errors.checkInTime && (
                         <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
@@ -1316,7 +1317,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
 
                     <div ref={(el) => { errorRefs.current.checkOutTime = el; }}>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Check-out Time *
                       </label>
                       <input
@@ -1330,7 +1331,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                           setErrors(prev => ({...prev, checkOutTime: ''}));
                         }}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                       {errors.checkOutTime && (
                         <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
@@ -1344,50 +1345,50 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
 
               {/* Pricing Summary */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  <CreditCard className="w-6 h-6 text-orange-500" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-brand-primary dark:text-brand-primary" />
                   Pricing Summary
                 </h2>
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700">
+                    <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                       Room Rate
                       {formData.stayType === "Multi-Day Stay" && numberOfDays > 0 && (
-                        <span className="text-xs text-gray-500 ml-1">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                           ({numberOfDays} {numberOfDays === 1 ? 'day' : 'days'})
                         </span>
                       )}
                     </span>
-                    <span className="font-semibold">₱{roomRate.toLocaleString()}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">₱{roomRate.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700">Security Deposit</span>
-                    <span className="font-semibold">₱{securityDeposit.toLocaleString()}</span>
+                    <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">Security Deposit</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">₱{securityDeposit.toLocaleString()}</span>
                   </div>
-                  <div className="pt-3 border-t">
+                  <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-lg font-bold text-gray-800">Total</span>
-                      <span className="text-2xl font-bold text-orange-500">
+                      <span className="text-base sm:text-lg font-bold text-gray-800 dark:text-white">Total</span>
+                      <span className="text-xl sm:text-2xl font-bold text-brand-primary dark:text-brand-primary">
                         ₱{totalAmount.toLocaleString()}
                       </span>
                     </div>
                   </div>
-                  <div className="pt-3 border-t">
-                    <div className="flex justify-between items-center text-green-600 mb-2">
-                      <span className="font-medium">💳 Down payment (Pay Online)</span>
+                  <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between items-center text-green-600 dark:text-green-400 mb-2">
+                      <span className="font-medium text-sm sm:text-base">💳 Down payment (Pay Online)</span>
                       <span className="font-bold">₱{downPayment.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between items-center text-gray-600">
-                      <span className="font-medium">Remaining Balance (Pay Upon Check-in)</span>
+                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
+                      <span className="font-medium text-sm sm:text-base">Remaining Balance (Pay Upon Check-in)</span>
                       <span className="font-bold">₱{remainingBalance.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800">
+                <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-300">
                     <strong>Note:</strong> Security deposit is refundable the next day upon
                     checkout if no missing/broken items.
                   </p>
@@ -1398,7 +1399,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               <button
                 type="button"
                 onClick={handleNext}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
+                className="w-full bg-gradient-to-r from-brand-primary to-brand-primaryDark hover:from-brand-primaryDark hover:to-brand-primary text-white font-bold py-3 sm:py-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg text-sm sm:text-base"
               >
                 Next: Confirmation & Payment
               </button>
@@ -1407,35 +1408,35 @@ const handleSubmit = async (e: React.FormEvent) => {
 
           {/* STEP 2: Confirmation & Payment */}
           {currentStep === 2 && (
-            <div className="space-y-6 slide-in-from-right">
+            <div className="space-y-4 sm:space-y-6 slide-in-from-right">
               {/* Confirmation Details */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4">
                   Confirm Your Details
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-6">
                   Please review your information before proceeding to payment. This is the final
                   step.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-500">Guest Name</p>
-                    <p className="font-semibold">
+                    <p className="text-gray-500 dark:text-gray-400">Guest Name</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
                       {formData.firstName} {formData.lastName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Email</p>
-                    <p className="font-semibold">{formData.email}</p>
+                    <p className="text-gray-500 dark:text-gray-400">Email</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{formData.email}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Phone</p>
-                    <p className="font-semibold">{formData.phone}</p>
+                    <p className="text-gray-500 dark:text-gray-400">Phone</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{formData.phone}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Guests</p>
-                    <p className="font-semibold">
+                    <p className="text-gray-500 dark:text-gray-400">Guests</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
                       {formData.adults} Adult{formData.adults !== 1 ? "s" : ""}
                       {formData.children > 0 && `, ${formData.children} Child${formData.children !== 1 ? "ren" : ""}`}
                       {formData.infants > 0 && `, ${formData.infants} Infant${formData.infants !== 1 ? "s" : ""}`}
@@ -1446,8 +1447,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
               {/* Add-ons */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Add-ons (Optional)</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4">Add-ons (Optional)</h2>
 
                 <div className="space-y-3">
                   {[
@@ -1468,27 +1469,27 @@ const handleSubmit = async (e: React.FormEvent) => {
                   ].map((item) => (
                     <div
                       key={item.key}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                      className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
                     >
                       <div>
-                        <p className="font-medium">{item.label}</p>
-                        <p className="text-sm text-gray-600">₱{item.price} each</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{item.label}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">₱{item.price} each</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
                           onClick={() => handleAddOnChange(item.key as keyof AddOns, false)}
-                          className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full transition-colors"
+                          className="w-8 h-8 flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full transition-colors"
                         >
-                          <Minus className="w-4 h-4" />
+                          <Minus className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                         </button>
-                        <span className="w-8 text-center font-semibold">
+                        <span className="w-8 text-center font-semibold text-gray-900 dark:text-white">
                           {addOns[item.key as keyof AddOns]}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleAddOnChange(item.key as keyof AddOns, true)}
-                          className="w-8 h-8 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+                          className="w-8 h-8 flex items-center justify-center bg-brand-primary hover:bg-brand-primaryDark text-white rounded-full transition-colors"
                         >
                           <Plus className="w-4 h-4" />
                         </button>
@@ -1498,15 +1499,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
 
                 {addOnsTotal > 0 && (
-                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
                       <strong>Add-ons Total:</strong> ₱{addOnsTotal.toLocaleString()}
                     </p>
                   </div>
                 )}
 
-                <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                  <p className="text-sm text-gray-700">
+                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     <strong>Note:</strong> Add-ons will be added to your total bill and reflected
                     in the price breakdown below.
                   </p>
@@ -1514,13 +1515,13 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
 
               {/* Stay Summary */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Stay Summary</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6">Stay Summary</h2>
 
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700">📥 Check-in:</span>
-                    <span className="font-semibold">
+                    <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">📥 Check-in:</span>
+                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
                       {bookingData.checkInDate
                         ? new Date(bookingData.checkInDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                         : "N/A"}{" "}
@@ -1534,8 +1535,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700">📤 Check-out:</span>
-                    <span className="font-semibold">
+                    <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">📤 Check-out:</span>
+                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
                       {bookingData.checkOutDate
                         ? new Date(bookingData.checkOutDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                         : "N/A"}{" "}
@@ -1616,32 +1617,32 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
 
               {/* Payment Method */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Payment Method</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6">Payment Method</h2>
 
                 <div className="space-y-3 mb-6">
-                  <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-orange-500 transition-colors">
+                  <label className="flex items-center gap-3 p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:border-brand-primary dark:hover:border-brand-primary transition-colors bg-white dark:bg-gray-700">
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="gcash"
                       checked={formData.paymentMethod === "gcash"}
                       onChange={handleInputChange}
-                      className="w-4 h-4 text-orange-500"
+                      className="w-4 h-4 text-brand-primary accent-brand-primary"
                     />
-                    <span className="font-medium">GCash</span>
+                    <span className="font-medium text-gray-900 dark:text-white">GCash</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-orange-500 transition-colors">
+                  <label className="flex items-center gap-3 p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:border-brand-primary dark:hover:border-brand-primary transition-colors bg-white dark:bg-gray-700">
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="bank"
                       checked={formData.paymentMethod === "bank"}
                       onChange={handleInputChange}
-                      className="w-4 h-4 text-orange-500"
+                      className="w-4 h-4 text-brand-primary accent-brand-primary"
                     />
-                    <span className="font-medium">Bank Transfer</span>
+                    <span className="font-medium text-gray-900 dark:text-white">Bank Transfer</span>
                   </label>
                 </div>
 
@@ -1802,7 +1803,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
 
               {/* Terms and Conditions */}
-              <div className="bg-white rounded-xl shadow-lg p-6" ref={(el) => { errorRefs.current.termsAccepted = el; }}>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6" ref={(el) => { errorRefs.current.termsAccepted = el; }}>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -1812,15 +1813,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                       handleInputChange(e);
                       setErrors(prev => ({...prev, termsAccepted: ''}));
                     }}
-                    className={`w-5 h-5 mt-1 ${errors.termsAccepted ? 'accent-red-500' : 'text-orange-500'}`}
+                    className={`w-5 h-5 mt-1 ${errors.termsAccepted ? 'accent-red-500' : 'accent-brand-primary'}`}
                   />
-                  <span className={`text-sm ${errors.termsAccepted ? 'text-red-700' : 'text-gray-700'}`}>
+                  <span className={`text-sm ${errors.termsAccepted ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
                     I agree to the{" "}
-                    <a href="#" className="text-orange-500 hover:underline">
+                    <a href="#" className="text-brand-primary dark:text-brand-primary hover:underline">
                       Terms and Conditions
                     </a>{" "}
                     and{" "}
-                    <a href="#" className="text-orange-500 hover:underline">
+                    <a href="#" className="text-brand-primary dark:text-brand-primary hover:underline">
                       Cancellation Policy
                     </a>
                   </span>
@@ -1834,18 +1835,18 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg transition-all duration-300"
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-3 sm:py-4 rounded-lg transition-all duration-300 text-sm sm:text-base"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="flex-1 bg-gradient-to-r from-brand-primary to-brand-primaryDark hover:from-brand-primaryDark hover:to-brand-primary text-white font-bold py-3 sm:py-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -1865,6 +1866,9 @@ const handleSubmit = async (e: React.FormEvent) => {
         </form>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </>
   );
 };
