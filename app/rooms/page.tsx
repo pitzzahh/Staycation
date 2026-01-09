@@ -28,7 +28,7 @@ export default async function RoomsPage() {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <SearchBarSticky />
       {/* Add top padding to account for fixed header + sticky search bar */}
-      <div className="pt-[150px] sm:pt-[230px] md:pt-[250px] lg:pt-[270px] bg-white dark:bg-gray-900">        
+      <div className="pt-[150px] sm:pt-[230px] md:pt-[250px] lg:pt-[270px] bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Welcome Section */}
           <div className="mb-2 sm:mb-8 text-center">
@@ -39,6 +39,7 @@ export default async function RoomsPage() {
               Discover our premium havens with world-class amenities. Short stays, extended stays, or your perfect getaway - all at your fingertips.
             </p>
           </div>
+
           <HotelRoomListings initialHavens={havens}/>
         </div>
       </div>
