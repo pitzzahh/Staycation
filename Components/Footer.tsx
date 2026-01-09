@@ -1,11 +1,19 @@
 "use client";
 
-import { Facebook, Instagram, MapPin, Phone, Mail, HelpCircle, FileText, Shield, ChevronRight } from "lucide-react";
+import { Facebook, Instagram, MapPin, Phone, Mail, HelpCircle, FileText, Shield, ChevronRight, Sun, Moon, Monitor, ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 const Footer = () => {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <footer className="bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800">
@@ -184,9 +192,53 @@ const Footer = () => {
       <div className="border-t border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
+            {/* Copyright */}
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
-              © {new Date().getFullYear()} Staycation Haven. All rights reserved.
+              &copy; {new Date().getFullYear()} Staycation Haven. All rights reserved.
             </p>
+
+            {/* Theme Toggle - Centered */}
+            {mounted && (
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`p-1.5 rounded-full transition-all duration-200 ${
+                    theme === 'dark'
+                      ? 'bg-white dark:bg-gray-700 text-brand-primary shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                  aria-label="Dark mode"
+                  title="Dark"
+                >
+                  <Moon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`p-1.5 rounded-full transition-all duration-200 ${
+                    theme === 'light'
+                      ? 'bg-white dark:bg-gray-700 text-brand-primary shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                  aria-label="Light mode"
+                  title="Light"
+                >
+                  <Sun className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setTheme('system')}
+                  className={`p-1.5 rounded-full transition-all duration-200 ${
+                    theme === 'system'
+                      ? 'bg-white dark:bg-gray-700 text-brand-primary shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                  aria-label="System mode"
+                  title="System"
+                >
+                  <Monitor className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-wrap justify-center sm:justify-end items-center gap-x-3 sm:gap-x-4 gap-y-2 text-xs sm:text-sm">
               {[
                 { href: '/sitemap', label: 'Sitemap' },
