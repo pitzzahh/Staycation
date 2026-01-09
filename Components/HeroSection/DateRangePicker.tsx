@@ -19,6 +19,7 @@ const DateRangePicker = ({
   const [isOpen, setIsOpen] = useState(false);
   const [selectingCheckOut, setSelectingCheckOut] = useState(false);
   const [currentMonthOffset, setCurrentMonthOffset] = useState(0);
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -27,6 +28,7 @@ const DateRangePicker = ({
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setSelectingCheckOut(false);
+        setHoveredDate(null);
       }
     };
 
@@ -73,6 +75,7 @@ const DateRangePicker = ({
         } else {
           onCheckOutChange(dateString);
           setSelectingCheckOut(false);
+          setHoveredDate(null);
         }
       }
     } else {
@@ -111,13 +114,24 @@ const DateRangePicker = ({
         date > new Date(checkInDate) &&
         date < new Date(checkOutDate);
 
+      // Check if date should be in hover range
+      let isHoveredRange = false;
+      if (checkInDate && hoveredDate && !checkOutDate) {
+        const hoverDate = new Date(hoveredDate);
+        const checkIn = new Date(checkInDate);
+        if (date > checkIn && date < hoverDate) {
+          isHoveredRange = true;
+        }
+      }
+
       days.push({
         day,
         dateString,
         isPast,
         isCheckIn,
         isCheckOut,
-        isInRange
+        isInRange,
+        isHoveredRange
       });
     }
 
@@ -131,6 +145,12 @@ const DateRangePicker = ({
 
   const canGoBack = currentMonthOffset > 0;
   const canGoForward = currentMonthOffset < 11;
+
+  const handleDateHover = (dateString: string) => {
+    if (!isPast && !isCheckIn && !isCheckOut) {
+      setHoveredDate(dateString);
+    }
+  };
 
   const renderMonth = (monthOffset: number) => {
     const calendarDays = generateCalendarForMonth(monthOffset);
@@ -160,24 +180,39 @@ const DateRangePicker = ({
               return <div key={`empty-${index}`} className="aspect-square"></div>;
             }
 
-            const { day, dateString, isPast, isCheckIn, isCheckOut, isInRange } = dayInfo;
+            const { day, dateString, isPast, isCheckIn, isCheckOut, isInRange, isHoveredRange } = dayInfo;
+
+            // Determine if this date should show hover effect
+            const isHovered = hoveredDate === dateString;
+            const shouldShowHover = !isPast && !isCheckIn && !isCheckOut && !isInRange && !isHoveredRange;
 
             return (
               <button
                 key={dateString}
                 onClick={() => !isPast && handleDateClick(dateString)}
+                onMouseEnter={() => !isPast && setHoveredDate(dateString)}
+                onMouseLeave={() => setHoveredDate(null)}
                 disabled={isPast}
                 className={`
-                  aspect-square flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-all duration-200
+                  aspect-square w-full h-full flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-all duration-200
+                  relative
                   ${isPast
-                    ? "text-gray-400 cursor-not-allowed bg-gray-100"
-                    : "hover:border-2 hover:border-brand-primary cursor-pointer"
+                    ? "text-gray-400 dark:text-gray-500 cursor-not-allowed bg-gray-100 dark:bg-gray-700"
+                    : "cursor-pointer"
                   }
                   ${isCheckIn || isCheckOut
-                    ? "bg-brand-primary text-white font-bold hover:bg-brand-primaryDark"
-                    : isInRange
-                    ? "bg-orange-100 text-gray-900"
-                    : "text-gray-700 dark:text-gray-300"
+                    ? "bg-brand-primary text-white font-bold z-10"
+                    : isInRange || isHoveredRange
+                    ? "bg-orange-100 dark:bg-orange-900/30 text-gray-900 dark:text-white"
+                    : ""
+                  }
+                  ${shouldShowHover
+                    ? "hover:bg-gray-100 dark:hover:bg-gray-600"
+                    : ""
+                  }
+                  ${isHovered && !isCheckIn && !isCheckOut
+                    ? "ring-2 ring-brand-primary ring-offset-2"
+                    : ""
                   }
                 `}
               >
@@ -195,7 +230,7 @@ const DateRangePicker = ({
       {/* Date Range Display Button - Airbnb Style */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 rounded-full hover:border-[#8B4513] transition-all duration-200 focus:outline-none"
+        className="w-full h-full flex items-center gap-2 px-3 sm:px-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full hover:border-[#8B4513] transition-all duration-200 focus:outline-none"
         onMouseEnter={(e) => {
           if (!isOpen) {
             e.currentTarget.style.borderColor = '#8B4513';
@@ -210,10 +245,10 @@ const DateRangePicker = ({
           borderColor: isOpen ? '#8B4513' : undefined
         }}
       >
-        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-500 group-hover:text-[#8B4513] transition-colors duration-200" />
+        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-[#8B4513] transition-colors duration-200" />
         <div className="flex-1 text-left min-w-0">
-          <p className="text-xs truncate text-gray-500">When</p>
-          <p className="text-sm sm:text-base font-semibold truncate text-gray-900">
+          <p className="text-xs truncate text-gray-500 dark:text-gray-400">When</p>
+          <p className="text-sm sm:text-base font-semibold truncate text-gray-900 dark:text-white">
             {formatDateRange()}
           </p>
         </div>
@@ -274,8 +309,9 @@ const DateRangePicker = ({
                 onCheckInChange("");
                 onCheckOutChange("");
                 setSelectingCheckOut(false);
+                setHoveredDate(null);
               }}
-              className="w-full mt-4 sm:mt-6 py-2 sm:py-2.5 bg-white border border-gray-300 text-gray-900 rounded-lg font-medium hover:border-[#8B4513] transition-all duration-200 text-sm sticky bottom-0 bg-white dark:bg-gray-700"
+              className="w-full mt-4 sm:mt-6 py-2 sm:py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-medium hover:border-[#8B4513] transition-all duration-200 text-sm sticky bottom-0"
             >
               Clear dates
             </button>
