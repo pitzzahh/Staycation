@@ -2,6 +2,7 @@
 
 import { X, Upload } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 interface PaymentSettingsModalProps {
   isOpen: boolean;
@@ -77,9 +78,11 @@ const PaymentSettingsModal = ({ isOpen, onClose }: PaymentSettingsModalProps) =>
               >
                 {qrCodePreview ? (
                   <div className="space-y-3">
-                    <img
+                    <Image
                       src={qrCodePreview}
                       alt="QR Code Preview"
+                      width={160}
+                      height={160}
                       className="mx-auto h-40 w-40 object-contain rounded-lg border-2 border-gray-200"
                     />
                     <p className="text-sm text-gray-600">Click to change</p>

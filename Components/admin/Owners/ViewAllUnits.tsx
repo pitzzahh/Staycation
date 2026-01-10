@@ -7,11 +7,30 @@ import EditHavenModal from "./Modals/EditHavenModal";
 import DeleteHavenModal from "./Modals/DeleteHavenModal";
 import toast from 'react-hot-toast';
 
-const ViewAllUnits = ({ onAddUnitClick }: any) => {
+interface HavenUnit {
+  uuid_id?: string;
+  id?: string;
+  haven_name: string;
+  tower: string;
+  floor: string;
+  view_type: string;
+  six_hour_rate: number;
+  ten_hour_rate: number;
+  weekday_rate: number;
+  weekend_rate: number;
+  status?: string;
+  [key: string]: unknown;
+}
+
+interface ViewAllUnitsProps {
+  onAddUnitClick: () => void;
+}
+
+const ViewAllUnits = ({ onAddUnitClick }: ViewAllUnitsProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isEditHavnModal, setIsEditOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedHaven, setSelectedHaven] = useState<any>(null)
+  const [selectedHaven, setSelectedHaven] = useState<HavenUnit | null>(null)
 
   // RTK Query call
   const { data, isLoading, isError } = useGetAllAdminRoomsQuery({});
@@ -104,7 +123,7 @@ const ViewAllUnits = ({ onAddUnitClick }: any) => {
 
   // Filter function
   const filteredUnits = units.filter(
-    (unit: any) =>
+    (unit: HavenUnit) =>
       unit.haven_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       unit.tower.toLowerCase().includes(searchQuery.toLowerCase()) ||
       unit.view_type.toLowerCase().includes(searchQuery.toLowerCase())
@@ -123,12 +142,12 @@ const ViewAllUnits = ({ onAddUnitClick }: any) => {
     }
   };
 
-  const handleEdit = (unit: any) => {
+  const handleEdit = (unit: HavenUnit) => {
     setSelectedHaven(unit);
     setIsEditOpen(true);
   };
 
-  const handleDeleteClick = (unit: any) => {
+  const handleDeleteClick = (unit: HavenUnit) => {
     setSelectedHaven(unit);
     setIsDeleteModalOpen(true);
   };
@@ -141,10 +160,16 @@ const ViewAllUnits = ({ onAddUnitClick }: any) => {
       toast.success(`${selectedHaven.haven_name} deleted successfully!`);
       setIsDeleteModalOpen(false);
       setSelectedHaven(null);
-      
-    } catch (error: any) {
+
+    } catch (error: unknown) {
       console.error("Failed to delete haven:", error);
-      toast.error(error?.data?.error || "Failed to delete haven");
+      const errorMessage =
+        error && typeof error === 'object' && 'data' in error &&
+        error.data && typeof error.data === 'object' && 'error' in error.data &&
+        typeof error.data.error === 'string'
+        ? error.data.error
+        : "Failed to delete haven";
+      toast.error(errorMessage);
     }
   };
 
@@ -226,7 +251,7 @@ const ViewAllUnits = ({ onAddUnitClick }: any) => {
               </tr>
             </thead>
             <tbody>
-              {filteredUnits.map((unit: any, index: number) => (
+              {filteredUnits.map((unit: HavenUnit, index: number) => (
                 <tr
                   key={unit.uuid_id || unit.id}
                   className="border-b border-gray-100 hover:bg-purple-50 transition-colors animate-in fade-in duration-500"

@@ -9,7 +9,6 @@ import {
   Calendar,
   Home,
   DollarSign,
-  Phone,
   Mail,
   Eye,
   Filter,
@@ -653,7 +652,7 @@ const GuestAssistancePage = () => {
                       Guest Message
                     </h3>
                     <p className="text-sm text-gray-700 italic">
-                      "{selectedBooking.message}"
+                      &ldquo;{selectedBooking.message}&rdquo;
                     </p>
                   </div>
                 )}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { DatePicker as HeroDatePicker } from "@nextui-org/date-picker";
 import { parseDate, toZoned } from "@internationalized/date";
 import { Calendar } from "lucide-react";
+import type { ZonedDateTime } from "@internationalized/date";
 
 interface DatePickerProps {
   label: string;
@@ -12,24 +13,24 @@ interface DatePickerProps {
 }
 
 const DatePicker = ({ label, date, onDateChange }: DatePickerProps) => {
-  const [selectedDate, setSelectedDate] = useState<any>(null);
   const [isHovered, setIsHovered] = useState(false);
 
   // Update selectedDate whenever `date` prop changes
-  useEffect(() => {
+  const selectedDate = useMemo<ZonedDateTime | null>(() => {
     if (date) {
       const parsed = parseDate(date); // CalendarDate
       const zoned = toZoned(parsed, "UTC"); // ZonedDateTime
-      setSelectedDate(zoned);
-    } else {
-      setSelectedDate(null);
+      return zoned;
     }
+    return null;
   }, [date]);
 
   // Format date for display
   const formatDisplayDate = (dateString: string) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
+    // Parse the date string correctly to avoid timezone issues
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -67,7 +68,6 @@ const DatePicker = ({ label, date, onDateChange }: DatePickerProps) => {
         <HeroDatePicker
           value={selectedDate}
           onChange={(newDate) => {
-            setSelectedDate(newDate);
             if (newDate) onDateChange(newDate.toString());
           }}
           className="w-full h-full"

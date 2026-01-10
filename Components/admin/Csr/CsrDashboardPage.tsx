@@ -3,7 +3,6 @@
 import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell, ChevronDown, User, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import CsrLogout from "./Auth/CsrLogout";
 import ProfilePage from "./ProfilePage";
 import { useSession } from "next-auth/react";
@@ -52,7 +51,6 @@ interface AdminUser {
 const ACTIVE_PAGE_STORAGE_KEY = "csr-dashboard-active-page";
 
 export default function CsrDashboard() {
-  const router = useRouter();
   const [sidebar, setSidebar] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
@@ -69,7 +67,7 @@ export default function CsrDashboard() {
   const messageButtonRef = useRef<HTMLButtonElement | null>(null);
   const { data: session } = useSession();
 
-  const userId = (session?.user as any)?.id;
+  const userId = (session?.user as AdminUser)?.id;
   const {
     data: headerConversationsData,
     isLoading: isLoadingHeaderConversations,
@@ -79,10 +77,12 @@ export default function CsrDashboard() {
   );
 
   const { data: employeesData } = useGetEmployeesQuery({});
-  const employees = employeesData?.data || [];
+  const employees = useMemo(() => {
+    return employeesData?.data || [];
+  }, [employeesData?.data]);
   const employeeNameById = useMemo(() => {
     const map: Record<string, string> = {};
-    employees.forEach((emp: any) => {
+    employees.forEach((emp: EmployeeProfile) => {
       const name = `${emp.first_name ?? ""} ${emp.last_name ?? ""}`.trim();
       map[emp.id] = name || emp.email || emp.employment_id || "Employee";
     });
@@ -90,7 +90,7 @@ export default function CsrDashboard() {
   }, [employees]);
   const employeeProfileImageById = useMemo(() => {
     const map: Record<string, string> = {};
-    employees.forEach((emp: any) => {
+    employees.forEach((emp: EmployeeProfile) => {
       if (emp?.id && emp?.profile_image_url) {
         map[emp.id] = emp.profile_image_url;
       }
@@ -181,8 +181,8 @@ export default function CsrDashboard() {
         }
 
         setEmployee(payload?.data ?? null);
-      } catch (err: any) {
-        if (err?.name === "AbortError") return;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
         console.error("Error fetching employee data:", err);
       } finally {
         setIsLoading(false);
@@ -328,14 +328,15 @@ export default function CsrDashboard() {
                   {isLoading ? (
                     <div className="w-full h-full bg-gray-200 animate-pulse"></div>
                   ) : employee?.profile_image_url ? (
-                    <img
+                    <Image
                       src={employee.profile_image_url}
                       alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : 'Profile'}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = '';
-                        target.onerror = null;
+                        target.style.display = 'none';
                       }}
                     />
                   ) : (
@@ -360,8 +361,8 @@ export default function CsrDashboard() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {isLoading ? (
                       <span className="inline-block h-3 bg-gray-100 rounded animate-pulse w-20 mt-0.5"></span>
-                    ) : employee?.role || (session?.user as any)?.role ? (
-                      employee?.role || (session?.user as any)?.role
+                    ) : employee?.role || (session?.user as AdminUser)?.role ? (
+                      employee?.role || (session?.user as AdminUser)?.role
                     ) : (
                       'CSR Staff'
                     )}
@@ -464,9 +465,11 @@ export default function CsrDashboard() {
                   {isLoading ? (
                     <div className="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
                   ) : employee?.profile_image_url ? (
-                    <img
+                    <Image
                       src={employee.profile_image_url}
                       alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : "Profile"}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -489,14 +492,15 @@ export default function CsrDashboard() {
                       {isLoading ? (
                         <div className="w-full h-full bg-gray-200 animate-pulse" />
                       ) : employee?.profile_image_url ? (
-                        <img
+                        <Image
                           src={employee.profile_image_url}
                           alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : "Profile"}
+                          width={48}
+                          height={48}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = "";
-                            target.onerror = null;
+                            target.style.display = 'none';
                           }}
                         />
                       ) : (
@@ -515,7 +519,7 @@ export default function CsrDashboard() {
                         {session?.user?.email || 'Loading...'}
                       </p>
                       <p className="text-xs text-brand-primary font-medium mt-1">
-                        {(session?.user as any)?.role || 'CSR'}
+                        {(session?.user as AdminUser)?.role || 'CSR'}
                       </p>
                     </div>
                   </div>

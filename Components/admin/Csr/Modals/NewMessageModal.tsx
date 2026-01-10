@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, UserCircle, MessageSquare, Loader2 } from "lucide-react";
+import Image from "next/image";
 import { useGetEmployeesQuery } from "@/redux/api/employeeApi";
 import { useCreateConversationMutation } from "@/redux/api/messagesApi";
 import toast from "react-hot-toast";
@@ -20,6 +21,8 @@ interface Employee {
   last_name?: string;
   email?: string;
   role?: string;
+  department?: string;
+  profile_image_url?: string;
 }
 
 export default function NewMessageModal({
@@ -28,7 +31,6 @@ export default function NewMessageModal({
   currentUserId,
   onConversationCreated,
 }: NewMessageModalProps) {
-  const [isMounted, setIsMounted] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<Employee | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,6 +39,21 @@ export default function NewMessageModal({
   const [createConversation, { isLoading: isCreating }] = useCreateConversationMutation();
 
   const employees = useMemo(() => employeesData?.data || [], [employeesData?.data]);
+
+  // Handle click outside to close modal
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (containerRef.current && !containerRef.current.contains(target)) {
+        onClose();
+      }
+    }
+
+    if (!isOpen) return;
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen, onClose]);
 
   const filteredEmployees = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -51,27 +68,12 @@ export default function NewMessageModal({
       });
   }, [employees, currentUserId, search]);
 
-  // Set mounted state after component mounts
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
+  // Don't render anything during SSR
+  if (typeof window === "undefined") {
+    return null;
+  }
 
-  if (!isMounted || !isOpen) return null;
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as Node;
-      if (containerRef.current && !containerRef.current.contains(target)) {
-        onClose();
-      }
-    }
-
-    if (!isOpen) return;
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
+  if (!isOpen) return null;
 
   const handleCreateConversation = async () => {
     if (!selectedUser) {
@@ -151,7 +153,7 @@ export default function NewMessageModal({
             </div>
           ) : filteredEmployees.length > 0 ? (
             <div className="space-y-2">
-              {filteredEmployees.map((employee: any) => {
+              {filteredEmployees.map((employee: Employee) => {
                 const isSelected = selectedUser?.id === employee.id;
                 const fullName = `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim() || employee.email || "Employee";
                 const initials = `${(employee.first_name?.[0] ?? "").toUpperCase()}${(employee.last_name?.[0] ?? "").toUpperCase()}` || "?";
@@ -168,14 +170,15 @@ export default function NewMessageModal({
                     }`}
                   >
                     {employee.profile_image_url ? (
-                      <img
+                      <Image
                         src={employee.profile_image_url}
                         alt={fullName}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = "";
-                          target.onerror = null;
+                          target.style.display = 'none';
                         }}
                       />
                     ) : (

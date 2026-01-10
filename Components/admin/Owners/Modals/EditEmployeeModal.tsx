@@ -1,85 +1,59 @@
 "use client";
 
 import { X, Upload } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { DatePicker } from "@nextui-org/date-picker";
-import { parseDate } from "@internationalized/date";
+import { parseDate, type CalendarDate } from "@internationalized/date";
 import { useUpdateEmployeeMutation } from "@/redux/api/employeeApi";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
+interface EmployeeData {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  employment_id?: string;
+  hire_date?: string;
+  role?: string;
+  department?: string;
+  monthly_salary?: number;
+  street_address?: string;
+  city?: string;
+  zip_code?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relation?: string;
+  profile_image_url?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
 interface EditEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  employee: any;
+  employee: EmployeeData | null;
 }
 
 const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps) => {
   const [updateEmployee, { isLoading }] = useUpdateEmployeeMutation();
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    employeeId: "",
-    role: "",
-    department: "",
-    hireDate: "",
-    salary: "",
-    address: "",
-    city: "",
-    zipCode: "",
-    emergencyContactName: "",
-    emergencyContactPhone: "",
-    emergencyContactRelation: "",
-    status: "active",
-  });
+  // Track which employee ID we've initialized for
+  const initializedEmployeeId = useRef<string | null>(null);
 
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [profilePreview, setProfilePreview] = useState<string>("");
-
-  const roles = [
-    { value: "Owner", label: "Owner" },
-    { value: "CSR", label: "Customer Service Representative" },
-    { value: "Cleaner", label: "Cleaner" },
-    { value: "Partner", label: "Partner" },
-  ];
-
-  const departmentByRole: Record<string, Array<{ value: string; label: string }>> = {
-    Owner: [{ value: "management", label: "Management" }],
-    CSR: [
-      { value: "front-desk", label: "Front Desk" },
-      { value: "customer-service", label: "Customer Service" },
-    ],
-    Cleaner: [
-      { value: "housekeeping", label: "Housekeeping" },
-      { value: "maintenance", label: "Maintenance" },
-    ],
-    Partner: [
-      { value: "management", label: "Management" },
-      { value: "customer-service", label: "Customer Service" },
-    ],
-  };
-
-  const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-  ];
-
-  // Load employee data when modal opens
-  useEffect(() => {
-    if (employee && isOpen) {
-      // Convert ISO date to YYYY-MM-DD format for parseDate
+  // Initialize with default values or employee data
+  const getInitialFormData = useCallback(() => {
+    if (employee) {
       let hireDateFormatted = "";
       if (employee.hire_date) {
         const dateObj = new Date(employee.hire_date);
-        hireDateFormatted = dateObj.toISOString().split('T')[0]; // Gets YYYY-MM-DD
+        hireDateFormatted = dateObj.toISOString().split('T')[0];
       }
 
-      setFormData({
+      return {
         firstName: employee.first_name || "",
         lastName: employee.last_name || "",
         email: employee.email || "",
@@ -96,10 +70,82 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
         emergencyContactPhone: employee.emergency_contact_phone || "",
         emergencyContactRelation: employee.emergency_contact_relation || "",
         status: employee.status || "active",
-      });
-      setProfilePreview(employee.profile_image_url || "");
+      };
     }
-  }, [employee, isOpen]);
+    
+    return {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      employeeId: "",
+      role: "",
+      department: "",
+      hireDate: "",
+      salary: "",
+      address: "",
+      city: "",
+      zipCode: "",
+      emergencyContactName: "",
+      emergencyContactPhone: "",
+      emergencyContactRelation: "",
+      status: "active",
+    };
+  }, [employee]);
+
+  const [formData, setFormData] = useState(() => getInitialFormData());
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string>(() => employee?.profile_image_url || "");
+
+  // Use useEffect to handle resetting form data when modal opens with a new employee
+  useEffect(() => {
+    if (isOpen && employee && initializedEmployeeId.current !== employee.id) {
+      const initialData = getInitialFormData();
+      setFormData(initialData);
+      setProfilePicture(null);
+      setProfilePreview(employee.profile_image_url || "");
+      initializedEmployeeId.current = employee.id;
+    }
+    
+    // Reset initializedEmployeeId when modal closes
+    if (!isOpen) {
+      initializedEmployeeId.current = null;
+    }
+  }, [isOpen, employee, getInitialFormData]);
+
+  const roles = useMemo(() => [
+    { value: "Owner", label: "Owner" },
+    { value: "CSR", label: "Customer Service Representative" },
+    { value: "Cleaner", label: "Cleaner" },
+    { value: "Partner", label: "Partner" },
+  ], []);
+
+  const departmentByRole = useMemo(() => ({
+    Owner: [{ value: "management", label: "Management" }],
+    CSR: [
+      { value: "front-desk", label: "Front Desk" },
+      { value: "customer-service", label: "Customer Service" },
+    ],
+    Cleaner: [
+      { value: "housekeeping", label: "Housekeeping" },
+      { value: "maintenance", label: "Maintenance" },
+    ],
+    Partner: [
+      { value: "management", label: "Management" },
+      { value: "customer-service", label: "Customer Service" },
+    ],
+  }), []);
+
+  const statusOptions = useMemo(() => [
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+  ], []);
+
+  // Handle modal close and reset state
+  const handleClose = () => {
+    setProfilePicture(null);
+    onClose();
+  };
 
   const getAvailableDepartments = () => {
     if (!formData.role) return [];
@@ -138,7 +184,7 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
 
     try {
       const employeeData = {
-        id: employee.id,
+        id: employee?.id || "",
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
@@ -162,12 +208,18 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
 
       if (result.success) {
         toast.success("Employee updated successfully!");
-        setProfilePicture(null);
-        onClose();
+        handleClose();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating employee:", error);
-      const errorMessage = error?.data?.error || error?.message || "Failed to update employee";
+      const errorMessage =
+        error && typeof error === 'object' && 'data' in error &&
+        error.data && typeof error.data === 'object' && 'error' in error.data &&
+        typeof error.data.error === 'string'
+        ? error.data.error
+        : error instanceof Error
+        ? error.message
+        : "Failed to update employee";
       toast.error(errorMessage);
     }
   };
@@ -176,7 +228,7 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-black/50 z-40" onClick={handleClose}></div>
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] shadow-2xl flex flex-col">
           {/* Header */}
@@ -186,7 +238,7 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
               <p className="text-sm text-gray-600 mt-1">Update employee information</p>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="text-gray-500 hover:text-gray-700 p-2 hover:bg-white/50 rounded-full transition-colors"
             >
               <X className="w-6 h-6" />
@@ -338,10 +390,10 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
                 </Select>
                 <DatePicker
                   label="Hire Date"
-                  value={formData.hireDate ? parseDate(formData.hireDate) as any : undefined}
-                  onChange={(date) => {
+                  value={formData.hireDate ? parseDate(formData.hireDate) : undefined}
+                  onChange={(date: CalendarDate | null) => {
                     if (date) {
-                      const dateStr = `${(date as any).year}-${String((date as any).month).padStart(2, "0")}-${String((date as any).day).padStart(2, "0")}`;
+                      const dateStr = `${date.year}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
                       setFormData({ ...formData, hireDate: dateStr });
                     }
                   }}
@@ -460,7 +512,7 @@ const EditEmployeeModal = ({ isOpen, onClose, employee }: EditEmployeeModalProps
           <div className="flex justify-end gap-3 p-6 border-t border-gray-200 flex-shrink-0">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
               disabled={isLoading}
             >

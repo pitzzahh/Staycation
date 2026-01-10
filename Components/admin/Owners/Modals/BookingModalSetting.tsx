@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import { TimeInput } from "@nextui-org/date-input";
-import { parseTime } from "@internationalized/date";
+import { parseTime, type Time } from "@internationalized/date";
 
 
 interface BookingModalSettingProps {
@@ -25,33 +25,6 @@ const BookingModalSetting = ({ isOpen, onClose }: BookingModalSettingProps) => {
   const [twentyFourHourCheckIn, setTwentyFourHourCheckIn] = useState("15:00");
   const [twentyFourHourCheckOut, setTwentyFourHourCheckOut] = useState("15:00");
 
-  // Generate time options (30-minute intervals)
-  const generateTimeOptions = () => {
-    const times = [];
-    for (let h = 0; h < 24; h++) {
-      for (let m = 0; m < 60; m += 30) {
-        const hour = h.toString().padStart(2, "0");
-        const minute = m.toString().padStart(2, "0");
-        const time24 = `${hour}:${minute}`;
-        const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-        const ampm = h >= 12 ? "PM" : "AM";
-        const time12 = `${hour12}:${minute} ${ampm}`;
-        times.push({ value: time24, label: time12 });
-      }
-    }
-    return times;
-  };
-
-  const timeOptions = generateTimeOptions();
-
-  // Convert 24-hour to 12-hour format
-  const formatTime = (time24: string) => {
-    const [hours, minutes] = time24.split(":");
-    const h = parseInt(hours);
-    const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-    const ampm = h >= 12 ? "PM" : "AM";
-    return `${hour12}:${minutes} ${ampm}`;
-  };
 
     if (!isOpen) return null;
 
@@ -100,8 +73,8 @@ const BookingModalSetting = ({ isOpen, onClose }: BookingModalSettingProps) => {
                 <div>
                   <TimeInput
                     label="Check-in Time *"
-                    value={sixHourCheckIn ? parseTime(sixHourCheckIn) as any : undefined}
-                    onChange={(time: any) => {
+                    value={sixHourCheckIn ? parseTime(sixHourCheckIn) : undefined}
+                    onChange={(time: Time | null) => {
                       if (time) {
                         const timeStr = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}`;
                         setSixHourCheckIn(timeStr);
@@ -117,8 +90,8 @@ const BookingModalSetting = ({ isOpen, onClose }: BookingModalSettingProps) => {
                 <div>
                   <TimeInput
                     label="Check-out Time *"
-                    value={sixHourCheckOut ? parseTime(sixHourCheckOut) as any : undefined}
-                    onChange={(time: any) => {
+                    value={sixHourCheckOut ? parseTime(sixHourCheckOut) : undefined}
+                    onChange={(time: Time | null) => {
                       if (time) {
                         const timeStr = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}`;
                         setSixHourCheckOut(timeStr);
@@ -149,8 +122,8 @@ const BookingModalSetting = ({ isOpen, onClose }: BookingModalSettingProps) => {
                 <div>
                   <TimeInput
                     label="Check-in Time *"
-                    value={twelveHourCheckIn ? parseTime(twelveHourCheckIn) as any : undefined}
-                    onChange={(time: any) => {
+                    value={twelveHourCheckIn ? parseTime(twelveHourCheckIn) : undefined}
+                    onChange={(time: Time | null) => {
                       if (time) {
                         const timeStr = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}`;
                         setTwelveHourCheckIn(timeStr);
@@ -166,8 +139,8 @@ const BookingModalSetting = ({ isOpen, onClose }: BookingModalSettingProps) => {
                 <div>
                   <TimeInput
                     label="Check-out Time *"
-                    value={twelveHourCheckOut ? parseTime(twelveHourCheckOut) as any : undefined}
-                    onChange={(time: any) => {
+                    value={twelveHourCheckOut ? parseTime(twelveHourCheckOut) : undefined}
+                    onChange={(time: Time | null) => {
                       if (time) {
                         const timeStr = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}`;
                         setTwelveHourCheckOut(timeStr);
@@ -198,8 +171,8 @@ const BookingModalSetting = ({ isOpen, onClose }: BookingModalSettingProps) => {
                 <div>
                   <TimeInput
                     label="Check-in Time *"
-                    value={twentyFourHourCheckIn ? parseTime(twentyFourHourCheckIn) as any : undefined}
-                    onChange={(time: any) => {
+                    value={twentyFourHourCheckIn ? parseTime(twentyFourHourCheckIn) : undefined}
+                    onChange={(time: Time | null) => {
                       if (time) {
                         const timeStr = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}`;
                         setTwentyFourHourCheckIn(timeStr);
@@ -215,8 +188,8 @@ const BookingModalSetting = ({ isOpen, onClose }: BookingModalSettingProps) => {
                 <div>
                   <TimeInput
                     label="Check-out Time *"
-                    value={twentyFourHourCheckOut ? parseTime(twentyFourHourCheckOut) as any : undefined}
-                    onChange={(time: any) => {
+                    value={twentyFourHourCheckOut ? parseTime(twentyFourHourCheckOut) : undefined}
+                    onChange={(time: Time | null) => {
                       if (time) {
                         const timeStr = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}`;
                         setTwentyFourHourCheckOut(timeStr);

@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface RoomImageGalleryProps {
   images: string[];
@@ -15,28 +15,28 @@ const RoomImageGallery = ({ images, autoPlayInterval = 3000 }: RoomImageGalleryP
   const [isHovered, setIsHovered] = useState(false);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  const nextImage = (e?: React.MouseEvent) => {
+  const nextImage = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
+  }, [images.length]);
 
-  const prevImage = (e: React.MouseEvent) => {
+  const prevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) =>
       prev === 0 ? images.length - 1 : prev - 1
     );
-  };
+  }, [images.length]);
 
-  const toggleAutoPlay = (e: React.MouseEvent) => {
+  const toggleAutoPlay = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setIsAutoPlaying(!isAutoPlaying);
-  };
+  }, [isAutoPlaying]);
 
   // Auto-play functionality
   useEffect(() => {
     if (isAutoPlaying && !isHovered && images.length > 1) {
       autoPlayRef.current = setInterval(() => {
-        nextImage();
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
       }, autoPlayInterval);
     }
 
@@ -45,7 +45,8 @@ const RoomImageGallery = ({ images, autoPlayInterval = 3000 }: RoomImageGalleryP
         clearInterval(autoPlayRef.current);
       }
     };
-  }, [isAutoPlaying, isHovered, currentImageIndex, images.length, autoPlayInterval]);
+  }, [isAutoPlaying, isHovered, images.length, autoPlayInterval]);
+
   return (
     <div
       className="relative w-full aspect-[4/3] bg-gray-200 dark:bg-gray-700 overflow-hidden group"

@@ -8,7 +8,7 @@ import GuestSelector from "./GuestSelector";
 import StayTypeSelectorModal from "./StayTypeSelectorModal";
 import ValidationModal from "./ValidationModal";
 import { useRouter } from "next/navigation";
-import { MapPin, Calendar as CalendarIcon, Users, Sparkles, Home, Search, TrendingUp } from "lucide-react";
+import { MapPin, Calendar as CalendarIcon, Users, Sparkles } from "lucide-react";
 import {
   setLocation as setReduxLocation,
   setCheckInDate as setReduxCheckInDate,

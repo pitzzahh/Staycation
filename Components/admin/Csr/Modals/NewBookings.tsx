@@ -36,14 +36,6 @@ export default function NewBookingModal({ onClose }: NewBookingModalProps) {
   const [createBooking, { isLoading }] = useCreateBookingMutation();
   const { data: havensData, isLoading: isLoadingHavens } = useGetHavensQuery({});
 
-  // Set mounted state after component mounts
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
-
-  if (!isMounted) return null;
-
   const [form, setForm] = useState({
     guestFirstName: "",
     guestLastName: "",
@@ -69,8 +61,23 @@ export default function NewBookingModal({ onClose }: NewBookingModalProps) {
     notes: "",
   });
 
+  // Set mounted state after component mounts - use requestAnimationFrame to avoid cascading renders
+  useEffect(() => {
+    // Schedule the state update for the next animation frame
+    const rafId = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      setIsMounted(false);
+    };
+  }, []);
+
   // Parse havens data
   const havens: Haven[] = Array.isArray(havensData) ? havensData : [];
+
+  if (!isMounted) return null;
 
   const calculateRoomRate = (selectedHaven?: Haven, checkInDate?: string, checkOutDate?: string) => {
     if (!selectedHaven) return "";
@@ -172,8 +179,6 @@ export default function NewBookingModal({ onClose }: NewBookingModalProps) {
       console.error(error);
     }
   };
-
-  if (!isMounted) return null;
 
   return createPortal(
     <>

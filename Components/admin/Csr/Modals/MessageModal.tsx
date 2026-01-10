@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { MessageSquare, ArrowRight, Check } from "lucide-react";
+import Image from "next/image";
 
 interface MessagePreview {
   id: string;
@@ -58,10 +59,18 @@ export default function MessageModal({
   const [position, setPosition] = useState({ top: 96, right: 16 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Set mounted state after component mounts
+  // Hydration fix: prevent SSR mismatch with portal rendering
+  // Use an effect with cleanup to handle mounting state
   useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
+    // Use requestAnimationFrame to schedule state update after initial render
+    const rafId = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    
+    return () => {
+      cancelAnimationFrame(rafId);
+      setIsMounted(false);
+    };
   }, []);
 
   useEffect(() => {
@@ -225,16 +234,17 @@ export default function MessageModal({
                     className="w-full text-left px-6 py-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors"
                   >
                     <div className="relative flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-semibold flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-semibold flex items-center justify-center overflow-hidden">
                         {avatarUrl ? (
-                          <img
+                          <Image
                             src={avatarUrl}
                             alt={displayName || "Conversation"}
-                            className="w-12 h-12 rounded-full object-cover"
+                            width={48}
+                            height={48}
+                            className="w-12 h-12 object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              target.src = "";
-                              target.onerror = null;
+                              target.style.display = 'none';
                             }}
                           />
                         ) : (

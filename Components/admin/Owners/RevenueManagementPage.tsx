@@ -1,6 +1,6 @@
 'use client';
 
-import { DollarSign, TrendingUp, Calendar, Edit2, Tag } from "lucide-react";
+import { TrendingUp, Calendar, Edit2, Tag } from "lucide-react";
 import { useState } from "react";
 
 const RevenueManagementPage = () => {

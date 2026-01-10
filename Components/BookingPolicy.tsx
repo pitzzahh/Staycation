@@ -79,7 +79,7 @@ const BookingPolicy = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Receive Confirmation</h3>
-                  <p className="text-gray-600">You'll receive a booking confirmation via email with all the details of your reservation and check-in instructions.</p>
+                  <p className="text-gray-600">You&apos;ll receive a booking confirmation via email with all the details of your reservation and check-in instructions.</p>
                 </div>
               </div>
             </div>

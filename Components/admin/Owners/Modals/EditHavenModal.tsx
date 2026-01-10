@@ -1,4 +1,3 @@
-// components/EditHavenModal.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,11 +8,55 @@ import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { Checkbox } from "@nextui-org/checkbox";
 import toast from 'react-hot-toast';
+import Image from 'next/image';
+
+interface HavenData {
+  uuid_id?: string;
+  haven_name?: string;
+  tower?: string;
+  floor?: string;
+  view_type?: string;
+  capacity?: number;
+  room_size?: number;
+  beds?: string;
+  description?: string;
+  youtube_url?: string;
+  six_hour_rate?: number;
+  ten_hour_rate?: number;
+  weekday_rate?: number;
+  weekend_rate?: number;
+  six_hour_check_in?: string;
+  ten_hour_check_in?: string;
+  twenty_one_hour_check_in?: string;
+  amenities?: Record<string, boolean>;
+  images?: ImageData[];
+  photo_tours?: PhotoTourData[];
+  blocked_dates?: BlockedDateData[];
+  [key: string]: unknown;
+}
+
+interface ImageData {
+  id?: string;
+  image_url?: string;
+  [key: string]: unknown;
+}
+
+interface PhotoTourData {
+  category?: string;
+  image_url?: string;
+  [key: string]: unknown;
+}
+
+interface BlockedDateData {
+  from_date: string;
+  to_date: string;
+  reason?: string;
+}
 
 interface EditHavenModalProps {
   isOpen: boolean;
   onClose: () => void;
-  havenData: any;
+  havenData: HavenData | null;
 }
 
 interface BlockedDate {
@@ -21,6 +64,10 @@ interface BlockedDate {
   fromDate: string;
   toDate: string;
   reason: string;
+}
+
+interface FormErrors {
+  [key: string]: string;
 }
 
 const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => {
@@ -65,7 +112,7 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
   });
 
   const [havenImages, setHavenImages] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [existingImages, setExistingImages] = useState<ImageData[]>([]);
 
   const [photoTourImages, setPhotoTourImages] = useState<Record<string, File[]>>({
     livingArea: [],
@@ -79,9 +126,11 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
     additional: [],
   });
 
-  const [existingPhotoTours, setExistingPhotoTours] = useState<any[]>([]);
+  const [existingPhotoTours, setExistingPhotoTours] = useState<PhotoTourData[]>([]);
 
   const [updateHaven, { isLoading }] = useUpdateHavenMutation();
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const towers = [
     { value: "tower-a", label: "Tower A" },
@@ -125,9 +174,10 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
     { key: "additional", label: "Additional Photos" },
   ];
 
+  // Initialize form data when havenData changes
   useEffect(() => {
-    if (havenData) {
-      setFormData({
+    if (havenData && isOpen && !isInitialized) {
+      const formattedData = {
         haven_name: havenData.haven_name || "",
         tower: havenData.tower || "",
         floor: havenData.floor || "",
@@ -158,14 +208,15 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
           washerDryer: false,
           towels: false,
         },
-      });
+      };
 
+      setFormData(formattedData);
       setExistingImages(havenData.images || []);
       setExistingPhotoTours(havenData.photo_tours || []);
 
       if (havenData.blocked_dates) {
         setBlockedDates(
-          havenData.blocked_dates.map((date: any, index: number) => ({
+          havenData.blocked_dates.map((date, index) => ({
             id: index,
             fromDate: date.from_date,
             toDate: date.to_date,
@@ -173,8 +224,67 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
           }))
         );
       }
+      setIsInitialized(true);
     }
-  }, [havenData]);
+  }, [havenData, isOpen, isInitialized]);
+
+  // Handle modal close
+  const handleClose = () => {
+    setIsInitialized(false);
+    setFormData({
+      haven_name: "",
+      tower: "",
+      floor: "",
+      view_type: "",
+      capacity: "",
+      room_size: "",
+      beds: "",
+      description: "",
+      youtube_url: "",
+      six_hour_rate: "",
+      ten_hour_rate: "",
+      weekday_rate: "",
+      weekend_rate: "",
+      six_hour_check_in: "09:00",
+      ten_hour_check_in: "09:00",
+      twenty_one_hour_check_in: "14:00",
+      amenities: {
+        wifi: false,
+        netflix: false,
+        ps4: false,
+        glowBed: false,
+        airConditioning: false,
+        kitchen: false,
+        balcony: false,
+        tv: false,
+        poolAccess: false,
+        parking: false,
+        washerDryer: false,
+        towels: false,
+      },
+    });
+    setHavenImages([]);
+    setExistingImages([]);
+    setPhotoTourImages({
+      livingArea: [],
+      kitchenette: [],
+      diningArea: [],
+      fullBathroom: [],
+      garage: [],
+      exterior: [],
+      pool: [],
+      bedroom: [],
+      additional: [],
+    });
+    setExistingPhotoTours([]);
+    setBlockedDates([]);
+    setBlockDateForm({
+      fromDate: "",
+      toDate: "",
+      reason: "",
+    });
+    onClose();
+  };
 
   const handleAmenityChange = (key: string, checked: boolean) => {
     setFormData({
@@ -239,8 +349,60 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
     setExistingPhotoTours(existingPhotoTours.filter((_, i) => i !== photoIndex));
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.haven_name.trim()) {
+      newErrors.haven_name = "Haven name is required";
+    }
+
+    if (!formData.capacity.trim()) {
+      newErrors.capacity = "Capacity is required";
+    } else if (isNaN(parseInt(formData.capacity))) {
+      newErrors.capacity = "Capacity must be a number";
+    }
+
+    if (!formData.room_size.trim()) {
+      newErrors.room_size = "Room size is required";
+    } else if (isNaN(parseFloat(formData.room_size))) {
+      newErrors.room_size = "Room size must be a number";
+    }
+
+    if (!formData.six_hour_rate.trim()) {
+      newErrors.six_hour_rate = "6-hour rate is required";
+    } else if (isNaN(parseFloat(formData.six_hour_rate))) {
+      newErrors.six_hour_rate = "6-hour rate must be a number";
+    }
+
+    if (!formData.ten_hour_rate.trim()) {
+      newErrors.ten_hour_rate = "10-hour rate is required";
+    } else if (isNaN(parseFloat(formData.ten_hour_rate))) {
+      newErrors.ten_hour_rate = "10-hour rate must be a number";
+    }
+
+    if (!formData.weekday_rate.trim()) {
+      newErrors.weekday_rate = "Weekday rate is required";
+    } else if (isNaN(parseFloat(formData.weekday_rate))) {
+      newErrors.weekday_rate = "Weekday rate must be a number";
+    }
+
+    if (!formData.weekend_rate.trim()) {
+      newErrors.weekend_rate = "Weekend rate is required";
+    } else if (isNaN(parseFloat(formData.weekend_rate))) {
+      newErrors.weekend_rate = "Weekend rate must be a number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
+      return;
+    }
 
     try {
       // Convert new haven images to base64
@@ -273,7 +435,7 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
       }
 
       const updateData = {
-        id: havenData.uuid_id,
+        id: havenData?.uuid_id || "",
         ...formData,
         capacity: parseInt(formData.capacity),
         room_size: parseFloat(formData.room_size),
@@ -297,10 +459,13 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
 
       await updateHaven(updateData).unwrap();
       toast.success(`${formData.haven_name} updated successfully!`);
-      onClose();
-    } catch (err: any) {
+      handleClose();
+    } catch (err: unknown) {
       console.error("Failed to update haven", err);
-      toast.error(err?.data?.error || "Failed to update haven");
+      const errorMessage = err && typeof err === 'object' && 'data' in err &&
+        err.data && typeof err.data === 'object' && 'error' in err.data &&
+        typeof err.data.error === 'string' ? err.data.error : "Failed to update haven";
+      toast.error(errorMessage);
     }
   };
 
@@ -308,7 +473,7 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
 
   const modalContent = (
     <>
-      <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={handleClose}></div>
       <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4">
         <div className="bg-white rounded-2xl max-w-6xl w-full shadow-2xl flex flex-col" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
           {/* Header */}
@@ -317,7 +482,7 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
               <h2 className="text-2xl font-bold text-gray-800">Edit Haven</h2>
               <p className="text-sm text-gray-600 mt-1">Update haven information</p>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/50 rounded-full transition-colors">
+            <button onClick={handleClose} className="p-2 hover:bg-white/50 rounded-full transition-colors">
               <X className="w-6 h-6 text-gray-600" />
             </button>
           </div>
@@ -331,13 +496,17 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
                   Basic Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Haven Name"
-                    labelPlacement="outside"
-                    value={formData.haven_name}
-                    onChange={(e) => setFormData({ ...formData, haven_name: e.target.value })}
-                    classNames={{ label: "text-sm font-medium text-gray-700" }}
-                  />
+                  <div>
+                    <Input
+                      label="Haven Name"
+                      labelPlacement="outside"
+                      value={formData.haven_name}
+                      onChange={(e) => setFormData({ ...formData, haven_name: e.target.value })}
+                      classNames={{ label: "text-sm font-medium text-gray-700" }}
+                      isInvalid={!!errors.haven_name}
+                      errorMessage={errors.haven_name}
+                    />
+                  </div>
                   <Select
                     label="Tower"
                     labelPlacement="outside"
@@ -382,22 +551,30 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
                   Haven Details
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <Input
-                    type="number"
-                    label="Maximum Guests"
-                    labelPlacement="outside"
-                    value={formData.capacity}
-                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                    classNames={{ label: "text-sm font-medium text-gray-700" }}
-                  />
-                  <Input
-                    type="number"
-                    label="Room Size (sq.m)"
-                    labelPlacement="outside"
-                    value={formData.room_size}
-                    onChange={(e) => setFormData({ ...formData, room_size: e.target.value })}
-                    classNames={{ label: "text-sm font-medium text-gray-700" }}
-                  />
+                  <div>
+                    <Input
+                      type="number"
+                      label="Maximum Guests"
+                      labelPlacement="outside"
+                      value={formData.capacity}
+                      onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                      classNames={{ label: "text-sm font-medium text-gray-700" }}
+                      isInvalid={!!errors.capacity}
+                      errorMessage={errors.capacity}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      label="Room Size (sq.m)"
+                      labelPlacement="outside"
+                      value={formData.room_size}
+                      onChange={(e) => setFormData({ ...formData, room_size: e.target.value })}
+                      classNames={{ label: "text-sm font-medium text-gray-700" }}
+                      isInvalid={!!errors.room_size}
+                      errorMessage={errors.room_size}
+                    />
+                  </div>
                 </div>
                 <div className="mb-4">
                   <Input
@@ -426,38 +603,54 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
                   Pricing
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    type="number"
-                    label="6-Hour Rate (₱)"
-                    labelPlacement="outside"
-                    value={formData.six_hour_rate}
-                    onChange={(e) => setFormData({ ...formData, six_hour_rate: e.target.value })}
-                    classNames={{ label: "text-sm font-medium text-gray-700" }}
-                  />
-                  <Input
-                    type="number"
-                    label="10-Hour Rate (₱)"
-                    labelPlacement="outside"
-                    value={formData.ten_hour_rate}
-                    onChange={(e) => setFormData({ ...formData, ten_hour_rate: e.target.value })}
-                    classNames={{ label: "text-sm font-medium text-gray-700" }}
-                  />
-                  <Input
-                    type="number"
-                    label="Weekday Rate (₱)"
-                    labelPlacement="outside"
-                    value={formData.weekday_rate}
-                    onChange={(e) => setFormData({ ...formData, weekday_rate: e.target.value })}
-                    classNames={{ label: "text-sm font-medium text-gray-700" }}
-                  />
-                  <Input
-                    type="number"
-                    label="Weekend Rate (₱)"
-                    labelPlacement="outside"
-                    value={formData.weekend_rate}
-                    onChange={(e) => setFormData({ ...formData, weekend_rate: e.target.value })}
-                    classNames={{ label: "text-sm font-medium text-gray-700" }}
-                  />
+                  <div>
+                    <Input
+                      type="number"
+                      label="6-Hour Rate (₱)"
+                      labelPlacement="outside"
+                      value={formData.six_hour_rate}
+                      onChange={(e) => setFormData({ ...formData, six_hour_rate: e.target.value })}
+                      classNames={{ label: "text-sm font-medium text-gray-700" }}
+                      isInvalid={!!errors.six_hour_rate}
+                      errorMessage={errors.six_hour_rate}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      label="10-Hour Rate (₱)"
+                      labelPlacement="outside"
+                      value={formData.ten_hour_rate}
+                      onChange={(e) => setFormData({ ...formData, ten_hour_rate: e.target.value })}
+                      classNames={{ label: "text-sm font-medium text-gray-700" }}
+                      isInvalid={!!errors.ten_hour_rate}
+                      errorMessage={errors.ten_hour_rate}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      label="Weekday Rate (₱)"
+                      labelPlacement="outside"
+                      value={formData.weekday_rate}
+                      onChange={(e) => setFormData({ ...formData, weekday_rate: e.target.value })}
+                      classNames={{ label: "text-sm font-medium text-gray-700" }}
+                      isInvalid={!!errors.weekday_rate}
+                      errorMessage={errors.weekday_rate}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      label="Weekend Rate (₱)"
+                      labelPlacement="outside"
+                      value={formData.weekend_rate}
+                      onChange={(e) => setFormData({ ...formData, weekend_rate: e.target.value })}
+                      classNames={{ label: "text-sm font-medium text-gray-700" }}
+                      isInvalid={!!errors.weekend_rate}
+                      errorMessage={errors.weekend_rate}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -535,7 +728,7 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
                   <div className="grid grid-cols-4 gap-4">
                     {existingImages.map((img, index) => (
                       <div key={`existing-${index}`} className="relative group">
-                        <img src={img.url} alt="" className="w-full h-24 object-cover rounded-lg" />
+                        <Image src={img.image_url || ''} alt="Haven image" width={96} height={96} className="w-full h-24 object-cover rounded-lg" />
                         <button
                           type="button"
                           onClick={() => handleRemoveExistingImage(index)}
@@ -547,7 +740,7 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
                     ))}
                     {havenImages.map((file, index) => (
                       <div key={`new-${index}`} className="relative group">
-                        <img src={URL.createObjectURL(file)} alt="" className="w-full h-24 object-cover rounded-lg" />
+                        <Image src={URL.createObjectURL(file)} alt="New haven image" width={96} height={96} className="w-full h-24 object-cover rounded-lg" />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(index)}
@@ -595,12 +788,12 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
                         {existingCategoryPhotos.length > 0 && (
                           <div className="mt-3 space-y-2">
                             <p className="text-xs text-gray-500 mb-1">Existing ({existingCategoryPhotos.length})</p>
-                            {existingCategoryPhotos.map((photo: any, index: number) => (
+                            {existingCategoryPhotos.map((photo: PhotoTourData & { globalIndex?: number, url?: string }, index: number) => (
                               <div key={`existing-${index}`} className="flex items-center justify-between p-2 bg-blue-50 rounded">
-                                <img src={photo.url} alt="" className="w-10 h-10 object-cover rounded" />
+                                <Image src={photo.image_url || photo.url || ''} alt="Photo tour" width={40} height={40} className="w-10 h-10 object-cover rounded" />
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveExistingPhotoTour(photo.globalIndex)}
+                                  onClick={() => handleRemoveExistingPhotoTour(photo.globalIndex || 0)}
                                   className="p-1 text-red-500 hover:bg-red-100 rounded"
                                   title="Delete photo"
                                 >
@@ -617,7 +810,7 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
                             <p className="text-xs text-gray-500 mb-1">New ({photoTourImages[category.key].length})</p>
                             {photoTourImages[category.key].map((file, index) => (
                               <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                <img src={URL.createObjectURL(file)} alt="" className="w-10 h-10 object-cover rounded" />
+                                <Image src={URL.createObjectURL(file)} alt="New photo tour" width={40} height={40} className="w-10 h-10 object-cover rounded" />
                                 <button
                                   type="button"
                                   onClick={() => handleRemovePhotoTourImage(category.key, index)}
@@ -719,8 +912,9 @@ const EditHavenModal = ({ isOpen, onClose, havenData }: EditHavenModalProps) => 
           {/* Footer */}
           <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex-shrink-0">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all"
+              disabled={isLoading}
             >
               Cancel
             </button>

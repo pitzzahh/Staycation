@@ -1,7 +1,6 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { signOut } from "next-auth/react";
 
@@ -10,18 +9,16 @@ interface CsrLogoutProps {
 }
 
 export default function CsrLogout({ sidebar }: CsrLogoutProps) {
-  const router = useRouter();
-
   const handleLogout = async () => {
     try {
       await signOut({
         callbackUrl: "/admin/login",
-        redirect: true
-      })
-      toast.success('Logged out successfully');
+        redirect: true,
+      });
+      toast.success("Logged out successfully");
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('An error occurred during logout');
+      console.error("Logout error:", error);
+      toast.error("An error occurred during logout");
     }
   };
 

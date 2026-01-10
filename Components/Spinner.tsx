@@ -1,7 +1,5 @@
 "use client";
 
-import LoadingAnimation from "./LoadingAnimation";
-
 interface SpinnerProps {
   label: string;
   variant?: "default" | "csr";

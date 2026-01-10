@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 import AnalyticsClient from "./AnalyticsClient";
 import LoadingAnimation from "@/Components/LoadingAnimation";
 import type { AnalyticsSummary, RevenueByRoom, MonthlyRevenue } from "@/backend/controller/analyticsController";

@@ -27,6 +27,14 @@ import AmenityBadge from "./AmenityBadge";
 import dynamic from "next/dynamic";
 import Footer from "../Footer";
 
+// Define proper type for session user
+interface SessionUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
 // Dynamically import RoomMap to avoid SSR issues with Leaflet
 const RoomMap = dynamic(() => import("./RoomMap"), {
   ssr: false,
@@ -82,10 +90,13 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
   const [lightboxImage, setLightboxImage] = useState("");
   const [showAllPhotos, setShowAllPhotos] = useState(false);
 
+  // Type-safe user id extraction
+  const userId = (session?.user as SessionUser)?.id || null;
+
   // RTK Query hooks
   const { data: wishlistStatus } = useCheckWishlistStatusQuery(
-    { userId: (session?.user as any)?.id, havenId: room.id },
-    { skip: !session?.user?.id }
+    { userId: userId, havenId: room.id },
+    { skip: !userId }
   );
   const [addToWishlist, { isLoading: isAdding }] = useAddToWishlistMutation();
   const [removeFromWishlist, { isLoading: isRemoving }] = useRemoveFromWishlistMutation();
@@ -158,7 +169,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
   };
 
   const handleWishlistToggle = async () => {
-    if (!session?.user?.id) {
+    if (!userId) {
       toast.error('Please login to add to wishlist');
       router.push('/login');
       return;
@@ -174,7 +185,7 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
       } else {
         // Add to wishlist
         const result = await addToWishlist({
-          user_id: (session.user as any).id,
+          user_id: userId,
           haven_id: room.id,
         }).unwrap();
         if (result.success) {

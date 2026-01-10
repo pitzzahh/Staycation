@@ -1,12 +1,14 @@
 "use client";
 
-import { X, Upload, Trash2, Calendar, Clock, Plus } from "lucide-react";
+import { X, Upload, Trash2, Calendar } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { Checkbox } from "@nextui-org/checkbox";
 import { useCreateHavenMutation } from "@/redux/api/roomApi"
 import toast from 'react-hot-toast';
+
 interface AddNewHavenModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,8 +21,16 @@ interface BlockedDate {
   reason: string;
 }
 
+// Define error type for better type safety
+interface ApiError {
+  data?: {
+    error?: string;
+  };
+  message?: string;
+}
+
 const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
-  const [createHaven, { isLoading}] = useCreateHavenMutation();
+  const [createHaven, { isLoading }] = useCreateHavenMutation();
   const [formData, setFormData] = useState({
     havenName: "",
     tower: "",
@@ -119,128 +129,134 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
     { key: "additional", label: "Additional Photos" },
   ];
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    // Convert haven images to base64
-    const havenImagesBase64 = await Promise.all(
-      havenImages.map((file) => {
-        return new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      })
-    );
+    try {
+      // Convert haven images to base64
+      const havenImagesBase64 = await Promise.all(
+        havenImages.map((file) => {
+          return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        })
+      );
 
-    // Convert photo tour images to base64
-    const photoTourBase64: Record<string, string[]> = {};
-    for (const [category, files] of Object.entries(photoTourImages)) {
-      if (files.length > 0) {
-        photoTourBase64[category] = await Promise.all(
-          files.map((file) => {
-            return new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(file);
-            });
-          })
-        );
+      // Convert photo tour images to base64
+      const photoTourBase64: Record<string, string[]> = {};
+      for (const [category, files] of Object.entries(photoTourImages)) {
+        if (files.length > 0) {
+          photoTourBase64[category] = await Promise.all(
+            files.map((file) => {
+              return new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+            })
+          );
+        }
       }
-    }
 
-    // Prepare haven data
-    const havenData = {
-      haven_name: formData.havenName,
-      tower: formData.tower,
-      floor: formData.floor,
-      view_type: formData.view,
-      capacity: parseInt(formData.capacity),
-      room_size: parseFloat(formData.roomSize),
-      beds: formData.beds,
-      description: formData.description,
-      youtube_url: formData.youtubeUrl,
-      six_hour_rate: parseFloat(formData.sixHourRate),
-      ten_hour_rate: parseFloat(formData.tenHourRate),
-      weekday_rate: parseFloat(formData.weekdayRate),
-      weekend_rate: parseFloat(formData.weekendRate),
-      six_hour_check_in: formData.sixHourCheckIn + ":00",
-      ten_hour_check_in: formData.tenHourCheckIn + ":00",
-      twenty_one_hour_check_in: formData.twentyOneHourCheckIn + ":00",
-      amenities: formData.amenities,
-      haven_images: havenImagesBase64,
-      photo_tour_images: photoTourBase64,
-      blocked_dates: blockedDates.map(date => ({
-        from_date: date.fromDate,
-        to_date: date.toDate,
-        reason: date.reason
-      }))
-    };
+      // Prepare haven data
+      const havenData = {
+        haven_name: formData.havenName,
+        tower: formData.tower,
+        floor: formData.floor,
+        view_type: formData.view,
+        capacity: parseInt(formData.capacity),
+        room_size: parseFloat(formData.roomSize),
+        beds: formData.beds,
+        description: formData.description,
+        youtube_url: formData.youtubeUrl,
+        six_hour_rate: parseFloat(formData.sixHourRate),
+        ten_hour_rate: parseFloat(formData.tenHourRate),
+        weekday_rate: parseFloat(formData.weekdayRate),
+        weekend_rate: parseFloat(formData.weekendRate),
+        six_hour_check_in: formData.sixHourCheckIn + ":00",
+        ten_hour_check_in: formData.tenHourCheckIn + ":00",
+        twenty_one_hour_check_in: formData.twentyOneHourCheckIn + ":00",
+        amenities: formData.amenities,
+        haven_images: havenImagesBase64,
+        photo_tour_images: photoTourBase64,
+        blocked_dates: blockedDates.map(date => ({
+          from_date: date.fromDate,
+          to_date: date.toDate,
+          reason: date.reason
+        }))
+      };
 
-    const result = await createHaven(havenData).unwrap();
+      const result = await createHaven(havenData).unwrap();
 
-    if (result.success) {
-      toast.success("Haven created successfully!");
+      if (result.success) {
+        toast.success("Haven created successfully!");
+        
+        // Reset form
+        setFormData({
+          havenName: "",
+          tower: "",
+          floor: "",
+          view: "",
+          capacity: "",
+          roomSize: "",
+          beds: "",
+          sixHourRate: "",
+          tenHourRate: "",
+          weekdayRate: "",
+          weekendRate: "",
+          sixHourCheckIn: "09:00",
+          tenHourCheckIn: "09:00",
+          twentyOneHourCheckIn: "14:00",
+          description: "",
+          youtubeUrl: "",
+          amenities: {
+            wifi: false,
+            netflix: false,
+            ps4: false,
+            glowBed: false,
+            airConditioning: false,
+            kitchen: false,
+            balcony: false,
+            tv: false,
+            poolAccess: false,
+            parking: false,
+            washerDryer: false,
+            towels: false,
+          },
+        });
+        setHavenImages([]);
+        setPhotoTourImages({
+          livingArea: [],
+          kitchenette: [],
+          diningArea: [],
+          fullBathroom: [],
+          garage: [],
+          exterior: [],
+          pool: [],
+          bedroom: [],
+          additional: [],
+        });
+        setBlockedDates([]);
+        
+        onClose();
+      }
+    } catch (error: unknown) {
+      console.error("Error creating haven:", error);
       
-      // Reset form
-      setFormData({
-        havenName: "",
-        tower: "",
-        floor: "",
-        view: "",
-        capacity: "",
-        roomSize: "",
-        beds: "",
-        sixHourRate: "",
-        tenHourRate: "",
-        weekdayRate: "",
-        weekendRate: "",
-        sixHourCheckIn: "09:00",
-        tenHourCheckIn: "09:00",
-        twentyOneHourCheckIn: "14:00",
-        description: "",
-        youtubeUrl: "",
-        amenities: {
-          wifi: false,
-          netflix: false,
-          ps4: false,
-          glowBed: false,
-          airConditioning: false,
-          kitchen: false,
-          balcony: false,
-          tv: false,
-          poolAccess: false,
-          parking: false,
-          washerDryer: false,
-          towels: false,
-        },
-      });
-      setHavenImages([]);
-      setPhotoTourImages({
-        livingArea: [],
-        kitchenette: [],
-        diningArea: [],
-        fullBathroom: [],
-        garage: [],
-        exterior: [],
-        pool: [],
-        bedroom: [],
-        additional: [],
-      });
-      setBlockedDates([]);
+      // Type-safe error handling
+      let errorMessage = "Failed to create haven";
+      if (typeof error === 'object' && error !== null) {
+        const apiError = error as ApiError;
+        errorMessage = apiError?.data?.error || apiError?.message || "Failed to create haven";
+      }
       
-      onClose();
+      toast.error(errorMessage);
     }
-  } catch (error: any) {
-    console.error("Error creating haven:", error);
-    const errorMessage =
-      error?.data?.error || error?.message || "Failed to create haven";
-    toast.error(errorMessage);
   }
-}
 
   const handleAmenityChange = (key: string, checked: boolean) => {
     setFormData({
@@ -868,10 +884,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                         className="relative group border border-gray-200 rounded-lg overflow-hidden"
                       >
                         <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                          <img
+                          <Image
                             src={URL.createObjectURL(file)}
                             alt={file.name}
                             className="w-full h-full object-cover"
+                            width={200}
+                            height={150}
+                            unoptimized // Since we're using object URLs
                           />
                         </div>
                         <button
@@ -934,10 +953,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                               className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200"
                             >
                               <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <img
+                                <Image
                                   src={URL.createObjectURL(file)}
                                   alt={file.name}
                                   className="w-10 h-10 object-cover rounded"
+                                  width={40}
+                                  height={40}
+                                  unoptimized // Since we're using object URLs
                                 />
                                 <p className="text-xs text-gray-600 truncate">
                                   {file.name}

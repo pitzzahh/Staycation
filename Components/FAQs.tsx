@@ -129,7 +129,7 @@ const FAQs = () => {
         <div className="mt-12 bg-orange-50 border-2 border-orange-200 rounded-xl p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Still Have Questions?</h2>
           <p className="text-gray-600 mb-6">
-            Can't find the answer you're looking for? Our support team is ready to help.
+            Can&apos;t find the answer you&apos;re looking for? Our support team is ready to help.
           </p>
           <a
             href="/help-center"

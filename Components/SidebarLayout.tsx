@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { HelpCircle } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import HelpSidebar from "./HelpSidebar";
 import Footer from "./Footer";
 
@@ -20,11 +21,16 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <img
-                src="/haven_logo.png"
-                alt="Staycation Haven Logo"
-                className="w-8 h-8 object-contain"
-              />
+              <div className="relative w-8 h-8">
+                <Image
+                  src="/haven_logo.png"
+                  alt="Staycation Haven Logo"
+                  fill
+                  sizes="32px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
               <span className="text-2xl font-display text-brand-primary">Staycation Haven</span>
             </Link>
             <button

@@ -6,8 +6,34 @@ import Image from 'next/image';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+interface Booking {
+  booking_id: string;
+  status: string;
+  room_name: string;
+  room_images?: string[];
+  tower?: string;
+  guest_first_name: string;
+  guest_last_name: string;
+  guest_email: string;
+  guest_phone: string;
+  adults: number;
+  children: number;
+  infants: number;
+  check_in_date: string;
+  check_in_time: string;
+  check_out_date: string;
+  check_out_time: string;
+  room_rate: number;
+  security_deposit: number;
+  add_ons_total: number;
+  total_amount: number;
+  down_payment: number;
+  payment_method: string;
+  [key: string]: unknown;
+}
+
 interface BookingDetailsClientProps {
-  booking: any;
+  booking: Booking;
   userId: string;
 }
 
@@ -131,7 +157,7 @@ export default function BookingDetailsClient({ booking }: BookingDetailsClientPr
       styles: { fontSize: 9, cellPadding: 4 }
     });
 
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    yPos = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
 
     // Payment Summary Table
     const formatAmount = (amount: number) => {
@@ -226,8 +252,6 @@ export default function BookingDetailsClient({ booking }: BookingDetailsClientPr
   const firstImage = Array.isArray(booking.room_images) && booking.room_images.length > 0
     ? booking.room_images[0]
     : '/Images/bg.jpg';
-
-  const totalGuests = booking.adults + booking.children + booking.infants;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pt-20">

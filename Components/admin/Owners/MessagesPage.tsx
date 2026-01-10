@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   Search,
@@ -37,7 +37,6 @@ interface Conversation {
 interface Message {
   id: string;
   sender_id: string;
-  sender_name?: string;
   message_text: string;
   created_at: string;
 }
@@ -62,49 +61,50 @@ export default function MessagesPage() {
     { skip: !userId, pollingInterval: 5000 } // Poll every 5 seconds for new messages
   );
 
+  const conversations = useMemo(() => conversationsData?.data || [], [conversationsData?.data]);
+
+  // Set the first conversation as active if none is selected
+  const effectiveActiveId = useMemo(() => {
+    if (activeId) return activeId;
+    if (conversations.length > 0) return conversations[0].id;
+    return null;
+  }, [activeId, conversations]);
+
   // Fetch messages for active conversation
   const {
     data: messagesData,
     isLoading: isLoadingMessages,
     refetch: refetchMessages,
   } = useGetMessagesQuery(
-    { conversationId: activeId || "" },
-    { skip: !activeId, pollingInterval: 3000 } // Poll every 3 seconds
+    { conversationId: effectiveActiveId || "" },
+    { skip: !effectiveActiveId, pollingInterval: 3000 } // Poll every 3 seconds
   );
 
   // Mutations
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [markAsRead] = useMarkMessagesAsReadMutation();
 
-  const conversations = useMemo(() => conversationsData?.data || [], [conversationsData?.data]);
   const messages = useMemo(() => messagesData?.data || [], [messagesData?.data]);
-
-  // Set first conversation as active on load
-  useEffect(() => {
-    if (conversations.length > 0 && !activeId) {
-      setActiveId(conversations[0].id);
-    }
-  }, [conversations, activeId]);
 
   // Mark messages as read when opening a conversation
   useEffect(() => {
-    if (activeId && userId) {
-      markAsRead({ conversation_id: activeId, user_id: userId });
+    if (effectiveActiveId && userId) {
+      markAsRead({ conversation_id: effectiveActiveId, user_id: userId });
     }
-  }, [activeId, userId, markAsRead]);
+  }, [effectiveActiveId, userId, markAsRead]);
 
   // Auto-scroll to bottom when messages change
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   const activeConversation = useMemo(
-    () => conversations.find((c) => c.id === activeId) || conversations[0],
-    [activeId, conversations]
+    () => conversations.find((c) => c.id === effectiveActiveId),
+    [effectiveActiveId, conversations]
   );
 
   const filteredConversations = useMemo(() => {
@@ -121,11 +121,11 @@ export default function MessagesPage() {
 
   const handleSendMessage = async () => {
     const text = draft.trim();
-    if (!text || !activeId || !userId) return;
+    if (!text || !effectiveActiveId || !userId) return;
 
     try {
       await sendMessage({
-        conversation_id: activeId,
+        conversation_id: effectiveActiveId,
         sender_id: userId,
         sender_name: session?.user?.name || "Owner",
         message_text: text,
@@ -270,7 +270,7 @@ export default function MessagesPage() {
             {/* Conversation List */}
             <div className="flex-1 overflow-y-auto">
               {filteredConversations.map((c) => {
-                const isActive = c.id === activeId;
+                const isActive = c.id === effectiveActiveId;
                 const activeStatus = getActiveStatus(c.last_message_time, c.type);
                 return (
                   <button
@@ -285,7 +285,7 @@ export default function MessagesPage() {
                   >
                     <div className="relative">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 text-white font-bold flex items-center justify-center shadow-md">
-                        {c.name.charAt(0).toUpperCase()}
+                        {c.name?.charAt(0).toUpperCase() || "?"}
                       </div>
                       {activeStatus.isActive && (
                         <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
@@ -349,7 +349,7 @@ export default function MessagesPage() {
                 <div className="h-16 px-4 flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50 sticky top-0 z-10">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 text-white font-bold flex items-center justify-center flex-shrink-0 shadow-md">
-                      {activeConversation.name.charAt(0).toUpperCase()}
+                      {activeConversation.name?.charAt(0).toUpperCase() || "?"}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-gray-900 truncate">
@@ -395,7 +395,7 @@ export default function MessagesPage() {
                       <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
                     </div>
                   ) : messages.length > 0 ? (
-                    messages.map((m) => {
+                    messages.map((m: Message) => {
                       const isMe = m.sender_id === userId;
                       return (
                         <div

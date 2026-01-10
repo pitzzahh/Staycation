@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import Image from "next/image";
 import RoomCard from "./RoomCard";
 import { SlidersHorizontal, ChevronRight, ChevronLeft, Eye } from "lucide-react";
 import { useGetHavensQuery } from "@/redux/api/roomApi";
@@ -80,9 +81,7 @@ interface HotelRoomListingsProps {
 
 const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
   const { isError } = useGetHavensQuery({});
-  const [sortBy, setSortBy] = useState<string>("recommended");
   const [currentPage, setCurrentPage] = useState<Record<string, number>>({});
-  const [filteredHavens, setFilteredHavens] = useState<Haven[]>(initialHavens);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -111,10 +110,10 @@ const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
     };
   }, []);
 
-  // Filter havens based on location when coming from search
-  useEffect(() => {
+  // Filter havens based on location when coming from search - use useMemo
+  const filteredHavens = useMemo(() => {
     if (isFromSearch && searchLocation) {
-      const filtered = initialHavens.filter((haven) => {
+      return initialHavens.filter((haven) => {
         const havenName = haven.haven_name || haven.name || '';
 
         // Extract haven number from full haven_name (e.g., "Haven 1" from "Haven 1 - Tower A")
@@ -123,10 +122,8 @@ const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
         // Match by haven number only (e.g., "Haven 1" matches all towers)
         return havenNumber === searchLocation.name;
       });
-      setFilteredHavens(filtered);
-    } else {
-      setFilteredHavens(initialHavens);
     }
+    return initialHavens;
   }, [searchLocation, isFromSearch, initialHavens]);
 
   const rooms: Room[] = filteredHavens.map((haven: Haven) => ({
@@ -221,7 +218,6 @@ const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
               </span>
               <button
                 onClick={() => {
-                  setFilteredHavens(initialHavens);
                   dispatch(setIsFromSearch(false));
                 }}
                 className="text-xs text-brand-primary hover:text-brand-primaryDark underline"
@@ -287,7 +283,6 @@ const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
               {isFromSearch && searchLocation && (
                 <button
                   onClick={() => {
-                    setFilteredHavens(initialHavens);
                     dispatch(setIsFromSearch(false));
                   }}
                   className="px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-colors"
@@ -300,7 +295,6 @@ const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
 
           {/* Room Groups by Haven */}
           {sortedHavenNumbers.map((havenNumber) => {
-            const havenRooms = groupedRooms[havenNumber];
             const { displayedRooms, currentPage, totalPages, hasMoreRooms, remainingRooms } = getCurrentPageRooms(havenNumber);
             
             // Only show pagination if there are more than 5 rooms
@@ -361,9 +355,11 @@ const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
                                 {/* Keep the image visible but darkened */}
                                 {room.images && room.images[0] && (
                                   <div className="h-full w-full">
-                                    <img
+                                    <Image
                                       src={room.images[0]}
                                       alt={room.name}
+                                      width={240}
+                                      height={192}
                                       className="h-full w-full object-cover"
                                     />
                                   </div>

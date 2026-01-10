@@ -11,7 +11,7 @@ const Contacts = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Get In Touch</h1>
           <p className="text-lg md:text-xl opacity-90 max-w-3xl mx-auto">
-            We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
           </p>
         </div>
       </div>
@@ -22,7 +22,7 @@ const Contacts = () => {
           {/* Contact Form */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
-            <p className="text-gray-600 mb-6">Fill out the form below and we'll get back to you shortly.</p>
+            <p className="text-gray-600 mb-6">Fill out the form below and we&apos;ll get back to you shortly.</p>
 
             <form className="space-y-4">
               <div>

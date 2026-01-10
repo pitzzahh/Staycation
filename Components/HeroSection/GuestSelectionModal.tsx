@@ -2,7 +2,6 @@ import { X } from "lucide-react";
 import GuestCounter from "./GuestCounter";
 import { useEffect, useState } from "react";
 
-
 interface Guests {
   adults: number;
   children: number;
@@ -16,21 +15,26 @@ interface GuestSelectorModalProps {
   onGuestChange: (type: keyof Guests, value: number) => void;
 }
 
-const GuestSelectorModal = ({ isOpen, onClose, guests, onGuestChange }:GuestSelectorModalProps) => {
+const GuestSelectorModal = ({ isOpen, onClose, guests, onGuestChange }: GuestSelectorModalProps) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !shouldRender) {
+      // When opening, set shouldRender first, then animate in
       setShouldRender(true);
       // Trigger animation after render
-      setTimeout(() => setIsAnimating(true), 10);
-    } else {
+      requestAnimationFrame(() => {
+        setIsAnimating(true);
+      });
+    } else if (!isOpen && shouldRender) {
+      // When closing, animate out first, then remove from DOM
       setIsAnimating(false);
       // Remove from DOM after animation completes
-      setTimeout(() => setShouldRender(false), 500);
+      const renderTimer = setTimeout(() => setShouldRender(false), 500);
+      return () => clearTimeout(renderTimer);
     }
-  }, [isOpen]);
+  }, [isOpen, shouldRender]);
 
   if (!shouldRender) return null;
 
@@ -135,4 +139,4 @@ const GuestSelectorModal = ({ isOpen, onClose, guests, onGuestChange }:GuestSele
   );
 };
 
-export default GuestSelectorModal
+export default GuestSelectorModal;

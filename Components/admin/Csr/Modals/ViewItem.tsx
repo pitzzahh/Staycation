@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -57,15 +56,20 @@ const formatDateTime = (value: unknown) => {
 export default function ViewItem({ item, onClose }: ViewItemProps) {
   const [isMounted, setIsMounted] = useState(false);
 
-  // Set mounted state after component mounts
+  // Set mounted state after component mounts - use requestAnimationFrame to avoid cascading renders
   useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
+    const rafId = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      setIsMounted(false);
+    };
   }, []);
 
-  if (!isMounted) return null;
-
   const statusColor = useMemo(() => statusToColor(item.status), [item.status]);
+
+  if (!isMounted) return null;
 
   return createPortal(
     <>

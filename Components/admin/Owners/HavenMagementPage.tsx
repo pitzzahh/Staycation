@@ -1,11 +1,6 @@
 'use client'
 
-import { useGetHavensQuery } from "@/redux/api/roomApi";
-
-
-
 const HavenManagementPage = () => {
-
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
       <h2 className="text-3xl font-bold">Haven Management</h2>
@@ -29,3 +24,5 @@ const HavenManagementPage = () => {
     </div>
   );
 };
+
+export default HavenManagementPage;  // Added export default

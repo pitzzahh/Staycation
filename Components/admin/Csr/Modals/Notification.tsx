@@ -50,12 +50,16 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Use requestAnimationFrame to avoid cascading renders
   useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
+    const rafId = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      setIsMounted(false);
+    };
   }, []);
-
-  if (!isMounted) return null;
 
   useEffect(() => {
     if (!isMounted) return;
@@ -100,22 +104,31 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [anchorRef, onClose, isMounted]);
 
+  // Initialize items from notifications without triggering cascading renders
   useEffect(() => {
     if (!isMounted) return;
-    setItems((prev) => {
-      const prevMap = new Map(prev.map((n) => [n.id, n]));
-      return notifications.map((n) => {
-        const existing = prevMap.get(n.id);
-        return {
-          ...n,
-          read: existing?.read ?? false,
-        };
+    
+    // Use a timeout to batch the state update
+    const timeoutId = setTimeout(() => {
+      setItems((prev) => {
+        const prevMap = new Map(prev.map((n) => [n.id, n]));
+        return notifications.map((n) => {
+          const existing = prevMap.get(n.id);
+          return {
+            ...n,
+            read: existing?.read ?? false,
+          };
+        });
       });
-    });
-  }, [notifications]);
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [notifications, isMounted]);
 
   const unreadCount = items.filter((n) => !n.read).length;
   const visibleItems = filter === "unread" ? items.filter((n) => !n.read) : items;
+
+  if (!isMounted) return null;
 
   return createPortal(
     <>
@@ -180,7 +193,12 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
             <div className="ml-auto">
               <button
                 type="button"
-                onClick={() => setItems((prev) => prev.map((n) => ({ ...n, read: true })))}
+                onClick={() => {
+                  // Use setTimeout to batch the state update
+                  setTimeout(() => {
+                    setItems((prev) => prev.map((n) => ({ ...n, read: true })));
+                  }, 0);
+                }}
                 className="text-sm font-semibold text-brand-primary hover:text-brand-primaryDark transition-colors"
               >
                 Mark all as read
@@ -200,11 +218,14 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
                     <button
                       key={notification.id}
                       type="button"
-                      onClick={() =>
-                        setItems((prev) =>
-                          prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
-                        )
-                      }
+                      onClick={() => {
+                        // Use setTimeout to batch the state update
+                        setTimeout(() => {
+                          setItems((prev) =>
+                            prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+                          );
+                        }, 0);
+                      }}
                       className={`w-full text-left px-6 py-4 flex items-start gap-3 transition-colors ${
                         notification.read
                           ? "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50"

@@ -21,7 +21,11 @@ const getHavenRooms = async (havenId: string) => {
 
   // Filter havens by the haven number
   if (data?.data) {
-    const filteredHavens = data.data.filter((haven: any) => {
+    interface Haven {
+      haven_name?: string;
+      name?: string;
+    }
+    const filteredHavens = data.data.filter((haven: Haven) => {
       const havenName = haven.haven_name || haven.name || '';
       const havenMatch = havenName.match(/Haven (\d+)/);
       return havenMatch && havenMatch[1] === havenId;

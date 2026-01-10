@@ -31,12 +31,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       success: true,
       booking: result.rows[0],
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching booking:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to fetch booking";
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Failed to fetch booking",
+        error: errorMessage,
       },
       { status: 500 }
     );

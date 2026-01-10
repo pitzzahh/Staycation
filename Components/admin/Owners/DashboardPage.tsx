@@ -9,7 +9,7 @@ import {
   TrendingUp,
   FileText,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   LineChart,
   Line,
@@ -20,6 +20,38 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGetRoomBookingsQuery } from "@/redux/api/bookingsApi";
+
+// Define types for the component
+interface Haven {
+  uuid_id: string;
+  haven_name?: string;
+  name?: string;
+  blocked_dates?: Array<{
+    from_date: string;
+    to_date: string;
+  }>;
+}
+
+interface Booking {
+  check_in_date: string;
+  check_out_date: string;
+  status: 'approved' | 'checked-in' | 'confirmed' | string;
+}
+
+interface CalendarDay {
+  date: number;
+  status: "available" | "booked" | "blocked" | "past";
+}
+
+interface DashboardPageProps {
+  onAddUnitClick: () => void;
+  onPaymentClick: () => void;
+  onBookingClick: () => void;
+  onPoliciesClick: () => void;
+  onDateClick: (date: Date, haven: Haven) => void;
+  havens: Haven[];
+}
+
 const DashboardPage = ({
   onAddUnitClick,
   onPaymentClick,
@@ -27,16 +59,25 @@ const DashboardPage = ({
   onPoliciesClick,
   havens,
   onDateClick,
-}: any) => {
+}: DashboardPageProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedHaven, setSelectedHaven] = useState(havens[0]);
+  const [selectedHaven, setSelectedHaven] = useState<Haven | null>(null);
+  const hasSetInitialHaven = useRef(false);
 
-  // Set initial selected haven when havens data loads
-  useEffect(() => {
-    if (havens.length > 0 && !selectedHaven) {
-      setSelectedHaven(havens[0]);
+  // Set initial selected haven when havens data loads - fixed to avoid cascading renders
+useEffect(() => {
+  if (havens.length > 0 && !selectedHaven && !hasSetInitialHaven.current) {
+    // Check if the value would actually change
+    const newHaven = havens[0];
+    const shouldUpdate = !selectedHaven || (selectedHaven && selectedHaven.uuid_id !== newHaven.uuid_id);
+    
+    if (shouldUpdate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedHaven(newHaven);
     }
-  }, [havens]);
+    hasSetInitialHaven.current = true;
+  }
+}, [havens, selectedHaven]);
 
   // Fetch bookings for the selected haven with polling to auto-refresh
   const { data: bookingsData } = useGetRoomBookingsQuery(
@@ -47,7 +88,7 @@ const DashboardPage = ({
     }
   );
 
-  const bookings = bookingsData?.data || [];
+  const bookings: Booking[] = bookingsData?.data || [];
 
   const monthName = currentMonth.toLocaleString("default", {
     month: "long",
@@ -66,7 +107,7 @@ const DashboardPage = ({
 
   // Helper function to check if a date is booked
   const isDateBooked = (date: Date) => {
-    return bookings.some((booking: any) => {
+    return bookings.some((booking) => {
       // Normalize check-in and check-out dates to midnight
       const checkIn = new Date(booking.check_in_date);
       checkIn.setHours(0, 0, 0, 0);
@@ -87,7 +128,7 @@ const DashboardPage = ({
   // Helper function to check if a date is blocked
   const isDateBlocked = (date: Date) => {
     if (!selectedHaven?.blocked_dates) return false;
-    return selectedHaven.blocked_dates.some((blocked: any) => {
+    return selectedHaven.blocked_dates.some((blocked) => {
       const fromDate = new Date(blocked.from_date);
       fromDate.setHours(0, 0, 0, 0);
 
@@ -101,7 +142,7 @@ const DashboardPage = ({
     });
   };
 
-  const calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
+  const calendarDays: CalendarDay[] = Array.from({ length: daysInMonth }, (_, i) => {
     const dayNumber = i + 1;
     const currentDate = new Date(
       currentMonth.getFullYear(),
@@ -110,7 +151,7 @@ const DashboardPage = ({
     );
     const isPast = isCurrentMonth && dayNumber < today.getDate();
 
-    let status = "available";
+    let status: CalendarDay["status"] = "available";
     if (isPast) {
       status = "past";
     } else if (isDateBooked(currentDate)) {
@@ -125,7 +166,7 @@ const DashboardPage = ({
     };
   });
 
-  const handleDateClick = (day: any) => {
+  const handleDateClick = (day: CalendarDay) => {
     if (day.status === "past" || day.status === "booked" || day.status === "blocked") {
       return; // Don't allow clicking on unavailable dates
     }
@@ -135,7 +176,9 @@ const DashboardPage = ({
       currentMonth.getMonth(),
       day.date
     );
-    onDateClick(clickedDate, selectedHaven);
+    if (selectedHaven) {
+      onDateClick(clickedDate, selectedHaven);
+    }
   };
 
   const getColor = (status: string) => {
@@ -162,32 +205,47 @@ const DashboardPage = ({
     { month: "Jun", revenue: 28000 },
   ];
 
+  // Define KPI type for better type safety
+  interface KpiItem {
+    title: string;
+    value: string;
+    icon: string;
+    color: string;
+  }
+
+  const kpis: KpiItem[] = [
+    {
+      title: "Total Revenue",
+      value: "₱121,000",
+      icon: "💰",
+      color: "bg-blue-500"
+    },
+    {
+      title: "Occupancy",
+      value: "78%",
+      icon: "👥",
+      color: "bg-green-500",
+    },
+    { 
+      title: "Pending", 
+      value: "12", 
+      icon: "⏳", 
+      color: "bg-orange-500" 
+    },
+    {
+      title: "Target",
+      value: "₱30,000",
+      icon: "🎯",
+      color: "bg-purple-500",
+    },
+  ];
+
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
-          {
-            title: "Total Revenue",
-            value: "₱121,000",
-            icon: "💰",
-            color: "bg-blue-500"
-          },
-          {
-            title: "Occupancy",
-            value: "78%",
-            icon: "👥",
-            color: "bg-green-500",
-          },
-          { title: "Pending", value: "12", icon: "⏳", color: "bg-orange-500" },
-          {
-            title: "Target",
-            value: "₱30,000",
-            icon: "🎯",
-            color: "bg-purple-500",
-          },
-        ].map((kpi, i) => (
+        {kpis.map((kpi, i) => (
           <div
-            key={i}
+            key={kpi.title}
             className={`${kpi.color} text-white rounded-lg p-6 shadow hover:shadow-lg animate-in fade-in slide-in-from-bottom duration-500`}
             style={{ animationDelay: `${i * 100}ms` }}
           >
@@ -225,12 +283,14 @@ const DashboardPage = ({
             <select
               value={selectedHaven?.uuid_id || ''}
               onChange={(e) => {
-                const selected = havens.find((h: any) => h.uuid_id === e.target.value);
-                setSelectedHaven(selected);
+                const selected = havens.find((h) => h.uuid_id === e.target.value);
+                if (selected) {
+                  setSelectedHaven(selected);
+                }
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
             >
-              {havens.map((h: any) => (
+              {havens.map((h) => (
                 <option key={h.uuid_id} value={h.uuid_id}>
                   {h.haven_name || h.name}
                 </option>
@@ -375,7 +435,7 @@ const DashboardPage = ({
                 <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
                   Details
                 </th>
-                <th className="text-center py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
                   Status
                 </th>
               </tr>

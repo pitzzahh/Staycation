@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Calendar, MapPin, Clock, Users, ChevronRight } from 'lucide-react';
+import { Calendar, MapPin, Users, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
 import { useGetUserBookingsQuery, useUpdateBookingStatusMutation } from '@/redux/api/bookingsApi';
 
@@ -216,7 +217,7 @@ const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
               No bookings found
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              You don't have any {filterStatus !== 'all' ? filterStatus : ''} bookings yet.
+              You don&apos;t have any {filterStatus !== 'all' ? filterStatus : ''} bookings yet.
             </p>
             <Link href="/rooms">
               <button className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
@@ -242,9 +243,11 @@ const MyBookingsPage = ({ initialData, userId }: MyBookingsPageProps) => {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
                     {/* Room Image */}
                     <div className="md:col-span-1">
-                      <img
+                      <Image
                         src={firstImage}
                         alt={booking.room_name}
+                        width={400}
+                        height={300}
                         className="w-full h-48 md:h-full object-cover rounded-lg"
                       />
                     </div>

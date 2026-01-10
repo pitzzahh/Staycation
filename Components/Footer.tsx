@@ -1,19 +1,21 @@
 "use client";
 
-import { Facebook, Instagram, MapPin, Phone, Mail, HelpCircle, FileText, Shield, ChevronRight, Sun, Moon, Monitor, ArrowUp } from "lucide-react";
+import { Facebook, Instagram, MapPin, Phone, Mail, HelpCircle, FileText, Shield, ChevronRight, Sun, Moon, Monitor } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
 
 const Footer = () => {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
+  // Hydration fix: prevent SSR mismatch with theme
+  if (typeof window !== 'undefined' && !mounted) {
     setMounted(true);
-  }, []);
+  }
 
   return (
     <footer className="bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800">
@@ -23,9 +25,11 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-1">
-              <img
+              <Image
                 src="/haven_logo.png"
                 alt="Staycation Haven Logo"
+                width={24}
+                height={24}
                 className="w-6 h-6 object-contain"
               />
               <span className="text-xl sm:text-2xl font-display text-brand-primary dark:text-brand-primary">
@@ -77,16 +81,16 @@ const Footer = () => {
               ].map((item) => (
                 <li key={item.label}>
                   {item.isExternal ? (
-                    <a 
-                      href={item.href} 
+                    <a
+                      href={item.href}
                       className={`text-sm hover:text-brand-primary transition-colors flex items-center gap-1.5 group ${pathname === item.href ? 'text-brand-primary font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                     >
                       <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform flex-shrink-0" />
                       <span>{item.label}</span>
                     </a>
                   ) : (
-                    <Link 
-                      href={item.href} 
+                    <Link
+                      href={item.href}
                       className={`text-sm hover:text-brand-primary transition-colors flex items-center gap-1.5 group ${pathname === item.href ? 'text-brand-primary font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                     >
                       <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform flex-shrink-0" />
@@ -113,8 +117,8 @@ const Footer = () => {
                 { href: '/house-rules', label: 'House Rules' }
               ].map((item) => (
                 <li key={item.label}>
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className={`text-sm hover:text-brand-primary transition-colors flex items-center gap-1.5 group ${pathname === item.href ? 'text-brand-primary font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                   >
                     <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform flex-shrink-0" />
@@ -140,8 +144,8 @@ const Footer = () => {
                 { href: '/accessibility', label: 'Accessibility' }
               ].map((item) => (
                 <li key={item.label}>
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className={`text-sm hover:text-brand-primary transition-colors flex items-center gap-1.5 group ${pathname === item.href ? 'text-brand-primary font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                   >
                     <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform flex-shrink-0" />
@@ -160,14 +164,14 @@ const Footer = () => {
                 {[
                   { href: 'https://www.facebook.com/staycationhavenph', icon: <Facebook className="w-5 h-5" />, label: 'Facebook' },
                   { href: 'https://www.instagram.com/staycationhavenph/', icon: <Instagram className="w-5 h-5" />, label: 'Instagram' },
-                  { 
-                    href: 'https://www.tiktok.com/@staycationhavenph', 
+                  {
+                    href: 'https://www.tiktok.com/@staycationhavenph',
                     icon: (
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.68v13.67a2.4 2.4 0 0 1-2.4 2.4 2.4 2.4 0 0 1-2.4-2.4 2.4 2.4 0 0 1 2.4-2.4c.18 0 .37.02.55.05V9.54a6.05 6.05 0 0 0-.55-.05A6.07 6.07 0 0 0 5 15.74a6.06 6.06 0 0 0 6.09 6.05 6.06 6.06 0 0 0 6.09-6.05V8.93a7.72 7.72 0 0 0 3.4 1.94v-3.6a4.27 4.27 0 0 1-.86-.1z" />
                       </svg>
-                    ), 
-                    label: 'TikTok' 
+                    ),
+                    label: 'TikTok'
                   },
                   { href: 'https://www.google.com/maps/', icon: <MapPin className="w-5 h-5" />, label: 'Location' }
                 ].map((social) => (
@@ -250,8 +254,8 @@ const Footer = () => {
                   {index > 0 && (
                     <span className="text-gray-400 mx-2 hidden sm:inline">•</span>
                   )}
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className={`hover:text-brand-primary transition-colors ${pathname === item.href ? 'text-brand-primary font-semibold' : 'text-gray-600 dark:text-gray-400'}`}
                   >
                     {item.label}

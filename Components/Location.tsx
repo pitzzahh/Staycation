@@ -74,7 +74,7 @@ const Location = () => {
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Email</h3>
             <p className="text-gray-600 mb-2">info@staycationhaven.ph</p>
-            <p className="text-sm text-gray-500">We'll respond quickly</p>
+            <p className="text-sm text-gray-500">We&apos;ll respond quickly</p>
           </div>
 
           {/* Hours Card */}

@@ -6,10 +6,8 @@ import { setCheckInDate, setCheckOutDate } from "@/redux/slices/bookingSlice";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { DatePicker } from "@nextui-org/date-picker";
-import { TimeInput } from "@nextui-org/date-input";
-import { parseDate, parseTime, today, getLocalTimeZone } from "@internationalized/date";
+import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import type { DateValue } from "@react-types/calendar";
-import type { TimeValue } from "@react-types/datepicker";
 import { useGetRoomBookingsQuery, useCreateBookingMutation } from "@/redux/api/bookingsApi";
 import {
   Calendar,
@@ -21,13 +19,12 @@ import {
   Upload,
   Plus,
   Minus,
-  Clock,
   Home,
   CreditCard,
   AlertCircle,
 } from "lucide-react";
-import Spinner from "./Spinner";
 import toast from "react-hot-toast";
+import Image from "next/image";
 import Footer from "./Footer";
 
 interface AddOns {
@@ -37,6 +34,22 @@ interface AddOns {
   extraComforter: number;
   guestKit: number;
   extraSlippers: number;
+}
+
+interface Booking {
+  status: string;
+  check_in_date: string;
+  check_out_date: string;
+}
+
+interface BlockedDate {
+  from_date: string;
+  to_date: string;
+}
+
+interface SessionUser {
+  id?: string;
+  role?: string;
 }
 
 const ADD_ON_PRICES = {
@@ -58,6 +71,7 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(1); // 1 = Guest Info, 2 = Confirmation & Payment
   const [errors, setErrors] = useState<Record<string, string>>({});
   const errorRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [bookingIdState] = useState(() => `BK${Date.now()}`);
 
   // Fetch existing bookings for the selected room
   const { data: roomBookingsData } = useGetRoomBookingsQuery(
@@ -76,7 +90,7 @@ const Checkout = () => {
   }, [bookingData.selectedRoom, roomBookingsData]);
 
   // RTK Query mutation for creating bookings
-  const [createBooking, { isLoading: isCreatingBooking }] = useCreateBookingMutation();
+  const [createBooking] = useCreateBookingMutation();
 
   interface GuestInfo {
     firstName: string;
@@ -86,12 +100,6 @@ const Checkout = () => {
     validId: File | null;
     validIdPreview: string;
   }
-
-  useEffect (() => {
-    setTimeout(() => {
-
-    })
-  },[])
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -125,30 +133,6 @@ const Checkout = () => {
     guestKit: 0,
     extraSlippers: 0,
   });
-
-  const totalGuests = formData.adults + formData.children + formData.infants;
-
-  // Update additional guests array when adults/children count changes
-  useEffect(() => {
-    const totalAdditionalGuests = formData.adults + formData.children - 1; // -1 for main guest
-    const currentLength = additionalGuests.length;
-
-    if (totalAdditionalGuests > currentLength) {
-      // Add new guests
-      const newGuests = Array(totalAdditionalGuests - currentLength).fill(null).map(() => ({
-        firstName: "",
-        lastName: "",
-        age: "",
-        gender: "",
-        validId: null,
-        validIdPreview: "",
-      }));
-      setAdditionalGuests([...additionalGuests, ...newGuests]);
-    } else if (totalAdditionalGuests < currentLength) {
-      // Remove excess guests
-      setAdditionalGuests(additionalGuests.slice(0, totalAdditionalGuests));
-    }
-  }, [formData.adults, formData.children]);
 
   // Calculate number of days for multi-day stay
   const calculateNumberOfDays = (): number => {
@@ -199,6 +183,32 @@ const Checkout = () => {
 
   const totalAmount = roomRate + securityDeposit + addOnsTotal;
   const remainingBalance = totalAmount - downPayment;
+  const totalGuests = formData.adults + formData.children + formData.infants;
+
+  // Update additional guests array when adults/children count changes
+  const updateAdditionalGuests = (adults: number, children: number) => {
+    const totalAdditionalGuests = adults + children - 1; // -1 for main guest
+    setAdditionalGuests(prev => {
+      const currentLength = prev.length;
+
+      if (totalAdditionalGuests > currentLength) {
+        // Add new guests
+        const newGuests = Array(totalAdditionalGuests - currentLength).fill(null).map(() => ({
+          firstName: "",
+          lastName: "",
+          age: "",
+          gender: "",
+          validId: null,
+          validIdPreview: "",
+        }));
+        return [...prev, ...newGuests];
+      } else if (totalAdditionalGuests < currentLength) {
+        // Remove excess guests
+        return prev.slice(0, totalAdditionalGuests);
+      }
+      return prev;
+    });
+  };
 
   // Create a function to check if a date is unavailable (booked or blocked)
   const isDateUnavailable = useMemo(() => {
@@ -207,7 +217,7 @@ const Checkout = () => {
       checkDate.setHours(0, 0, 0, 0);
 
       // Check if the date falls within any existing booking's date range
-      const isBooked = roomBookingsData?.data?.some((booking: any) => {
+      const isBooked = roomBookingsData?.data?.some((booking: Booking) => {
         // Only block dates for approved/confirmed/checked-in bookings
         // Pending bookings don't block dates until approved
         const approvedStatuses = ['approved', 'confirmed', 'check_in', 'checked-in'];
@@ -226,7 +236,7 @@ const Checkout = () => {
       });
 
       // Check if the date is in blocked_dates from the room
-      const isBlocked = bookingData.selectedRoom?.blocked_dates?.some((blocked: any) => {
+      const isBlocked = bookingData.selectedRoom?.blocked_dates?.some((blocked: BlockedDate) => {
         const fromDate = new Date(blocked.from_date);
         fromDate.setHours(0, 0, 0, 0);
         const toDate = new Date(blocked.to_date);
@@ -255,17 +265,28 @@ const Checkout = () => {
         toast.error("Maximum 4 guests allowed (adults + children). Infants are not counted.");
         return;
       }
-    }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        type === "checkbox"
-          ? (e.target as HTMLInputElement).checked
-          : type === "number"
-          ? parseInt(value) || 0
-          : value,
-    }));
+      // Update formData
+      const updatedFormData = {
+        ...formData,
+        [name]: type === "number" ? newValue : value,
+      };
+
+      setFormData(updatedFormData);
+
+      // Update additionalGuests directly
+      updateAdditionalGuests(currentAdults, currentChildren);
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]:
+          type === "checkbox"
+            ? (e.target as HTMLInputElement).checked
+            : type === "number"
+            ? parseInt(value) || 0
+            : value,
+      }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'payment' | 'id', guestIndex?: number) => {
@@ -331,7 +352,7 @@ const Checkout = () => {
     // Auto-calculate check-out date if check-in date is already selected
     if (bookingData.checkInDate && selectedStayType) {
       const checkInDate = new Date(bookingData.checkInDate);
-      let checkOutDate = new Date(checkInDate);
+      const checkOutDate = new Date(checkInDate);
 
       if (selectedStayType === "10 Hours - ₱1,599") {
         // 10 hours: check-in 2:00 PM, check-out 12:00 AM next day
@@ -459,8 +480,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   try {
     setIsLoading(true);
 
-    // Generate booking ID
-    const bookingId = `BK${Date.now()}`;
+    // Use the booking ID generated at component mount
+    const bookingId = bookingIdState;
 
     // Convert payment proof to base64 if it's a File
     let paymentProofBase64 = '';
@@ -507,9 +528,10 @@ const handleSubmit = async (e: React.FormEvent) => {
     );
 
     // Prepare booking data for database
+    const sessionUser = session?.user as SessionUser | undefined;
     const bookingRequestData = {
       booking_id: bookingId,
-      user_id: (session?.user as any)?.id || null, // NULL for guest, UUID for logged-in users
+      user_id: sessionUser?.id || null, // NULL for guest, UUID for logged-in users
       guest_first_name: formData.firstName,
       guest_last_name: formData.lastName,
       guest_age: formData.age,
@@ -547,7 +569,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         toast.success(`Booking Submitted Successfully!\n\nYour booking ID is: ${bookingId}\n\nStatus: Pending Admin Approval\n\nYou will receive a confirmation email once the admin approves your booking.`);
 
         // Clear form and redirect based on user role
-        const userRole = (session?.user as any)?.role;
+        const userRole = sessionUser?.role;
         if (userRole === 'Owner') {
           router.push('/admin/owners');
         } else {
@@ -557,10 +579,13 @@ const handleSubmit = async (e: React.FormEvent) => {
         setIsLoading(false);
         toast.error('Failed to create booking. Please try again or contact support.');
       }
-    } catch (mutationError: any) {
+    } catch (mutationError: unknown) {
       setIsLoading(false);
       console.error('RTK Query mutation error:', mutationError);
-      toast.error(mutationError?.data?.error || 'An error occurred. Please try again or contact support.');
+      const errorMessage = mutationError && typeof mutationError === 'object' && 'data' in mutationError
+        ? (mutationError.data as { error?: string })?.error
+        : undefined;
+      toast.error(errorMessage || 'An error occurred. Please try again or contact support.');
     }
 
   } catch (error) {
@@ -880,9 +905,11 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                     {formData.validIdPreview && (
                       <div className="mt-4">
-                        <img
+                        <Image
                           src={formData.validIdPreview}
                           alt="Valid ID preview"
+                          width={300}
+                          height={200}
                           className="max-w-xs mx-auto rounded-lg shadow-md border-2 border-green-500"
                         />
                         <p className="text-sm text-green-600 mt-2 font-medium">✓ ID uploaded successfully</p>
@@ -1055,9 +1082,11 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                           {guest.validIdPreview && (
                             <div className="mt-4">
-                              <img
+                              <Image
                                 src={guest.validIdPreview}
                                 alt="Valid ID preview"
+                                width={300}
+                                height={200}
                                 className="max-w-xs mx-auto rounded-lg shadow-md border-2 border-green-500"
                               />
                               <p className="text-sm text-green-600 mt-2 font-medium">✓ ID uploaded successfully</p>
@@ -1180,8 +1209,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <div>
                       <DatePicker
                         label="Check-in Date *"
-                        value={bookingData.checkInDate ? parseDate(bookingData.checkInDate) as any : undefined}
-                        onChange={(date: any) => {
+                        value={bookingData.checkInDate ? parseDate(bookingData.checkInDate) : undefined}
+                        onChange={(date: DateValue | null) => {
                           if (date) {
                             const dateStr = `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`;
                             dispatch(setCheckInDate(dateStr));
@@ -1217,20 +1246,20 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <div>
                       <DatePicker
                         label="Check-out Date *"
-                        value={bookingData.checkOutDate ? parseDate(bookingData.checkOutDate) as any : undefined}
-                        onChange={(date: any) => {
+                        value={bookingData.checkOutDate ? parseDate(bookingData.checkOutDate) : undefined}
+                        onChange={(date: DateValue | null) => {
                           if (date) {
                             const dateStr = `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`;
                             dispatch(setCheckOutDate(dateStr));
                           }
                         }}
-                        minValue={bookingData.checkInDate ? parseDate(bookingData.checkInDate) as any : today(getLocalTimeZone())}
+                        minValue={bookingData.checkInDate ? parseDate(bookingData.checkInDate) : today(getLocalTimeZone())}
                         maxValue={
                           // For 10 hours and 21 hours, max is same as check-in date + 1 day
                           (formData.stayType === "10 Hours - ₱1,599" || formData.stayType.includes("21 Hours")) && bookingData.checkInDate
                             ? (() => {
                                 const maxDate = parseDate(bookingData.checkInDate);
-                                return parseDate(`${maxDate.year}-${String(maxDate.month).padStart(2, '0')}-${String(maxDate.day + 1).padStart(2, '0')}`) as any;
+                                return parseDate(`${maxDate.year}-${String(maxDate.month).padStart(2, '0')}-${String(maxDate.day + 1).padStart(2, '0')}`);
                               })()
                             : undefined
                         }
@@ -1275,7 +1304,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                             if (formData.stayType === "10 Hours - ₱1,599") {
                               // Add 10 hours
                               let newHours = hours + 10;
-                              let newMinutes = minutes;
+                              const newMinutes = minutes;
 
                               if (newHours >= 24) {
                                 newHours -= 24;
@@ -1285,7 +1314,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                             } else if (formData.stayType.includes("21 Hours")) {
                               // Add 21 hours
                               let newHours = hours + 21;
-                              let newMinutes = minutes;
+                              const newMinutes = minutes;
 
                               if (newHours >= 24) {
                                 newHours -= 24;
@@ -1769,9 +1798,11 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </label>
                     {formData.paymentProofPreview && (
                       <div className="mt-4">
-                        <img
+                        <Image
                           src={formData.paymentProofPreview}
                           alt="Payment proof preview"
+                          width={300}
+                          height={200}
                           className="max-w-xs mx-auto rounded-lg shadow-md"
                         />
                         <p className="text-sm text-green-600 mt-2">✓ File uploaded</p>

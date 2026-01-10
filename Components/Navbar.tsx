@@ -4,17 +4,15 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
 import {
   User,
   LogOut,
   ChevronDown,
-  Moon,
-  Sun,
   Calendar,
   Heart,
   HelpCircle,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import HelpSidebar from "./HelpSidebar";
 
 interface User {
@@ -31,15 +29,14 @@ const Navbar = () => {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
-  const { theme, setTheme } = useTheme();
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const menuItems = ["Havens", "Contacts", "Location", "About"];
 
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const menuItems = ["Havens", "Contacts", "Location", "About"];
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -74,9 +71,11 @@ const Navbar = () => {
         {/* Logo */}
         <Link href={"/"}>
           <div className="flex items-center gap-1 cursor-pointer">
-            <img
+            <Image
               src="/haven_logo.png"
               alt="Staycation Haven Logo"
+              width={24}
+              height={24}
               className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
             />
             <span className="text-xl sm:text-2xl font-display text-brand-primary dark:text-brand-primary">taycation Haven</span>
@@ -132,10 +131,12 @@ const Navbar = () => {
               >
                 {(session.user as User).profile_image_url ||
                 (session.user as User).image ? (
-                  <img
+                  <Image
                     src={(session.user as User).profile_image_url ||
-                    (session.user as User).image}
+                    (session.user as User).image || ''}
                     alt={(session.user as User).name || "User"}
+                    width={32}
+                    height={32}
                     className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
                   />
                 ) : (
@@ -160,10 +161,12 @@ const Navbar = () => {
                     <div className="flex items-center gap-2 sm:gap-3">
                       {(session.user as User).profile_image_url ||
                       (session.user as User).image ? (
-                        <img
+                        <Image
                           src={(session.user as User).profile_image_url ||
-                          (session.user as User).image}
+                          (session.user as User).image || ''}
                           alt={(session.user as User).name || "User"}
+                          width={48}
+                          height={48}
                           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
                         />
                       ) : (
@@ -250,10 +253,12 @@ const Navbar = () => {
               >
                 {(session.user as User).profile_image_url ||
                 (session.user as User).image ? (
-                  <img
+                  <Image
                     src={(session.user as User).profile_image_url ||
-                    (session.user as User).image}
+                    (session.user as User).image || ''}
                     alt={(session.user as User).name || "User"}
+                    width={24}
+                    height={24}
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 ) : (
@@ -275,10 +280,12 @@ const Navbar = () => {
                     <div className="flex items-center gap-2">
                       {(session.user as User).profile_image_url ||
                       (session.user as User).image ? (
-                        <img
+                        <Image
                           src={(session.user as User).profile_image_url ||
-                          (session.user as User).image}
+                          (session.user as User).image || ''}
                           alt={(session.user as User).name || "User"}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
@@ -426,10 +433,12 @@ const Navbar = () => {
                 <div className="flex items-center gap-3 p-3 bg-brand-primary/10 dark:bg-brand-primary/20 rounded-lg border-2 border-brand-primary dark:border-brand-primary">
                   {(session.user as User).profile_image_url ||
                   (session.user as User).image ? (
-                    <img
+                    <Image
                       src={(session.user as User).profile_image_url ||
-                      (session.user as User).image}
+                      (session.user as User).image || ''}
                       alt={(session.user as User).name || "User"}
+                      width={48}
+                      height={48}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (

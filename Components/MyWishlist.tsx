@@ -1,22 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { Heart, MapPin, Star, Trash2 } from 'lucide-react';
+import { Heart, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
 import { useGetUserWishlistQuery, useRemoveFromWishlistMutation } from '@/redux/api/wishlistApi';
+
+interface WishlistItem {
+  id: string;
+  room_name: string;
+  images?: string[];
+  tower?: string;
+  price: number;
+  haven_id: string;
+}
 
 interface MyWishlistPageProps {
   initialData: {
     success: boolean;
-    data: any[];
+    data: WishlistItem[];
   };
   userId: string;
 }
 
 const MyWishlistPage = ({ initialData, userId }: MyWishlistPageProps) => {
   // RTK Query hooks - skip if we have initial data on first render
-  const { data: wishlistData, isLoading, error, refetch } = useGetUserWishlistQuery(userId);
+  const { data: wishlistData, refetch } = useGetUserWishlistQuery(userId);
 
   const [removeFromWishlist, { isLoading: isRemoving }] = useRemoveFromWishlistMutation();
 
@@ -67,7 +76,7 @@ const MyWishlistPage = ({ initialData, userId }: MyWishlistPageProps) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wishlistItems.map((item: any) => {
+            {wishlistItems.map((item: WishlistItem) => {
               const firstImage = Array.isArray(item.images) && item.images.length > 0
                 ? item.images[0]
                 : '/Images/bg.jpg';
@@ -79,9 +88,11 @@ const MyWishlistPage = ({ initialData, userId }: MyWishlistPageProps) => {
                 >
                   {/* Room Image */}
                   <div className="relative h-64">
-                    <img
+                    <Image
                       src={firstImage}
                       alt={item.room_name}
+                      width={400}
+                      height={300}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <button

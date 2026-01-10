@@ -41,9 +41,15 @@ export default function SettingsPage() {
     timezone: "GMT+08",
   });
 
+  // Sync theme with appearance state using requestAnimationFrame to avoid cascading renders
   useEffect(() => {
     if (theme && theme !== appearance.theme) {
-      setAppearance((prev) => ({ ...prev, theme }));
+      // Schedule the state update for the next animation frame
+      const rafId = requestAnimationFrame(() => {
+        setAppearance((prev) => ({ ...prev, theme }));
+      });
+      
+      return () => cancelAnimationFrame(rafId);
     }
   }, [theme, appearance.theme]);
 

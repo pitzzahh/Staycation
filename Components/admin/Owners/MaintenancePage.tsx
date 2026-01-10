@@ -1,6 +1,6 @@
 'use client';
 
-import { Wrench, AlertCircle, CheckCircle, Clock, Calendar } from "lucide-react";
+import { Wrench, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { useState } from "react";
 
 const MaintenancePage = () => {

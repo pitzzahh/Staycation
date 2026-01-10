@@ -4,7 +4,6 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  Home,
   Lock,
   LogIn,
   User,
@@ -15,6 +14,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import axios from "axios";
+import Image from "next/image";
 
 interface LoginFormState {
   email: string;
@@ -124,13 +124,19 @@ const AdminLogin = () => {
             router.push("/admin/owners")
         }
       }
-    } catch(error: any) {
+    } catch(error: unknown) {
       console.log("Login error: ", error);
 
-      const errorMessage = 
-        error?.response?.data?.error || 
-        error?.response?.data?.message || 
-        error?.message || 
+      const errorMessage =
+        error && typeof error === 'object' && 'response' in error &&
+        error.response && typeof error.response === 'object' && 'data' in error.response &&
+        error.response.data && typeof error.response.data === 'object' &&
+        ('error' in error.response.data && typeof error.response.data.error === 'string'
+          ? error.response.data.error
+          : 'message' in error.response.data && typeof error.response.data.message === 'string'
+          ? error.response.data.message
+          : null) ||
+        (error instanceof Error ? error.message : null) ||
         "An error occurred. Please try again.";
       
       setFormData((prev) => ({
@@ -154,8 +160,7 @@ const AdminLogin = () => {
         <div className="text-center mb-10 animate-in fade-in-slide-from-top duration-700">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 flex items-center justify-center">
-              {/* <Home className="w-8 h-8 text-white" /> */}
-              <img src="/Images/shlogo.png" alt="no-logo" className="w-full h-full rounded-full"/>
+              <Image src="/Images/shlogo.png" alt="Staycation Haven Logo" width={64} height={64} className="w-full h-full rounded-full"/>
             </div>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-2">

@@ -5,13 +5,26 @@ import { useState } from "react";
 import { useGetBookingsQuery, useUpdateBookingStatusMutation } from "@/redux/api/bookingsApi";
 import Image from "next/image";
 
+interface AdditionalGuest {
+  name: string;
+  age?: number;
+  [key: string]: unknown;
+}
+
+interface Booking {
+  id: string;
+  status: string;
+  additional_guests?: AdditionalGuest[];
+  [key: string]: unknown;
+}
+
 const ReservationsPage = () => {
   const [filter, setFilter] = useState("all");
   const { data, isLoading, refetch } = useGetBookingsQuery({});
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
-  const reservations = (data as any[]) || [];
+  const reservations: Booking[] = (data as Booking[]) || [];
 
   const handleApprove = async (bookingId: string) => {
     try {
@@ -50,7 +63,7 @@ const ReservationsPage = () => {
   const handleCheckIn = async (bookingId: string) => {
     try {
       // Find the booking details
-      const booking = reservations.find((r: any) => r.id === bookingId);
+      const booking = reservations.find((r: Booking) => r.id === bookingId);
       if (!booking) {
         alert('Booking not found');
         return;
@@ -104,7 +117,7 @@ const ReservationsPage = () => {
   const handleCheckOut = async (bookingId: string) => {
     try {
       // Find the booking details
-      const booking = reservations.find((r: any) => r.id === bookingId);
+      const booking = reservations.find((r: Booking) => r.id === bookingId);
       if (!booking) {
         alert('Booking not found');
         return;
@@ -169,9 +182,9 @@ const ReservationsPage = () => {
 
   const filteredReservations = filter === "all"
     ? reservations
-    : reservations.filter((r: any) => r.status === filter);
+    : reservations.filter((r: Booking) => r.status === filter);
 
-  const handleViewDetails = (booking: any) => {
+  const handleViewDetails = (booking: Booking) => {
     setSelectedBooking(booking);
   };
 
@@ -284,7 +297,7 @@ const ReservationsPage = () => {
                     Additional Guests ({selectedBooking.additional_guests.length})
                   </h3>
                   <div className="space-y-6">
-                    {selectedBooking.additional_guests.map((guest: any, index: number) => {
+                    {selectedBooking.additional_guests.map((guest: AdditionalGuest, index: number) => {
                       const guestNumber = index + 2;
                       const isAdult = index < selectedBooking.adults - 1;
                       const guestType = isAdult ? `Adult ${guestNumber}` : `Child ${guestNumber - (selectedBooking.adults - 1)}`;
@@ -436,7 +449,7 @@ const ReservationsPage = () => {
                     Add-ons Selected
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {Object.entries(selectedBooking.add_ons).map(([key, value]: [string, any]) => {
+                    {Object.entries(selectedBooking.add_ons).map(([key, value]: [string, unknown]) => {
                       if (value > 0) {
                         return (
                           <div key={key} className="bg-white p-3 rounded-lg">
@@ -586,7 +599,7 @@ const ReservationsPage = () => {
             <p className="text-gray-600">There are no {filter !== 'all' ? filter : ''} reservations at the moment.</p>
           </div>
         ) : (
-          filteredReservations.map((reservation: any) => (
+          filteredReservations.map((reservation: Booking) => (
             <div key={reservation.id} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow">
               <div className="flex flex-col md:flex-row gap-6">
                 {/* Left Section */}

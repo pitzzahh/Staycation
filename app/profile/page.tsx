@@ -3,9 +3,10 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { User, Mail, Calendar, Shield, MapPin, Phone, Edit } from "lucide-react";
+import { User, Mail, Calendar, Shield, Edit } from "lucide-react";
 import Footer from "@/Components/Footer";
 import LoadingAnimation from "@/Components/LoadingAnimation";
+import Image from "next/image";
 
 const ProfilePage = () => {
   const { data: session, status } = useSession();
@@ -75,10 +76,12 @@ const ProfilePage = () => {
             <div className="bg-gradient-to-r from-orange-500 to-yellow-500 h-32 relative">
               <div className="absolute -bottom-16 left-8">
                 {session.user.image ? (
-                  <img
+                  <Image
                     src={session.user.image}
                     alt={session.user.name || "User"}
-                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+                    width={128}
+                    height={128}
+                    className="rounded-full border-4 border-white shadow-lg object-cover"
                   />
                 ) : (
                   <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">

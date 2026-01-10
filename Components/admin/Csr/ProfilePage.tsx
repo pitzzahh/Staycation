@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, X } from "lucide-react";
+import Image from "next/image";
 
 interface AdminUser {
   id?: string;
@@ -86,9 +87,9 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
         }
 
         setEmployee(payload?.data ?? null);
-      } catch (err: any) {
-        if (err?.name === "AbortError") return;
-        setError(err?.message || "Failed to load employee profile");
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "Failed to load employee profile");
       } finally {
         setIsLoading(false);
       }
@@ -155,10 +156,16 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
               <div className="flex flex-col items-center">
                 <div className="w-32 h-32 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-xl overflow-hidden">
                   {profileImage ? (
-                    <img
+                    <Image
                       src={profileImage}
                       alt={displayName}
+                      width={128}
+                      height={128}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
                     />
                   ) : (
                     <span>{displayName?.charAt(0).toUpperCase()}</span>

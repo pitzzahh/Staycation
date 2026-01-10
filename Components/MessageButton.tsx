@@ -1,8 +1,7 @@
 "use client";
 
-import { MessageCircle, X, Send, Phone, Mail, HelpCircle, Calendar } from "lucide-react";
+import { MessageCircle, X, Send, HelpCircle, Calendar } from "lucide-react";
 import { useState } from "react";
-import Link from "next/link";
 
 const MessageButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +11,31 @@ const MessageButton = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [bookingId, setBookingId] = useState("");
-  const [bookingData, setBookingData] = useState<any>(null);
+  const [bookingData, setBookingData] = useState<{
+    booking_id: string;
+    status: string;
+    guest_first_name: string;
+    guest_last_name: string;
+    guest_email: string;
+    guest_phone: string;
+    room_name?: string;
+    check_in_date: string;
+    check_out_date: string;
+    check_in_time: string;
+    check_out_time: string;
+    adults: number;
+    children: number;
+    infants: number;
+    payment_method: string;
+    room_rate: number;
+    security_deposit: number;
+    add_ons_total: number;
+    total_amount: number;
+    down_payment: number;
+    remaining_balance: number;
+    rejection_reason?: string;
+    created_at?: string;
+  } | null>(null);
   const [bookingError, setBookingError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showFullDetails, setShowFullDetails] = useState(false);
@@ -78,7 +101,7 @@ const MessageButton = () => {
       } else {
         setBookingError("Booking not found. Please check your booking ID.");
       }
-    } catch (error) {
+    } catch {
       setBookingError("Failed to fetch booking. Please try again.");
     } finally {
       setIsLoading(false);

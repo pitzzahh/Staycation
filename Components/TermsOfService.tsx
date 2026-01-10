@@ -31,7 +31,7 @@ const TermsOfService = () => {
             <div className="bg-white rounded-xl border border-gray-200 p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                By accessing and using Staycation Haven's website and services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our services.
+                By accessing and using Staycation Haven&apos;s website and services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our services.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 These Terms of Service apply to all users of the site, including without limitation users who are browsers, vendors, customers, merchants, and/or contributors of content.
@@ -139,7 +139,7 @@ const TermsOfService = () => {
                 </li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-4">
-                We reserve the right to terminate a guest's stay immediately without refund for violations of our terms or house rules.
+                We reserve the right to terminate a guest&apos;s stay immediately without refund for violations of our terms or house rules.
               </p>
             </div>
           </section>

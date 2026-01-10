@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   Search,
@@ -14,6 +14,7 @@ import {
   X,
   Loader2,
 } from "lucide-react";
+import Image from "next/image";
 import {
   useGetConversationsQuery,
   useGetMessagesQuery,
@@ -56,6 +57,58 @@ interface Conversation {
   unread_count?: number;
 }
 
+// Helper functions defined outside the component to avoid conditional hooks
+const formatTime = (timestamp: string) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m`;
+  if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h`;
+  return date.toLocaleDateString();
+};
+
+const formatMessageTime = (timestamp: string) => {
+  // Convert UTC timestamp to Philippine time (UTC+8)
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString("en-PH", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Manila",
+    hour12: true,
+  });
+};
+
+const getActiveStatus = (lastMessageTime: string | undefined, type: string) => {
+  if (!lastMessageTime || type !== "internal") {
+    return { isActive: false, statusText: type === "internal" ? "Offline" : "Guest" };
+  }
+
+  const now = new Date();
+  const lastActive = new Date(lastMessageTime);
+  const diffMs = now.getTime() - lastActive.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  // Active if last message was within 3 minutes
+  if (diffMins < 3) {
+    return { isActive: true, statusText: "Active now" };
+  }
+
+  // Show last active time
+  if (diffMins < 60) {
+    return { isActive: false, statusText: `Active ${diffMins}m ago` };
+  }
+
+  if (diffMins < 1440) {
+    const hours = Math.floor(diffMins / 60);
+    return { isActive: false, statusText: `Active ${hours}h ago` };
+  }
+
+  return { isActive: false, statusText: "Offline" };
+};
+
 // Skeleton component defined outside the main component
 const Skeleton = ({ className }: { className: string }) => (
   <div className={`animate-pulse bg-gray-200 dark:bg-gray-800 ${className}`} />
@@ -66,10 +119,11 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
   const userId = (session?.user as { id?: string })?.id;
 
   const [search, setSearch] = useState("");
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasInitializedActiveId = useRef(false);
+  const hasProcessedInitialConversationId = useRef(false);
 
   // Fetch conversations
   const {
@@ -80,6 +134,48 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     { userId: userId || "" },
     { skip: !userId, pollingInterval: 5000 }
   );
+
+  const conversations = useMemo(() => conversationsData?.data || [], [conversationsData?.data]);
+
+  // Compute initial active conversation ID
+  const getInitialActiveId = useCallback((): string | null => {
+    if (conversations.length === 0) return null;
+
+    if (initialConversationId) {
+      const exists = conversations.some((c: Conversation) => c.id === initialConversationId);
+      if (exists) return initialConversationId;
+    }
+
+    return conversations[0]?.id || null;
+  }, [conversations, initialConversationId]);
+
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Initialize activeId once when conversations are loaded - FIXED VERSION
+  useEffect(() => {
+    // Only run this effect once when conversations are loaded and we haven't initialized activeId yet
+    if (conversations.length > 0 && !hasInitializedActiveId.current) {
+      const initialActiveId = getInitialActiveId();
+      if (initialActiveId !== activeId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveId(initialActiveId);
+      }
+      hasInitializedActiveId.current = true;
+    }
+  }, [conversations.length, activeId, getInitialActiveId]);
+
+  // Update activeId when initialConversationId changes - FIXED VERSION
+  useEffect(() => {
+    // Skip if we've already processed the initialConversationId
+    if (initialConversationId && conversations.length > 0 && !hasProcessedInitialConversationId.current) {
+      const exists = conversations.some((c: Conversation) => c.id === initialConversationId);
+      if (exists && initialConversationId !== activeId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveId(initialConversationId);
+      }
+      hasProcessedInitialConversationId.current = true;
+    }
+  }, [initialConversationId, conversations, activeId]);
 
   // Fetch messages for active conversation
   const {
@@ -95,7 +191,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [markAsRead] = useMarkMessagesAsReadMutation();
 
-  const conversations = useMemo(() => conversationsData?.data || [], [conversationsData?.data]);
   const messages = useMemo(() => messagesData?.data || [], [messagesData?.data]);
   const { data: employeesData } = useGetEmployeesQuery({});
   const employees = useMemo(() => employeesData?.data || [], [employeesData?.data]);
@@ -119,25 +214,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     return map;
   }, [employees]);
 
-  // Set first conversation as active on load
-  useEffect(() => {
-    if (conversations.length === 0) return;
-
-    if (initialConversationId && !activeId) {
-      const exists = conversations.some((c: Conversation) => c.id === initialConversationId);
-      if (exists) {
-        setActiveId(initialConversationId);
-      } else {
-        setActiveId(conversations[0].id);
-      }
-      return;
-    }
-
-    if (!activeId) {
-      setActiveId(conversations[0].id);
-    }
-  }, [conversations, activeId, initialConversationId]);
-
   // Mark messages as read when opening a conversation
   useEffect(() => {
     if (activeId && userId) {
@@ -154,7 +230,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     scrollToBottom();
   }, [messages]);
 
-  const getConversationDisplayName = (conversation: Conversation | undefined | null) => {
+  const getConversationDisplayName = useCallback((conversation: Conversation | undefined | null) => {
     if (!conversation) return "";
     if (conversation.type === "guest") {
       return conversation.name;
@@ -172,7 +248,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     }
 
     return conversation.name;
-  };
+  }, [employeeMap, userId]);
 
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeId) ?? conversations[0],
@@ -190,6 +266,50 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
 
   const showSkeletonConversations = isLoadingConversations && conversations.length === 0;
   const showSkeletonMessages = isLoadingMessages && messages.length === 0;
+
+  const filteredConversations = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return conversations;
+    return conversations.filter((c: Conversation) => {
+      return (
+        c.name?.toLowerCase().includes(term) ||
+        (c.last_message && c.last_message.toLowerCase().includes(term)) ||
+        c.type.toLowerCase().includes(term)
+      );
+    });
+  }, [search, conversations]);
+
+  const handleSendMessage = async () => {
+    const text = draft.trim();
+    if (!text || !activeId || !userId) return;
+
+    try {
+      await sendMessage({
+        conversation_id: activeId,
+        sender_id: userId,
+        sender_name: session?.user?.name || "CSR",
+        message_text: text,
+      }).unwrap();
+
+      setDraft("");
+      refetchMessages();
+      refetchConversations();
+    } catch (error: unknown) {
+      console.error("Failed to send message:", error);
+      const errorMessage = error && typeof error === 'object' && 'data' in error
+        ? (error as { data?: { error?: string } }).data?.error
+        : "Failed to send message";
+      toast.error(errorMessage || "Failed to send message");
+    }
+  };
+
+  // Use useCallback for memoized functions - MOVED OUTSIDE CONDITIONAL RENDER
+  const memoizedFormatTime = useCallback((timestamp: string) => formatTime(timestamp), []);
+  const memoizedFormatMessageTime = useCallback((timestamp: string) => formatMessageTime(timestamp), []);
+  const memoizedGetActiveStatus = useCallback(
+    (lastMessageTime: string | undefined, type: string) => getActiveStatus(lastMessageTime, type),
+    []
+  );
 
   if (showSkeletonConversations) {
     return (
@@ -257,93 +377,6 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
     );
   }
 
-  const filteredConversations = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return conversations;
-    return conversations.filter((c: Conversation) => {
-      return (
-        c.name?.toLowerCase().includes(term) ||
-        (c.last_message && c.last_message.toLowerCase().includes(term)) ||
-        c.type.toLowerCase().includes(term)
-      );
-    });
-  }, [search, conversations]);
-
-  const handleSendMessage = async () => {
-    const text = draft.trim();
-    if (!text || !activeId || !userId) return;
-
-    try {
-      await sendMessage({
-        conversation_id: activeId,
-        sender_id: userId,
-        sender_name: session?.user?.name || "CSR",
-        message_text: text,
-      }).unwrap();
-
-      setDraft("");
-      refetchMessages();
-      refetchConversations();
-    } catch (error: unknown) {
-      console.error("Failed to send message:", error);
-      const errorMessage = error && typeof error === 'object' && 'data' in error 
-        ? (error as { data?: { error?: string } }).data?.error 
-        : "Failed to send message";
-      toast.error(errorMessage || "Failed to send message");
-    }
-  };
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h`;
-    return date.toLocaleDateString();
-  };
-
-  const formatMessageTime = (timestamp: string) => {
-    // Convert UTC timestamp to Philippine time (UTC+8)
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString("en-PH", {
-      hour: "numeric",
-      minute: "2-digit",
-      timeZone: "Asia/Manila",
-      hour12: true,
-    });
-  };
-
-  const getActiveStatus = (lastMessageTime: string | undefined, type: string) => {
-    if (!lastMessageTime || type !== "internal") {
-      return { isActive: false, statusText: type === "internal" ? "Offline" : "Guest" };
-    }
-
-    const now = new Date();
-    const lastActive = new Date(lastMessageTime);
-    const diffMs = now.getTime() - lastActive.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-
-    // Active if last message was within 3 minutes
-    if (diffMins < 3) {
-      return { isActive: true, statusText: "Active now" };
-    }
-
-    // Show last active time
-    if (diffMins < 60) {
-      return { isActive: false, statusText: `Active ${diffMins}m ago` };
-    }
-
-    if (diffMins < 1440) {
-      const hours = Math.floor(diffMins / 60);
-      return { isActive: false, statusText: `Active ${hours}h ago` };
-    }
-
-    return { isActive: false, statusText: "Offline" };
-  };
-
   return (
     <div className="animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-4">
@@ -400,7 +433,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                 filteredConversations.map((c) => {
                   const isActive = c.id === activeId;
                   const conversationName = getConversationDisplayName(c);
-                  const activeStatus = getActiveStatus(c.last_message_time, c.type);
+                  const activeStatus = memoizedGetActiveStatus(c.last_message_time, c.type);
                   const otherParticipantIds = userId
                     ? (c.participant_ids || []).filter((id: string) => id !== userId)
                     : (c.participant_ids || []);
@@ -425,14 +458,15 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                       <div className="relative">
                         <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center">
                           {avatarUrl ? (
-                            <img
+                            <Image
                               src={avatarUrl}
                               alt={conversationName || c.name || "Conversation"}
+                              width={44}
+                              height={44}
                               className="w-11 h-11 rounded-full object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.src = "";
-                                target.onerror = null;
+                                target.style.display = 'none';
                               }}
                             />
                           ) : (
@@ -450,7 +484,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                           </p>
                           <span className="text-xs text-gray-400">•</span>
                           <p className="text-xs text-gray-400 whitespace-nowrap">
-                            {c.last_message_time ? formatTime(c.last_message_time) : ""}
+                            {c.last_message_time ? memoizedFormatTime(c.last_message_time) : ""}
                           </p>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -479,14 +513,15 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {activeConversationAvatarUrl ? (
-                        <img
+                        <Image
                           src={activeConversationAvatarUrl}
                           alt={activeConversationName || activeConversation.name || "Conversation"}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = "";
-                            target.onerror = null;
+                            target.style.display = 'none';
                           }}
                         />
                       ) : (
@@ -500,7 +535,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                         {activeConversationName || activeConversation.name}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {getActiveStatus(activeConversation.last_message_time, activeConversation.type).statusText}
+                        {memoizedGetActiveStatus(activeConversation.last_message_time, activeConversation.type).statusText}
                       </p>
                     </div>
                   </div>
@@ -556,7 +591,7 @@ export default function MessagePage({ onClose, initialConversationId }: MessageP
                             >
                               {m.message_text}
                             </div>
-                            <span className="text-[11px] text-gray-400">{formatMessageTime(m.created_at)}</span>
+                            <span className="text-[11px] text-gray-400">{memoizedFormatMessageTime(m.created_at)}</span>
                           </div>
                         </div>
                       );

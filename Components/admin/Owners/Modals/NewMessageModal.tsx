@@ -5,6 +5,17 @@ import { X, Search, UserCircle, MessageSquare, Loader2 } from "lucide-react";
 import { useGetEmployeesQuery } from "@/redux/api/employeeApi";
 import { useCreateConversationMutation } from "@/redux/api/messagesApi";
 import toast from "react-hot-toast";
+import Image from "next/image";
+
+interface Employee {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  role?: string;
+  department?: string;
+  profile_image_url?: string;
+}
 
 interface NewMessageModalProps {
   isOpen: boolean;
@@ -20,15 +31,14 @@ export default function NewMessageModal({
   onConversationCreated,
 }: NewMessageModalProps) {
   const [search, setSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<Employee | null>(null);
 
   const { data: employeesData, isLoading } = useGetEmployeesQuery({});
   const [createConversation, { isLoading: isCreating }] = useCreateConversationMutation();
 
-  const employees = employeesData?.data || [];
-
   // Filter out current user and filter by search
   const filteredEmployees = useMemo(() => {
+    const employees: Employee[] = employeesData?.data || [];
     const term = search.trim().toLowerCase();
     return employees
       .filter((emp) => emp.id !== currentUserId)
@@ -39,7 +49,7 @@ export default function NewMessageModal({
         const email = emp.email?.toLowerCase() || "";
         return fullName.includes(term) || role.includes(term) || email.includes(term);
       });
-  }, [employees, currentUserId, search]);
+  }, [employeesData?.data, currentUserId, search]);
 
   const handleCreateConversation = async () => {
     if (!selectedUser) {
@@ -66,9 +76,15 @@ export default function NewMessageModal({
       setSelectedUser(null);
       setSearch("");
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create conversation:", error);
-      toast.error(error?.data?.error || "Failed to create conversation");
+      const errorMessage =
+        error && typeof error === 'object' && 'data' in error &&
+        error.data && typeof error.data === 'object' && 'error' in error.data &&
+        typeof error.data.error === 'string'
+        ? error.data.error
+        : "Failed to create conversation";
+      toast.error(errorMessage);
     }
   };
 
@@ -135,15 +151,12 @@ export default function NewMessageModal({
                     <div className="flex items-center gap-4">
                       {/* Avatar */}
                       {employee.profile_image_url ? (
-                        <img
+                        <Image
                           src={employee.profile_image_url}
                           alt={fullName}
+                          width={48}
+                          height={48}
                           className="w-12 h-12 rounded-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = "";
-                            target.onerror = null;
-                          }}
                         />
                       ) : (
                         <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">

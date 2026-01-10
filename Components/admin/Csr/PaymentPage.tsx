@@ -37,13 +37,13 @@ export default function PaymentPage() {
   const [sortField, setSortField] = useState<keyof PaymentRow | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  const payments: PaymentRow[] = [
+  const payments = useMemo(() => [
     {
       booking_id: "BK-001",
       guest: "John Smith",
       amount: "₱25,000",
       payment_proof: "/payment_proofs/sample-proof-1.jpg",
-      status: "Paid",
+      status: "Paid" as PaymentStatus,
       statusColor: "bg-green-100 text-green-700",
     },
     {
@@ -51,7 +51,7 @@ export default function PaymentPage() {
       guest: "Sarah Johnson",
       amount: "₱18,000",
       payment_proof: "/payment_proofs/sample-proof-2.jpg",
-      status: "Pending",
+      status: "Pending" as PaymentStatus,
       statusColor: "bg-yellow-100 text-yellow-700",
     },
     {
@@ -59,7 +59,7 @@ export default function PaymentPage() {
       guest: "Mike Wilson",
       amount: "₱30,000",
       payment_proof: "/payment_proofs/sample-proof-3.jpg",
-      status: "Rejected",
+      status: "Rejected" as PaymentStatus,
       statusColor: "bg-red-100 text-red-700",
     },
     {
@@ -67,7 +67,7 @@ export default function PaymentPage() {
       guest: "Emily Brown",
       amount: "₱22,500",
       payment_proof: "/payment_proofs/sample-proof-4.jpg",
-      status: "Paid",
+      status: "Paid" as PaymentStatus,
       statusColor: "bg-green-100 text-green-700",
     },
     {
@@ -75,7 +75,7 @@ export default function PaymentPage() {
       guest: "David Lee",
       amount: "₱27,500",
       payment_proof: "/payment_proofs/sample-proof-5.jpg",
-      status: "Pending",
+      status: "Pending" as PaymentStatus,
       statusColor: "bg-yellow-100 text-yellow-700",
     },
     {
@@ -83,7 +83,7 @@ export default function PaymentPage() {
       guest: "Sarah Johnson",
       amount: "₱18,000",
       payment_proof: "/payment_proofs/sample-proof-2.jpg",
-      status: "Pending",
+      status: "Pending" as PaymentStatus,
       statusColor: "bg-yellow-100 text-yellow-700",
     },
     {
@@ -91,7 +91,7 @@ export default function PaymentPage() {
       guest: "Mike Wilson",
       amount: "₱30,000",
       payment_proof: "/payment_proofs/sample-proof-3.jpg",
-      status: "Rejected",
+      status: "Rejected" as PaymentStatus,
       statusColor: "bg-red-100 text-red-700",
     },
     {
@@ -99,7 +99,7 @@ export default function PaymentPage() {
       guest: "Emily Brown",
       amount: "₱22,500",
       payment_proof: "/payment_proofs/sample-proof-4.jpg",
-      status: "Paid",
+      status: "Paid" as PaymentStatus,
       statusColor: "bg-green-100 text-green-700",
     },
     {
@@ -107,10 +107,10 @@ export default function PaymentPage() {
       guest: "David Lee",
       amount: "₱27,500",
       payment_proof: "/payment_proofs/sample-proof-5.jpg",
-      status: "Pending",
+      status: "Pending" as PaymentStatus,
       statusColor: "bg-yellow-100 text-yellow-700",
     },
-  ];
+  ], []);
 
   const filteredPayments = useMemo(() => {
     return payments.filter((payment) => {
@@ -225,7 +225,10 @@ export default function PaymentPage() {
             <select
               value={filterStatus}
               onChange={(e) => {
-                setFilterStatus(e.target.value as any);
+                const value = e.target.value;
+                if (value === "all" || ["Paid", "Pending", "Rejected"].includes(value)) {
+                  setFilterStatus(value as "all" | PaymentStatus);
+                }
                 setCurrentPage(1);
               }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-orange-500"

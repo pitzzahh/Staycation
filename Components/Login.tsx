@@ -1,37 +1,19 @@
 "use client";
 
-import { ArrowRight, Mail, Home } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import { useState } from "react";
-import SocialLoginButton from "./SocialLoginButton";
 import Spinner from "./Spinner"
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hooks";
 import { setCheckInDate, setCheckOutDate, setGuests } from "@/redux/slices/bookingSlice";
 import { signIn } from "next-auth/react";
 import Footer from "./Footer";
-
-interface SocialLoginOption {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  hoverColor: string;
-}
+import Image from "next/image";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
-
-  const SocialLoginOptions: SocialLoginOption[] = [
-    {
-      id: "google",
-      name: "Google",
-      icon: <Mail className="w-5 h-5" />,
-      color: "bg-red-600",
-      hoverColor: "bg-red-700",
-    },
-  ];
 
   const handleSocialLogin = async (provider: string) => {
     setIsLoading(true);
@@ -92,9 +74,11 @@ const Login = () => {
                 className="flex items-center gap-1 hover:opacity-80 transition-opacity"
                 aria-label="Go to homepage"
               >
-                <img
+                <Image
                   src="/haven_logo.png"
                   alt="Staycation Haven Logo"
+                  width={24}
+                  height={24}
                   className="w-6 h-6 object-contain"
                 />
                 <span className="text-xl font-display text-brand-primary dark:text-brand-primary">

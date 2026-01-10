@@ -1,14 +1,15 @@
 "use client";
 
-import { X, Upload, User, AlertCircle } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { X, Upload, User } from "lucide-react";
+import { useState, useRef } from "react";
 import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { DatePicker } from "@nextui-org/date-picker";
-import { parseDate } from "@internationalized/date";
+import { parseDate, type DateValue } from "@internationalized/date";
 import { useCreateEmployeeMutation } from "@/redux/api/employeeApi";
 import toast from "react-hot-toast";
 import Image from "next/image";
+
 interface CreateEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -76,20 +77,18 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
     return departmentByRole[formData.role] || [];
   };
 
-  useEffect(() => {
-    if (formData.role) {
-      const rolePrefix = formData.role.substring(0, 3).toUpperCase();
-      const timeStamp = Date.now().toString().slice(-6);
-      const generatedId = `${rolePrefix}-${timeStamp}`;
-      setFormData((prev) => ({ ...prev, employeeId: generatedId }));
-    }
-  }, [formData.role]);
+  const handleRoleChange = (value: string) => {
+    const rolePrefix = value.substring(0, 3).toUpperCase();
+    const timeStamp = Date.now().toString().slice(-6);
+    const generatedId = `${rolePrefix}-${timeStamp}`;
 
-  useEffect(() => {
-    if (formData.role) {
-      setFormData((prev) => ({ ...prev, department: "" }));
-    }
-  }, []);
+    setFormData((prev) => ({
+      ...prev,
+      role: value,
+      employeeId: generatedId,
+      department: ""
+    }));
+  };
 
   // const departments = [
   //   { value: "front-desk", label: "Front Desk" },
@@ -318,10 +317,16 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
         setTouchedFields({});
         onClose();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating employee: ", error);
       const errorMessage =
-        error?.data?.error || error?.message || "Failed to create employee";
+        error && typeof error === 'object' && 'data' in error &&
+        error.data && typeof error.data === 'object' && 'error' in error.data &&
+        typeof error.data.error === 'string'
+        ? error.data.error
+        : error instanceof Error
+        ? error.message
+        : "Failed to create employee";
       toast.error(errorMessage);
     }
   };
@@ -599,10 +604,10 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
                       labelPlacement="outside"
                       value={
                         formData.hireDate
-                          ? (parseDate(formData.hireDate) as any)
+                          ? parseDate(formData.hireDate)
                           : undefined
                       }
-                      onChange={(date: any) => {
+                      onChange={(date: DateValue | null) => {
                         if (date) {
                           const dateStr = `${date.year}-${String(
                             date.month
@@ -631,7 +636,7 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
                       selectedKeys={formData.role ? [formData.role] : []}
                       onSelectionChange={(keys) => {
                         const selectedValue = Array.from(keys)[0] as string;
-                        setFormData({ ...formData, role: selectedValue });
+                        handleRoleChange(selectedValue);
                       }}
                       isRequired
                       classNames={{

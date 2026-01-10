@@ -103,7 +103,7 @@ const CancellationPolicy = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Go to My Bookings</h3>
-                  <p className="text-gray-600">Navigate to the "My Bookings" section from your profile menu.</p>
+                  <p className="text-gray-600">Navigate to the &quot;My Bookings&quot; section from your profile menu.</p>
                 </div>
               </div>
 
@@ -115,7 +115,7 @@ const CancellationPolicy = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Select Your Booking</h3>
-                  <p className="text-gray-600">Find the booking you wish to cancel and click "View Details" or "Cancel Booking."</p>
+                  <p className="text-gray-600">Find the booking you wish to cancel and click &quot;View Details&quot; or &quot;Cancel Booking.&quot;</p>
                 </div>
               </div>
 
@@ -139,7 +139,7 @@ const CancellationPolicy = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Receive Confirmation</h3>
-                  <p className="text-gray-600">You'll receive an email confirmation of your cancellation and refund details.</p>
+                  <p className="text-gray-600">You&apos;ll receive an email confirmation of your cancellation and refund details.</p>
                 </div>
               </div>
             </div>

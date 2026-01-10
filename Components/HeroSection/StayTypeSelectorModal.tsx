@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import { useTransition } from "react";
 import StayTypeCard from "../StayTypeCard";
 import { useAppDispatch } from "@/redux/hooks";
 import {
@@ -34,6 +35,7 @@ const StayTypeSelectorModal = ({
   daysDifference,
   router,
 }: StayTypeSelectorModalProps) => {
+  const [, startTransition] = useTransition();
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<string>("");
@@ -110,16 +112,34 @@ const StayTypeSelectorModal = ({
   ];
 
   useEffect(() => {
-    if (isOpen) {
+  let closeTimer: NodeJS.Timeout | null = null;
+
+  if (isOpen && !shouldRender) {
+    startTransition(() => {
       setShouldRender(true);
-      // Trigger animation after render
-      setTimeout(() => setIsAnimating(true), 10);
-    } else {
+    });
+
+    // Animate in after mount
+    closeTimer = setTimeout(() => {
+      setIsAnimating(true);
+    }, 16); // ~1 frame
+  }
+
+  if (!isOpen && shouldRender) {
+    // Animate out
+    closeTimer = setTimeout(() => {
       setIsAnimating(false);
-      // Remove from DOM after animation completes
-      setTimeout(() => setShouldRender(false), 500);
-    }
-  }, [isOpen]);
+
+      startTransition(() => {
+        setShouldRender(false);
+      });
+    }, 500); // match animation duration
+  }
+
+  return () => {
+    if (closeTimer) clearTimeout(closeTimer);
+  };
+}, [isOpen, shouldRender, startTransition]);
 
   // Auto-scroll to schedule preference when multi-day is selected
   useEffect(() => {

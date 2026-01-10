@@ -12,7 +12,7 @@ const HelpCenter = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Help Center</h1>
           <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-            We're here to assist you 24/7. Reach out to our dedicated support team for any questions or concerns.
+            We&apos;re here to assist you 24/7. Reach out to our dedicated support team for any questions or concerns.
           </p>
         </div>
       </div>
@@ -59,7 +59,7 @@ const HelpCenter = () => {
               <Clock className="w-6 h-6 text-brand-primary" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Support Hours</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">We're available 24/7</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">We&apos;re available 24/7</p>
             <p className="text-gray-900 dark:text-white font-medium">Always Open</p>
           </div>
         </div>
@@ -156,7 +156,7 @@ const HelpCenter = () => {
         <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Still Need Help?</h2>
           <p className="text-gray-600 mb-6">
-            Can't find what you're looking for? Our support team is here to assist you.
+            Can&apos;t find what you&apos;re looking for? Our support team is here to assist you.
           </p>
           <Link href="/contacts" className="inline-block bg-brand-primary hover:bg-brand-primaryDark text-white px-8 py-3 rounded-lg font-medium transition-colors">
             Contact Support

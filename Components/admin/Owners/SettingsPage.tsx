@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Lock, Globe, Mail, Smartphone, Shield, CreditCard } from "lucide-react";
+import { Bell, Mail, Smartphone, Shield, CreditCard } from "lucide-react";
 import { useState } from "react";
 
 const SettingsPage = () => {

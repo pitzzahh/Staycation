@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import {
   Building2,
   Heart,
@@ -136,29 +138,31 @@ const AboutPage = () => {
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
                 Founded in 2020, Staycation Haven was born from a simple idea:
-                not everyone needs a full 24-hour hotel stay. Whether you're
+                not everyone needs a full 24-hour hotel stay. Whether you&apos;re
                 traveling through the city, need a comfortable place to rest
                 between meetings, or want a quick getaway without breaking the
-                bank, we're here for you.
+                bank, we&apos;re here for you.
               </p>
               <p>
-                We've revolutionized urban accommodation by offering flexible
+                We&apos;ve revolutionized urban accommodation by offering flexible
                 booking options – from 6-hour quick stays to multi-day retreats.
                 Our havens are designed with modern travelers in mind, combining
                 comfort, convenience, and affordability.
               </p>
               <p>
-                Today, we're proud to serve thousands of guests across multiple
+                Today, we&apos;re proud to serve thousands of guests across multiple
                 premium locations, maintaining our commitment to quality,
                 cleanliness, and exceptional service.
               </p>
             </div>
           </div>
           <div className="relative h-96 rounded-2xl overflow-hidden border-2 border-gray-200">
-            <img
+            <Image
               src="/Images/haven9_Living_Area_haven_7_1764217597_1817.jpg"
               alt="Staycation Haven Interior"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              priority
             />
           </div>
         </div>
@@ -205,10 +209,12 @@ const AboutPage = () => {
                 className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-brand-primary transition-all duration-300"
               >
                 <div className="h-64 bg-orange-50 flex items-center justify-center">
-                  <img
+                  <Image
                     src={member.image}
                     alt={member.name}
-                    className="w-32 h-32 object-contain"
+                    width={128}
+                    height={128}
+                    className="object-contain"
                   />
                 </div>
                 <div className="p-6">

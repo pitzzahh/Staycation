@@ -1,8 +1,7 @@
 "use client";
 
-import { Star, User, MapPin, Video, X, Heart, Sparkles } from "lucide-react";
+import { Star, Video, X, Heart, Sparkles } from "lucide-react";
 import RoomImageGallery from "./RoomImageGallery";
-import AmenityBadge from "./AmenityBadge";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

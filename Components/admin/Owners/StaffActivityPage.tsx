@@ -9,10 +9,8 @@ import {
   LogOut,
   Edit,
   CheckCircle,
-  XCircle,
   FileText,
   Search,
-  Filter,
   Loader2,
 } from "lucide-react";
 import { useState } from "react";
@@ -21,11 +19,40 @@ import { useGetActivityLogsQuery, useGetActivityStatsQuery } from "@/redux/api/a
 import toast from "react-hot-toast";
 import Image from "next/image";
 
-const StaffActivityPage = ({ onCreateClick, onEditClick }: any) => {
+interface Employee {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  role?: string;
+  phone?: string;
+  status?: string;
+  profile_image_url?: string;
+  [key: string]: unknown;
+}
+
+interface ActivityLog {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  action: string;
+  action_type: string;
+  details?: string;
+  created_at: string;
+  role?: string;
+  profile_image_url?: string;
+  [key: string]: unknown;
+}
+
+interface StaffActivityPageProps {
+  onCreateClick: () => void;
+  onEditClick: (employee: Employee) => void;
+}
+
+const StaffActivityPage = ({ onCreateClick, onEditClick }: StaffActivityPageProps) => {
   const [tab, setTab] = useState("activity");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
 
   // Fetch employees from API
   const { data: employeesData, isLoading: isLoadingEmployees } = useGetEmployeesQuery({});
@@ -42,7 +69,7 @@ const StaffActivityPage = ({ onCreateClick, onEditClick }: any) => {
   const activityLogs = activityLogsData?.data || [];
   const stats = statsData?.data || { active_csr: 0, active_cleaners: 0, logged_out: 0, total: 0 };
 
-  const filteredLogs = activityLogs.filter((log: any) => {
+  const filteredLogs = activityLogs.filter((log: ActivityLog) => {
     const staffName = `${log.first_name || ''} ${log.last_name || ''}`.toLowerCase();
     const matchesSearch =
       staffName.includes(searchQuery.toLowerCase()) ||
@@ -197,19 +224,19 @@ const StaffActivityPage = ({ onCreateClick, onEditClick }: any) => {
                 <User className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                 <p className="text-gray-600 font-medium">No employees found</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Click "Create Employee" to add your first team member
+                  Click &quot;Create Employee&quot; to add your first team member
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
               {employees
-                .filter((user: any) =>
+                .filter((user: Employee) =>
                   user.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   user.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   user.role?.toLowerCase().includes(searchQuery.toLowerCase())
                 )
-                .map((user: any, i: number) => (
+                .map((user: Employee, i: number) => (
                   <div
                     key={user.id}
                     className="border border-gray-200 rounded-lg p-4 flex justify-between items-center hover:border-orange-300 transition-colors animate-in fade-in duration-500"
@@ -256,7 +283,6 @@ const StaffActivityPage = ({ onCreateClick, onEditClick }: any) => {
                       </span>
                       <button
                         onClick={() => {
-                          setSelectedEmployee(user);
                           onEditClick(user);
                         }}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -270,8 +296,14 @@ const StaffActivityPage = ({ onCreateClick, onEditClick }: any) => {
                             try {
                               await deleteEmployee(user.id).unwrap();
                               toast.success(`Successfully deleted ${user.first_name} ${user.last_name}`);
-                            } catch (error: any) {
-                              toast.error(error?.data?.error || "Failed to delete employee");
+                            } catch (error: unknown) {
+                              const errorMessage =
+                                error && typeof error === 'object' && 'data' in error &&
+                                error.data && typeof error.data === 'object' && 'error' in error.data &&
+                                typeof error.data.error === 'string'
+                                ? error.data.error
+                                : "Failed to delete employee";
+                              toast.error(errorMessage);
                             }
                           }
                         }}
@@ -371,7 +403,7 @@ const StaffActivityPage = ({ onCreateClick, onEditClick }: any) => {
                       </td>
                     </tr>
                   ) : (
-                    filteredLogs.map((log: any, index: number) => {
+                    filteredLogs.map((log: ActivityLog, index: number) => {
                       const staffName = `${log.first_name || ''} ${log.last_name || ''}`.trim();
                       const initial = staffName.charAt(0) || 'U';
                       return (
@@ -391,11 +423,14 @@ const StaffActivityPage = ({ onCreateClick, onEditClick }: any) => {
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-3">
                               {log.profile_image_url ? (
-                                <img
-                                  src={log.profile_image_url}
-                                  alt={staffName}
-                                  className="w-10 h-10 rounded-full object-cover"
-                                />
+                                <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                                  <Image
+                                    src={log.profile_image_url}
+                                    alt={staffName}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
                               ) : (
                                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
                                   {initial}

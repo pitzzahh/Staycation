@@ -47,7 +47,9 @@ const DateRangePicker = ({
 
     const formatDate = (dateString: string) => {
       if (!dateString) return "";
-      const date = new Date(dateString);
+      // Parse the date string correctly to avoid timezone issues
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
       return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     };
 
@@ -145,12 +147,6 @@ const DateRangePicker = ({
 
   const canGoBack = currentMonthOffset > 0;
   const canGoForward = currentMonthOffset < 11;
-
-  const handleDateHover = (dateString: string) => {
-    if (!isPast && !isCheckIn && !isCheckOut) {
-      setHoveredDate(dateString);
-    }
-  };
 
   const renderMonth = (monthOffset: number) => {
     const calendarDays = generateCalendarForMonth(monthOffset);

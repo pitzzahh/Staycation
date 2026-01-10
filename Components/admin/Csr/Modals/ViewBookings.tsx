@@ -46,10 +46,15 @@ interface ViewBookingsProps {
 export default function ViewBookings({ booking, onClose }: ViewBookingsProps) {
   const [isMounted, setIsMounted] = useState(false);
 
-  // Set mounted state after component mounts
+  // Set mounted state after component mounts - use requestAnimationFrame to avoid cascading renders
   useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
+    const rafId = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      setIsMounted(false);
+    };
   }, []);
 
   if (!isMounted) return null;
@@ -106,8 +111,6 @@ export default function ViewBookings({ booking, onClose }: ViewBookingsProps) {
   };
 
   const additionalGuests = parseAdditionalGuests();
-
-  if (!isMounted) return null;
 
   return createPortal(
     <>

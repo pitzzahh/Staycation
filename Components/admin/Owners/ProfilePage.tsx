@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Mail, Phone, MapPin, Calendar, Edit2, Save, X, Briefcase, DollarSign, Users, AlertCircle, Lock, Loader2 } from "lucide-react";
+import { Camera, Mail, Phone, MapPin, Calendar, Edit2, Save, X, Briefcase, DollarSign, Users, AlertCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useUpdateEmployeeMutation } from "@/redux/api/employeeApi";
 
@@ -26,6 +26,13 @@ interface EmployeeProfile {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   emergency_contact_relation?: string;
+}
+
+interface UserSession {
+  id?: string;
+  name?: string;
+  email?: string;
+  role?: string;
 }
 
 const ProfilePage = () => {
@@ -60,7 +67,7 @@ const ProfilePage = () => {
     const fetchEmployeeData = async () => {
       if (!session?.user) return;
 
-      const userId = (session.user as any)?.id;
+      const userId = (session.user as UserSession)?.id;
       if (!userId) return;
 
       try {
@@ -103,9 +110,10 @@ const ProfilePage = () => {
           setProfileImage(image);
           setOriginalProfileImage(image);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Failed to fetch employee data:", error);
-        toast.error(error?.message || "Failed to load profile data");
+        const errorMessage = error instanceof Error ? error.message : "Failed to load profile data";
+        toast.error(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -128,14 +136,14 @@ const ProfilePage = () => {
 
   const handleSave = async () => {
     try {
-      const userId = (session?.user as any)?.id;
+      const userId = (session?.user as UserSession)?.id;
       if (!userId) {
         toast.error("User ID not found");
         return;
       }
 
       // Prepare update data
-      const updateData: any = {
+      const updateData: Record<string, string | number | null> = {
         id: userId,
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -233,9 +241,14 @@ const ProfilePage = () => {
 
       setIsEditing(false);
       router.refresh();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to update profile:", error);
-      toast.error(error?.data?.error || "Failed to update profile");
+      const errorMessage = error && typeof error === 'object' && 'data' in error &&
+        error.data && typeof error.data === 'object' && 'error' in error.data &&
+        typeof error.data.error === 'string'
+        ? error.data.error
+        : "Failed to update profile";
+      toast.error(errorMessage);
     }
   };
 
@@ -331,7 +344,7 @@ const ProfilePage = () => {
                 </h1>
                 <p className="text-gray-500 flex items-center gap-2">
                   <span className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-sm font-semibold">
-                    {(session?.user as any)?.role || "Owner"}
+                    {(session?.user as UserSession)?.role || "Owner"}
                   </span>
                 </p>
               </div>

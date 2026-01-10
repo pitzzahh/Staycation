@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Menu, X, Home, Users, MessageSquare, Settings, Bell, UserCircle, ChevronDown, BarChart3, Calendar, DollarSign, Wrench, Star, Shield, FileText } from "lucide-react";
+import { LogOut, Menu, X, Home, Users, MessageSquare, Settings, Bell, UserCircle, ChevronDown, BarChart3, Calendar, DollarSign, Wrench, Star, Shield } from "lucide-react";
 import DashboardPage from "./DashboardPage";
 import GuestAssistancePage from "./GuestAssistancePage";
 import AddUnitModal from "./Modals/AddUnitModal";
@@ -28,6 +28,36 @@ import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useGetHavensQuery } from "@/redux/api/roomApi";
 
+interface Haven {
+  uuid_id?: string;
+  haven_name?: string;
+  tower?: string;
+  floor?: string;
+  [key: string]: unknown;
+}
+
+interface EmployeeData {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+interface UserSession {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  profile_image_url?: string;
+  role?: string;
+}
+
+interface User {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
 export default function OwnerDashboard() {
   const { data: session} = useSession();
   const [sidebar, setSidebar] = useState(true);
@@ -45,7 +75,7 @@ export default function OwnerDashboard() {
     addHaven: false,
     policies: false,
   });
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null);
   const [bookingDateModal, setBookingDateModal] = useState<{
     isOpen: boolean;
     selectedDate: Date | null;
@@ -57,19 +87,28 @@ export default function OwnerDashboard() {
   });
 
   // Fetch havens from database
-  const { data: havensData, isLoading: havensLoading } = useGetHavensQuery({});
-  const allHavens = (havensData as any[]) || [];
+  const { data: havensData } = useGetHavensQuery({});
+  
+  // Type guard for havensData
+  const getAllHavens = (): Haven[] => {
+    if (Array.isArray(havensData)) {
+      return havensData as Haven[];
+    }
+    return [];
+  };
+
+  const allHavens = getAllHavens();
 
   // Group havens by name to get unique haven names
   const uniqueHavenNames = Array.from(
-    new Set(allHavens.map((h: any) => h.haven_name?.trim()))
-  ).filter(Boolean);
+    new Set(allHavens.map((h: Haven) => h.haven_name?.trim()))
+  ).filter(Boolean) as string[];
 
   // Create haven objects with the first matching haven's data for each unique name
   const havens = uniqueHavenNames.map((name: string) => {
-    const haven = allHavens.find((h: any) => h.haven_name?.trim() === name);
+    const haven = allHavens.find((h: Haven) => h.haven_name?.trim() === name);
     return haven;
-  }).filter(Boolean);
+  }).filter((haven): haven is Haven => !!haven);
 
   const openModal = (modal: string) => setModals({ ...modals, [modal]: true });
   const closeModal = (modal: string) =>
@@ -194,6 +233,28 @@ export default function OwnerDashboard() {
     },
   ];
 
+  // Helper function to get user from session
+  const getUser = (): User | null => {
+    return session?.user || null;
+  };
+
+  // Helper function to get user session with role
+  const getUserSession = (): UserSession | null => {
+    const user = getUser();
+    if (!user) return null;
+    
+    return {
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      profile_image_url: (user as UserSession)?.profile_image_url,
+      role: (user as UserSession)?.role || "Owner"
+    };
+  };
+
+  const user = getUser();
+  const userSession = getUserSession();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 flex">
       {/* Mobile Menu Backdrop */}
@@ -283,9 +344,9 @@ export default function OwnerDashboard() {
           {sidebar && (
             <div className="mb-3 p-3 bg-white rounded-lg border border-gray-200">
               <div className="flex items-center gap-3">
-                {session && ((session.user as any)?.profile_image_url || (session.user as any)?.image) ? (
+                {userSession?.profile_image_url || userSession?.image ? (
                   <Image
-                    src={(session.user as any)?.profile_image_url || (session.user as any)?.image}
+                    src={userSession.profile_image_url || userSession.image || ''}
                     alt="Profile"
                     width={40}
                     height={40}
@@ -293,15 +354,15 @@ export default function OwnerDashboard() {
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {session?.user?.name?.charAt(0) || "O"}
+                    {userSession?.name?.charAt(0) || "O"}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-800 truncate">
-                    {(session?.user.name || "User")}
+                    {userSession?.name || "User"}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    {(session?.user as any)?.role || "Owner"}
+                    {userSession?.role || "Owner"}
                   </p>
                 </div>
               </div>
@@ -346,7 +407,7 @@ export default function OwnerDashboard() {
                   "Dashboard"}
               </h1>
               <p className="text-sm text-gray-500">
-                Welcome back! Here's what's happening today.
+                Welcome back! Here&apos;s what&apos;s happening today.
               </p>
             </div>
           </div>
@@ -369,9 +430,9 @@ export default function OwnerDashboard() {
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                {session && ((session.user as any)?.profile_image_url || (session.user as any)?.image) ? (
+                {userSession?.profile_image_url || userSession?.image ? (
                   <Image
-                    src={(session.user as any)?.profile_image_url || (session.user as any)?.image}
+                    src={userSession.profile_image_url || userSession.image || ''}
                     alt="Profile"
                     width={40}
                     height={40}
@@ -379,7 +440,7 @@ export default function OwnerDashboard() {
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {session?.user?.name?.charAt(0) || "O"}
+                    {userSession?.name?.charAt(0) || "O"}
                   </div>
                 )}
                 <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
@@ -391,9 +452,9 @@ export default function OwnerDashboard() {
                   {/* User Info */}
                   <div className="px-4 py-3 border-b border-gray-200">
                     <div className="flex items-center gap-3">
-                      {session && ((session.user as any)?.profile_image_url || (session.user as any)?.image) ? (
+                      {userSession?.profile_image_url || userSession?.image ? (
                         <Image
-                          src={(session.user as any)?.profile_image_url || (session.user as any)?.image}
+                          src={userSession.profile_image_url || userSession.image || ''}
                           alt="Profile"
                           width={48}
                           height={48}
@@ -401,15 +462,15 @@ export default function OwnerDashboard() {
                         />
                       ) : (
                         <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {session?.user?.name?.charAt(0) || "O"}
+                          {userSession?.name?.charAt(0) || "O"}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">
-                          {session?.user?.name || "User"}
+                          {userSession?.name || "User"}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
-                          {(session?.user as any)?.role || "Owner"}
+                          {userSession?.role || "Owner"}
                         </p>
                       </div>
                     </div>
@@ -494,7 +555,7 @@ export default function OwnerDashboard() {
             {page === "staff" && (
               <StaffActivityPage
                 onCreateClick={() => openModal("employee")}
-                onEditClick={(employee: any) => {
+                onEditClick={(employee: EmployeeData) => {
                   setSelectedEmployee(employee);
                   openModal("editEmployee");
                 }}
@@ -576,7 +637,14 @@ export default function OwnerDashboard() {
 }
 
 // Placeholder component for Haven Management
-function HavenManagementPlaceholder({ onAddHavenClick, onViewAllClick }: any) {
+interface HavenManagementPlaceholderProps {
+  onAddHavenClick: () => void;
+  onViewAllClick: () => void;
+}
+
+function HavenManagementPlaceholder({ onAddHavenClick, onViewAllClick }: HavenManagementPlaceholderProps) {
+  const sampleHavens = ["Haven 1", "Haven 2", "Haven 3", "Haven 4"];
+  
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
@@ -612,7 +680,7 @@ function HavenManagementPlaceholder({ onAddHavenClick, onViewAllClick }: any) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl shadow-lg p-6">
           <p className="text-sm opacity-90 mb-2">Total Units</p>
-          <p className="text-4xl font-bold">{havens.length}</p>
+          <p className="text-4xl font-bold">{sampleHavens.length}</p>
           <p className="text-sm mt-2 opacity-75">Active properties</p>
         </div>
         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl shadow-lg p-6">
@@ -629,5 +697,3 @@ function HavenManagementPlaceholder({ onAddHavenClick, onViewAllClick }: any) {
     </div>
   );
 }
-
-const havens = ["Haven 1", "Haven 2", "Haven 3", "Haven 4"];
