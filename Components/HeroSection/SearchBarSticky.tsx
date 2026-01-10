@@ -6,7 +6,6 @@ import DateRangePicker from "./DateRangePicker";
 import LocationSelector from "./LocationSelector";
 import GuestSelector from "./GuestSelector";
 import StayTypeSelectorModal from "./StayTypeSelectorModal";
-import ValidationModal from "./ValidationModal";
 import { useRouter } from "next/navigation";
 import { MapPin, Calendar as CalendarIcon, Users, Sparkles } from "lucide-react";
 import {
@@ -17,6 +16,7 @@ import {
   setIsFromSearch,
 } from '@/redux/slices/bookingSlice'
 import { useAppDispatch } from "@/redux/hooks";
+import toast from "react-hot-toast";
 
 interface StayType {
   id: string;
@@ -44,8 +44,6 @@ const SearchBarSticky = () => {
   const [checkInDate, setCheckInDate] = useState<string>("");
   const [checkOutDate, setCheckOutDate] = useState<string>("");
   const [isStayTypeModalOpen, setIsStayTypeModalOpen] = useState<boolean>(false);
-  const [isValidationModalOpen, setIsValidationModalOpen] = useState<boolean>(false);
-  const [validationMessage, setValidationMessage] = useState<string>("");
   const [selectedStay, setSelectedStay] = useState<StayType | null>(null);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(false);
@@ -145,13 +143,11 @@ const SearchBarSticky = () => {
   const handleSearch = () => {
     // Validation - only check for location
     if (!selectedLocation) {
-      const message = "Please select a location.";
-      setValidationMessage(message);
-      setIsValidationModalOpen(true);
+      toast.error("Please select a location.");
       return;
     }
 
-    // Save to redux and navigate to rooms page
+    // Save to redux (persists across pages for later use)
     dispatch(setReduxLocation(selectedLocation));
     dispatch(setReduxCheckInDate(checkInDate));
     dispatch(setReduxCheckOutDate(checkOutDate));
@@ -367,13 +363,6 @@ const SearchBarSticky = () => {
         onSelectStay={setSelectedStay}
         daysDifference={calculateDaysDifference(checkInDate, checkOutDate)}
         router={router}
-      />
-
-      {/* Validation Modal */}
-      <ValidationModal
-        isOpen={isValidationModalOpen}
-        onClose={() => setIsValidationModalOpen(false)}
-        message={validationMessage}
       />
     </div>
   );
