@@ -4,7 +4,7 @@ import { Facebook, Instagram, MapPin, Phone, Mail, HelpCircle, FileText, Shield,
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 const Footer = () => {
@@ -13,9 +13,9 @@ const Footer = () => {
   const [mounted, setMounted] = useState(false);
 
   // Hydration fix: prevent SSR mismatch with theme
-  if (typeof window !== 'undefined' && !mounted) {
+  useEffect(() => {
     setMounted(true);
-  }
+  }, []);
 
   return (
     <footer className="bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800">
