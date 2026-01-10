@@ -5,6 +5,7 @@ import { DatePicker as HeroDatePicker } from "@nextui-org/date-picker";
 import { parseDate, toZoned } from "@internationalized/date";
 import { Calendar } from "lucide-react";
 import type { ZonedDateTime } from "@internationalized/date";
+import { formatDateWithYear } from "@/lib/dateUtils";
 
 interface DatePickerProps {
   label: string;
@@ -25,17 +26,9 @@ const DatePicker = ({ label, date, onDateChange }: DatePickerProps) => {
     return null;
   }, [date]);
 
-  // Format date for display
+  // Format date for display using timezone-safe utility
   const formatDisplayDate = (dateString: string) => {
-    if (!dateString) return "";
-    // Parse the date string correctly to avoid timezone issues
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return formatDateWithYear(dateString);
   };
 
   return (

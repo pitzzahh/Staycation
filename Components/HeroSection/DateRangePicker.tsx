@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { formatDateSafe } from "@/lib/dateUtils";
 
 interface DateRangePickerProps {
   checkInDate: string;
@@ -45,18 +46,10 @@ const DateRangePicker = ({
   const formatDateRange = () => {
     if (!checkInDate && !checkOutDate) return "Add dates";
 
-    const formatDate = (dateString: string) => {
-      if (!dateString) return "";
-      // Parse the date string correctly to avoid timezone issues
-      const [year, month, day] = dateString.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    };
-
     if (checkInDate && checkOutDate) {
-      return `${formatDate(checkInDate)} - ${formatDate(checkOutDate)}`;
+      return `${formatDateSafe(checkInDate)} - ${formatDateSafe(checkOutDate)}`;
     } else if (checkInDate) {
-      return formatDate(checkInDate);
+      return formatDateSafe(checkInDate);
     }
     return "Add dates";
   };
@@ -108,7 +101,8 @@ const DateRangePicker = ({
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dateString = date.toISOString().split('T')[0];
+      // Create date string in local time to avoid timezone shift
+      const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isPast = date < todayDate;
       const isCheckIn = checkInDate === dateString;
       const isCheckOut = checkOutDate === dateString;
