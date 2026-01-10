@@ -14,12 +14,16 @@ import {
   Sparkles,
   Clock,
   Tag,
+  Calendar,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { setSelectedRoom } from "@/redux/slices/bookingSlice";
+import { formatDateSafe } from "@/lib/dateUtils";
 import { useSession } from "next-auth/react";
 import { useCheckWishlistStatusQuery, useAddToWishlistMutation, useRemoveFromWishlistMutation } from "@/redux/api/wishlistApi";
 import toast from "react-hot-toast";
@@ -84,11 +88,21 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { data: session } = useSession();
+  const bookingData = useAppSelector((state) => state.booking);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState("Living Area");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState("");
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+
+  // Debug: Log booking data when component mounts or booking data changes
+  useEffect(() => {
+    console.log('[RoomDetailsPage] Booking Data from Redux:', bookingData);
+    console.log('[RoomDetailsPage] isFromSearch:', bookingData.isFromSearch);
+    console.log('[RoomDetailsPage] Check-in Date:', bookingData.checkInDate);
+    console.log('[RoomDetailsPage] Check-out Date:', bookingData.checkOutDate);
+    console.log('[RoomDetailsPage] Guests:', bookingData.guests);
+  }, [bookingData]);
 
   // Type-safe user id extraction
   const userId = (session?.user as SessionUser)?.id || null;
@@ -518,6 +532,70 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                 </p>
                 <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">{room.pricePerNight}</p>
               </div>
+
+              {/* Your Search Section */}
+              {bookingData.isFromSearch && (
+                <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-primary" />
+                    Your Search
+                  </h3>
+                  <div className="space-y-1.5">
+                    {/* Check-in Date */}
+                    {bookingData.checkInDate ? (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <LogIn className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 dark:text-gray-400" />
+                        <span className="text-gray-600 dark:text-gray-400">Check-in:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {formatDateSafe(bookingData.checkInDate, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                        <div className="h-3 w-16 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                        <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                      </div>
+                    )}
+
+                    {/* Check-out Date */}
+                    {bookingData.checkOutDate ? (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <LogOut className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 dark:text-gray-400" />
+                        <span className="text-gray-600 dark:text-gray-400">Check-out:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {formatDateSafe(bookingData.checkOutDate, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                        <div className="h-3 w-16 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                        <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                      </div>
+                    )}
+
+                    {/* Guest Counts */}
+                    {bookingData.guests ? (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 dark:text-gray-400" />
+                        <span className="text-gray-600 dark:text-gray-400">Guests:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {bookingData.guests.adults} Adult{bookingData.guests.adults !== 1 ? 's' : ''}
+                          {bookingData.guests.children > 0 && `, ${bookingData.guests.children} Child${bookingData.guests.children !== 1 ? 'ren' : ''}`}
+                          {bookingData.guests.infants > 0 && `, ${bookingData.guests.infants} Infant${bookingData.guests.infants !== 1 ? 's' : ''}`}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                        <div className="h-3 w-12 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                        <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700 space-y-2">
                 <div className="flex items-center gap-2">

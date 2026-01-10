@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import RoomCard from "./RoomCard";
 import { SlidersHorizontal, ChevronRight, ChevronLeft, Eye } from "lucide-react";
-import { useGetHavensQuery } from "@/redux/api/roomApi";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { setIsFromSearch } from "@/redux/slices/bookingSlice";
@@ -80,7 +79,6 @@ interface HotelRoomListingsProps {
 }
 
 const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
-  const { isError } = useGetHavensQuery({});
   const [currentPage, setCurrentPage] = useState<Record<string, number>>({});
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
@@ -248,14 +246,8 @@ const HotelRoomListings = ({ initialHavens }: HotelRoomListingsProps) => {
             </div>
           </div>
 
-          {isError && (
-            <div className="text-center py-20 text-red-500">
-              Failed to load rooms
-            </div>
-          )}
-
           {/* No Results Message */}
-          {rooms.length === 0 && !isError && (
+          {rooms.length === 0 && (
             <div className="text-center py-20">
               <div className="mb-4">
                 <svg

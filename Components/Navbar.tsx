@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import {
@@ -28,8 +28,9 @@ const Navbar = () => {
   const [isHelpSidebarOpen, setIsHelpSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session, status } = useSession();
-  const profileRef = useRef<HTMLDivElement>(null);
+  const profileContainerRef = useRef<HTMLDivElement>(null);
 
   const menuItems = ["Havens", "Contacts", "Location", "About"];
 
@@ -42,21 +43,33 @@ const Navbar = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
+        profileContainerRef.current &&
+        !profileContainerRef.current.contains(event.target as Node)
       ) {
         setIsProfileOpen(false);
       }
     };
 
     if (isProfileOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [isProfileOpen]);
+
+  // Handle navigation from dropdown items
+  const handleDropdownNavigation = (href: string) => {
+    setIsProfileOpen(false);
+    router.push(href);
+  };
+
+  // Toggle profile dropdown with event handling
+  const toggleProfileDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsProfileOpen(!isProfileOpen);
+  };
 
   // Hide navbar on certain pages
   const shouldHideNavbar = pathname === "/admin/login" || 
@@ -124,10 +137,10 @@ const Navbar = () => {
           {status === "loading" ? (
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
           ) : session?.user ? (
-            <div className="relative" ref={profileRef}>
+            <div className="relative" ref={profileContainerRef}>
               <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 hover:from-yellow-100 hover:to-orange-100 dark:hover:from-yellow-900/30 dark:hover:to-orange-900/30 border-2 border-orange-200 dark:border-orange-600 transition-all duration-300 transform hover:scale-105"
+                onClick={toggleProfileDropdown}
+                className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-brand-primary dark:hover:border-brand-primary transition-colors duration-200"
               >
                 {(session.user as User).profile_image_url ||
                 (session.user as User).image ? (
@@ -137,18 +150,18 @@ const Navbar = () => {
                     alt={(session.user as User).name || "User"}
                     width={32}
                     height={32}
-                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-brand-primary"
                   />
                 ) : (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
-                    <User className="w-3 h-3 sm:w-5 sm:h-5 text-white" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-primary flex items-center justify-center">
+                    <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                 )}
-                <span className="hidden sm:block font-semibold text-gray-800 dark:text-gray-100 max-w-20 sm:max-w-32 truncate text-xs sm:text-sm">
+                <span className="hidden sm:block font-medium text-gray-800 dark:text-gray-100 max-w-20 sm:max-w-32 truncate text-sm">
                   {(session.user as User).name}
                 </span>
                 <ChevronDown
-                  className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300 transition-transform duration-300 ${
+                  className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                     isProfileOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -156,69 +169,73 @@ const Navbar = () => {
 
               {/* Profile Dropdown */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
-                  <div className="p-3 sm:p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-b border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center gap-2 sm:gap-3">
+                <div className="absolute right-0 mt-2 w-52 sm:w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-3">
                       {(session.user as User).profile_image_url ||
                       (session.user as User).image ? (
                         <Image
                           src={(session.user as User).profile_image_url ||
                           (session.user as User).image || ''}
                           alt={(session.user as User).name || "User"}
-                          width={48}
-                          height={48}
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                          width={40}
+                          height={40}
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-brand-primary"
                         />
                       ) : (
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
-                          <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <div className="w-10 h-10 rounded-full bg-brand-primary flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-800 dark:text-gray-100 truncate text-sm sm:text-base">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">
                           {session.user.name}
                         </p>
-                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                           {session.user.email}
                         </p>
                       </div>
                     </div>
                   </div>
-                  <Link href="/profile">
-                    <button
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium text-sm"
-                    >
-                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>My Profile</span>
-                    </button>
-                  </Link>
 
-                  <Link href="/my-bookings">
+                  <div className="py-1">
                     <button
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium text-sm"
+                      onClick={() => handleDropdownNavigation("/profile")}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 text-left"
                     >
-                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>My Bookings</span>
+                      <User className="w-4 h-4 text-brand-primary" />
+                      <span className="text-sm font-medium">My Profile</span>
                     </button>
-                  </Link>
-                  <Link href="/my-wishlist">
+
                     <button
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium text-sm"
+                      onClick={() => handleDropdownNavigation("/my-bookings")}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 text-left"
                     >
-                      <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>My Wishlist</span>
+                      <Calendar className="w-4 h-4 text-brand-primary" />
+                      <span className="text-sm font-medium">My Bookings</span>
                     </button>
-                  </Link>
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 text-red-600 dark:text-red-400 font-medium text-sm"
-                  >
-                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>Sign Out</span>
-                  </button>
+
+                    <button
+                      onClick={() => handleDropdownNavigation("/my-wishlist")}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 text-left"
+                    >
+                      <Heart className="w-4 h-4 text-brand-primary" />
+                      <span className="text-sm font-medium">My Wishlist</span>
+                    </button>
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-600 py-1">
+                    <button
+                      onClick={async () => {
+                        setIsProfileOpen(false);
+                        await signOut({ callbackUrl: "/login" });
+                      }}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150 text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm font-medium">Sign Out</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -246,10 +263,10 @@ const Navbar = () => {
           {status === "loading" ? (
             <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
           ) : session?.user ? (
-            <div className="relative" ref={profileRef}>
+            <div className="relative" ref={profileContainerRef}>
               <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-orange-200 dark:border-orange-600 transition-all duration-300"
+                onClick={toggleProfileDropdown}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-brand-primary dark:hover:border-brand-primary transition-colors duration-200"
               >
                 {(session.user as User).profile_image_url ||
                 (session.user as User).image ? (
@@ -257,17 +274,17 @@ const Navbar = () => {
                     src={(session.user as User).profile_image_url ||
                     (session.user as User).image || ''}
                     alt={(session.user as User).name || "User"}
-                    width={24}
-                    height={24}
-                    className="w-6 h-6 rounded-full object-cover"
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-primary"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
-                    <User className="w-3 h-3 text-white" />
+                  <div className="w-7 h-7 rounded-full bg-brand-primary flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
                   </div>
                 )}
                 <ChevronDown
-                  className={`w-3 h-3 text-gray-600 dark:text-gray-300 transition-transform duration-300 ${
+                  className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                     isProfileOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -275,9 +292,9 @@ const Navbar = () => {
 
               {/* Profile Dropdown */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
-                  <div className="p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-b border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center gap-2">
+                <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-3">
                       {(session.user as User).profile_image_url ||
                       (session.user as User).image ? (
                         <Image
@@ -286,15 +303,15 @@ const Navbar = () => {
                           alt={(session.user as User).name || "User"}
                           width={40}
                           height={40}
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-brand-primary"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-brand-primary flex items-center justify-center">
                           <User className="w-5 h-5 text-white" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-800 dark:text-gray-100 truncate text-sm">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">
                           {session.user.name}
                         </p>
                         <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
@@ -303,41 +320,45 @@ const Navbar = () => {
                       </div>
                     </div>
                   </div>
-                  <Link href="/profile">
-                    <button
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full px-3 py-2.5 flex items-center gap-2 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium text-sm"
-                    >
-                      <User className="w-4 h-4" />
-                      <span>My Profile</span>
-                    </button>
-                  </Link>
 
-                  <Link href="/my-bookings">
+                  <div className="py-1">
                     <button
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full px-3 py-2.5 flex items-center gap-2 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium text-sm"
+                      onClick={() => handleDropdownNavigation("/profile")}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 text-left"
                     >
-                      <Calendar className="w-4 h-4" />
-                      <span>My Bookings</span>
+                      <User className="w-4 h-4 text-brand-primary" />
+                      <span className="text-sm font-medium">My Profile</span>
                     </button>
-                  </Link>
-                  <Link href="/my-wishlist">
+
                     <button
-                      onClick={() => setIsProfileOpen(false)}
-                      className="w-full px-3 py-2.5 flex items-center gap-2 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200 text-gray-700 dark:text-gray-300 font-medium text-sm"
+                      onClick={() => handleDropdownNavigation("/my-bookings")}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 text-left"
                     >
-                      <Heart className="w-4 h-4" />
-                      <span>My Wishlist</span>
+                      <Calendar className="w-4 h-4 text-brand-primary" />
+                      <span className="text-sm font-medium">My Bookings</span>
                     </button>
-                  </Link>
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="w-full px-3 py-2.5 flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 text-red-600 dark:text-red-400 font-medium text-sm"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sign Out</span>
-                  </button>
+
+                    <button
+                      onClick={() => handleDropdownNavigation("/my-wishlist")}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 text-left"
+                    >
+                      <Heart className="w-4 h-4 text-brand-primary" />
+                      <span className="text-sm font-medium">My Wishlist</span>
+                    </button>
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-600 py-1">
+                    <button
+                      onClick={async () => {
+                        setIsProfileOpen(false);
+                        await signOut({ callbackUrl: "/login" });
+                      }}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150 text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm font-medium">Sign Out</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -403,6 +424,7 @@ const Navbar = () => {
               >
                 <Link href={href}>
                   <div
+                    onClick={() => setIsMenuOpen(false)}
                     className={`${
                       isActive
                         ? "text-brand-primary dark:text-brand-primary bg-brand-primary/10 dark:bg-brand-primary/20 font-semibold border-l-4 border-brand-primary dark:border-brand-primary"
@@ -430,7 +452,7 @@ const Navbar = () => {
             ) : session?.user ? (
               <div className="space-y-3">
                 {/* User Info */}
-                <div className="flex items-center gap-3 p-3 bg-brand-primary/10 dark:bg-brand-primary/20 rounded-lg border-2 border-brand-primary dark:border-brand-primary">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                   {(session.user as User).profile_image_url ||
                   (session.user as User).image ? (
                     <Image
@@ -439,10 +461,10 @@ const Navbar = () => {
                       alt={(session.user as User).name || "User"}
                       width={48}
                       height={48}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-brand-primary"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center">
                       <User className="w-6 h-6 text-white" />
                     </div>
                   )}
@@ -456,39 +478,45 @@ const Navbar = () => {
                   </div>
                 </div>
                 {/* Profile Button */}
-                <Link href="/profile">
-                  <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-all duration-300 shadow-md"
-                  >
-                    <User className="w-5 h-5" />
-                    <span>My Profile</span>
-                  </button>
-                </Link>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/profile");
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-all duration-300 shadow-md"
+                >
+                  <User className="w-5 h-5" />
+                  <span>My Profile</span>
+                </button>
                 {/* My Bookings Button */}
-                <Link href="/my-bookings">
-                  <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-all duration-300 shadow-md"
-                  >
-                    <Calendar className="w-5 h-5" />
-                    <span>My Bookings</span>
-                  </button>
-                </Link>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/my-bookings");
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-all duration-300 shadow-md"
+                >
+                  <Calendar className="w-5 h-5" />
+                  <span>My Bookings</span>
+                </button>
                 {/* My Wishlist Button */}
-                <Link href="/my-wishlist">
-                  <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-all duration-300 shadow-md"
-                  >
-                    <Heart className="w-5 h-5" />
-                    <span>My Wishlist</span>
-                  </button>
-                </Link>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/my-wishlist");
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primaryDark text-white rounded-lg font-medium transition-all duration-300 shadow-md"
+                >
+                  <Heart className="w-5 h-5" />
+                  <span>My Wishlist</span>
+                </button>
 
                 {/* Sign Out Button */}
                 <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={async () => {
+                    setIsMenuOpen(false);
+                    await signOut({ callbackUrl: "/login" });
+                  }}
                   className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-all duration-300 shadow-md"
                 >
                   <LogOut className="w-5 h-5" />
@@ -497,7 +525,10 @@ const Navbar = () => {
               </div>
             ) : (
               <Link href="/login">
-                <button className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white px-6 py-3 rounded-lg font-medium transform hover:scale-105 transition-all duration-300 shadow-md">
+                <button 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white px-6 py-3 rounded-lg font-medium transform hover:scale-105 transition-all duration-300 shadow-md"
+                >
                   Sign In
                 </button>
               </Link>
@@ -525,19 +556,6 @@ const Navbar = () => {
         }
         .animate-fade-in {
           animation: fade-in 0.3s ease-out;
-        }
-        @keyframes slide-down {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slide-down {
-          animation: slide-down 0.2s ease-out;
         }
       `}</style>
 
