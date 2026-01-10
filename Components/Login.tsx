@@ -1,9 +1,7 @@
 "use client";
 
-import { ArrowRight, Mail, Home } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import { useState } from "react";
-import SocialLoginButton from "./SocialLoginButton";
-import Spinner from "./Spinner"
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hooks";
 import { setCheckInDate, setCheckOutDate, setGuests } from "@/redux/slices/bookingSlice";
@@ -19,7 +17,8 @@ interface SocialLoginOption {
 }
 
 const Login = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isGuestLoading, setIsGuestLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -34,24 +33,24 @@ const Login = () => {
   ];
 
   const handleSocialLogin = async (provider: string) => {
-    setIsLoading(true);
+    setIsGoogleLoading(true);
 
     try {
       if (provider.toLowerCase() === "google") {
         await signIn("google", { callbackUrl: "/rooms" });
       } else {
         alert(`${provider} login not yet implemented`);
-        setIsLoading(false);
+        setIsGoogleLoading(false);
       }
     } catch (error) {
       console.error("Login error:", error);
       alert("An error occurred during login");
-      setIsLoading(false);
+      setIsGoogleLoading(false);
     }
   };
 
   const handleGuestLogin = () => {
-    setIsLoading(true);
+    setIsGuestLoading(true);
 
     // Set smart defaults: today + tomorrow + 2 guests
     const today = new Date();
@@ -73,7 +72,7 @@ const Login = () => {
 
     setTimeout(() => {
       router.push("/rooms");
-      setIsLoading(false);
+      setIsGuestLoading(false);
     }, 1500);
   };
 
@@ -117,14 +116,25 @@ const Login = () => {
             <div className="mb-6">
               <button
                 onClick={() => handleSocialLogin("google")}
-                disabled={isLoading}
+                disabled={isGoogleLoading || isGuestLoading}
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Continue with Google"
               >
-                <Mail className="w-5 h-5 text-red-600 dark:text-red-500" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Continue with Google
-                </span>
+                {isGoogleLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-red-200 dark:border-red-900 border-t-red-600 dark:border-t-red-500 rounded-full animate-spin"></div>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                      Processing...
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-5 h-5 text-red-600 dark:text-red-500" />
+                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                      Continue with Google
+                    </span>
+                  </>
+                )}
               </button>
             </div>
 
@@ -144,12 +154,21 @@ const Login = () => {
             <div className="mb-8">
               <button
                 onClick={handleGuestLogin}
-                disabled={isLoading}
+                disabled={isGoogleLoading || isGuestLoading}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-brand-primary hover:bg-brand-primaryDark text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Continue as Guest"
               >
-                <span>Continue as Guest</span>
-                <ArrowRight className="w-5 h-5" />
+                {isGuestLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-orange-300/40 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Continue as Guest</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
               </button>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 text-center">
                 Guest users can book rooms with smart defaults
@@ -176,13 +195,6 @@ const Login = () => {
               </p>
             </div>
           </div>
-
-          {/* Loading Indicator */}
-          {isLoading && (
-            <div className="mt-6">
-              <Spinner label="Processing your request" />
-            </div>
-          )}
         </div>
       </div>
 
